@@ -1,0 +1,19 @@
+{namespace plugin.account}
+
+/**
+ * @param user StashUser object which is in the context provided by AccountServlet
+ */
+{template .sshTab}
+<html>
+<head>
+    <meta name="decorator" content="stash.users.account">
+    <meta name="userSlug" content="{$user.slug}">
+    <meta name="activeTab" content="account-plugin-tab">
+    <title>{$user.displayName} / Account Tab</title>
+</head>
+<body>
+    <h3>Hello, {$user.displayName}</h3>
+    <p>Welcome to my plugin tab in the account page.</p>
+</body>
+</html>
+{/template}

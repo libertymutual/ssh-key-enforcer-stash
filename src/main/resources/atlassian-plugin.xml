@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<atlassian-plugin key="${project.groupId}.${project.artifactId}" name="${project.name}" plugins-version="2">
+  <plugin-info>
+    <description>${project.description}</description>
+    <version>${project.version}</version>
+    <vendor name="${project.organization.name}" url="${project.organization.url}"/>
+    <param name="plugin-icon">images/pluginIcon.png</param>
+    <param name="plugin-logo">images/pluginLogo.png</param>
+  </plugin-info>
+  <!-- add our i18n resource -->
+  <resource type="i18n" name="i18n" location="stash-ssh-key-enforcer"/>
+  <!-- add our web resources -->
+  <web-resource key="stash-ssh-key-enforcer-resources" name="stash-ssh-key-enforcer Web Resources">
+    <dependency>com.atlassian.auiplugin:ajs</dependency>
+    <dependency>com.atlassian.soy.soy-template-plugin:soy-deps</dependency>
+    <!-- transform calls to AJS.getText() inside JS files -->
+    <transformation extension="js">
+      <transformer key="jsI18n"/>
+    </transformation>
+    <!-- resource type="soy" name="supportTeamTab" location="/override-add-keys.soy"/> -->
+    <!-- transform Soy templates into JS -->
+    <transformation extension="soy">
+      <transformer key="soyTransformer"/>
+    </transformation>
+     <resource type="download" name="key-enforcer.js" location="/js/stash-ssh-key-enforcer.js"/>
+   
+    <context>stash.page.user.account.settings</context>
+  </web-resource>
+  <stash-resource key="account-ssh-soy" name="Account Tab Soy Templates">
+    <directory location="/templates/" />
+</stash-resource>
+  <component key="GeneralEventListener" class="com.edwardawebb.stash.GeneralEventListener"/>
+  <servlet name="User Key Management Servlet" i18n-name-key="user-key-management-servlet.name" key="user-key-management-servlet" class="com.edwardawebb.servlet.UserKeyManagementServlet">
+    <description key="user-key-management-servlet.description">The User Key Management Servlet Plugin</description>
+    <url-pattern>/accounts/users/*</url-pattern>
+  </servlet>
+  <rest name="Key Details Resource" i18n-name-key="key-details-resource.name" key="key-details-resource" path="/keydetailsresource" version="1.0">
+    <description key="key-details-resource.description">The Key Details Resource Plugin</description>
+  </rest>
+  
+      <web-item key="user-keys" name="User Keys" section="stash.user.account.nav">
+        <link>/plugins/servlet/account/users/${accountUser.name}</link>
+        <!-- <link>${navBuilder.pluginServlets().path('userkeymanagementservlet').buildRelNoContext()}</link-->
+        <label key="key.enforcer.servlet.link.label"/>
+    </web-item>
+  
+  <!-- import from the product container -->
+  <component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties"/>
+  
+</atlassian-plugin>
