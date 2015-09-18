@@ -33,6 +33,13 @@
 		<dependency>
 			<groupId>com.atlassian.stash</groupId>
 			<artifactId>stash-api</artifactId>
+			<version>${stash.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atlassian.stash</groupId>
+			<artifactId>stash-ssh</artifactId>
+			<version>${stash.ssh.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -122,6 +129,12 @@
 			<version>1.1.3-incubating</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.atlassian.activeobjects</groupId>
+			<artifactId>activeobjects-plugin</artifactId>
+			<version>${ao.version}</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -139,6 +152,21 @@
 							<dataVersion>${stash.data.version}</dataVersion>
 						</product>
 					</products>
+					                   <!-- Specify what to bundle in the OBR -->
+<!--                     <pluginDependencies> -->
+<!--                         <pluginDependency> -->
+<!--                             <groupId>com.atlassian.stash</groupId> -->
+<!--                             <artifactId>stash-ssh</artifactId> -->
+<!--                         </pluginDependency> -->
+<!--                     </pluginDependencies> -->
+<!--                     <instructions> -->
+<!--                         Specify what package to include. Ensure that any packages from OBRs are also listed. -->
+<!--                         <Import-Package> -->
+<!--                             com.atlassian.stash.ssh, -->
+<!--                             com.edwardawebb -->
+<!--                         </Import-Package> -->
+<!--                         <CONF_COMM/> -->
+<!--                     </instructions> -->
 				</configuration>
 			</plugin>
 			<plugin>
@@ -152,8 +180,10 @@
 	</build>
 	<properties>
 		<stash.version>3.11.2</stash.version>
+		<stash.ssh.version>3.10.0</stash.ssh.version>
 		<stash.data.version>3.11.2</stash.data.version>
 		<amps.version>5.0.13</amps.version>
 		<plugin.testrunner.version>1.2.3</plugin.testrunner.version>
+		<ao.version>0.29.4</ao.version>
 	</properties>
 </project>

@@ -7,6 +7,10 @@
     <vendor name="${project.organization.name}" url="${project.organization.url}"/>
     <param name="plugin-icon">images/pluginIcon.png</param>
     <param name="plugin-logo">images/pluginLogo.png</param>
+    <!--  bundle-instructions>
+      <Import-Package>com.atlassian.stash.ssh,*;resolution:=optional</Import-Package>
+    </bundle-instructions-->
+    
   </plugin-info>
   <!-- add our i18n resource -->
   <resource type="i18n" name="i18n" location="stash-ssh-key-enforcer"/>
