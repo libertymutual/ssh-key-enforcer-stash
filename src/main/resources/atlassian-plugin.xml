@@ -10,7 +10,6 @@
     <!--  bundle-instructions>
       <Import-Package>com.atlassian.stash.ssh,*;resolution:=optional</Import-Package>
     </bundle-instructions-->
-    
   </plugin-info>
   <!-- add our i18n resource -->
   <resource type="i18n" name="i18n" location="stash-ssh-key-enforcer"/>
@@ -50,4 +49,24 @@
   <component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties"/>
   <component-import key="soyTemplateRenderer" interface="com.atlassian.soy.renderer.SoyTemplateRenderer" filter=""/>
   <component-import key="userManager" interface="com.atlassian.sal.api.user.UserManager" filter=""/>
+  <component-import key="sshKeyManager" interface="com.atlassian.stash.ssh.api.SshKeyService" filter=""/>
+  <component key="enterpriseSshKeyService" class="com.edwardawebb.stash.ssh.EnterpriseSshKeyServiceImpl" name="Enterprise Ssh Key Manager Impl" i18n-name-key="enterprise-ssh-key-manager-impl.name">
+    <description key="enterprise-ssh-key-manager-impl.description">The Enterprise Ssh Key Manager Impl Plugin</description>
+    <interface>com.edwardawebb.stash.ssh.EnterpriseSshKeyService</interface>
+  </component>
+  <component name="Enterprise Key Repository" i18n-name-key="enterprise-key-repository.name" key="enterprise-key-repository" class="com.edwardawebb.stash.ssh.EnterpriseKeyRepositoryImpl">
+    <description key="enterprise-key-repository.description">The Enterprise Key Repository Plugin</description>
+    <interface>com.edwardawebb.stash.ssh.EnterpriseKeyRepository</interface>
+  </component>
+  
+  
+  <!--  AO support for key meta -->
+  
+  <component-import key="ao" name="Active Objects service" interface="com.atlassian.activeobjects.external.ActiveObjects">
+  <description>Component to access Active Objects functionality from the plugin</description>
+</component-import>
+  <ao key="ao-module">
+  <description>The module configuring the Active Objects service used by this plugin</description>
+  <entity>com.edwardawebb.stash.ssh.SshKeyEntity</entity>
+</ao>
 </atlassian-plugin>
