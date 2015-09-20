@@ -43,7 +43,17 @@
   <web-item key="user-keys" name="User Keys" section="stash.user.account.nav">
     <link>/plugins/servlet/account/users/${accountUser.name}</link>
     <!-- <link>${navBuilder.pluginServlets().path('userkeymanagementservlet').buildRelNoContext()}</link-->
-    <label key="key.enforcer.servlet.link.label"/>
+    <label key="key.enforcer.servlet.link.user.label"/>
+  </web-item>
+  <web-item key="repo-keys" name="Repository Keys" section="stash.repository.settings.panel/repository-permissions-section">
+    <link>/plugins/servlet/account/users/</link>
+    <!-- <link>${navBuilder.pluginServlets().path('userkeymanagementservlet').buildRelNoContext()}</link-->
+    <label key="key.enforcer.servlet.link.repo.label"/>
+  </web-item>
+  <web-item key="project-keys" name="Project Keys" section="stash.user.account.nav">
+    <link>/plugins/servlet/account/users/${accountUser.name}</link>
+    <!-- <link>${navBuilder.pluginServlets().path('userkeymanagementservlet').buildRelNoContext()}</link-->
+    <label key="key.enforcer.servlet.link.project.label"/>
   </web-item>
   <!-- import from the product container -->
   <component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties"/>
