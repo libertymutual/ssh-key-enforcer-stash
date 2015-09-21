@@ -1,31 +1,56 @@
 {namespace plugin.account}
 
 /**
- * @param user StashUser object which is in the context provided by AccountServlet
+ * 
  */
 {template .sshTab}
 <html>
 <head>
     <meta name="decorator" content="stash.users.account">
-    <meta name="userSlug" content="{$user.slug}">
     <meta name="activeTab" content="account-plugin-tab">
-    <title>{$user.displayName} / Account Tab</title>
+    <title>Enterprise Key Management</title>
+    {webResourceManager_requireResource('com.edwardawebb.stash-ssh-key-enforcer:stash-ssh-key-generator-resources')}
+    
 </head>
 <body>
 <div class="aui-group">
-    <h3>Hello, {$user.displayName}</h3>
+    <h3>Enterprise Key Generation</h3>
     <p>You may create a new SSH Key Pair if your previous was lost or compromised.</p>
     <p>Once created you will have the chance to download the public/private key as a file. Make sure to save them in a safe place. See [LINK]</p>
 </div>
     
-    <div class="aui-group">
+<div class="aui-group">
     <div class="aui-item">
-       <button class="aui-button aui-button-primary">Create New Key Pair</button>
-    </div>
-    <div class="aui-item">
-        <div id="keyresults"></div>
+       <button id="ssh-key-gen-button" class="aui-button aui-button-primary">Create New Key Pair</button>
     </div>
 </div>
+<div class="aui-group">
+    <div class="aui-item">
+    	<div class="hidden-info" style="display:none;"><h4>Private Key</h4><p>Save this locally as ~/.ssh/id_rsa</p></div>
+    </div>
+    <div class="aui-item">
+        <input id="ssh-key-rez-private" readonly></input>
+    </div>
+</div>
+<div class="aui-group">
+    <div class="aui-item">
+    	<div class="hidden-info" style="display:none;"><h4>Public Key</h4><p>Save this locally as ~/.ssh/id_rsa.pub</p></div>
+     </div>
+    <div class="aui-item">
+        <input id="ssh-key-rez-public" readonly></input>
+    </div>
+</div>
+    	
+<div class="aui-group">
+    <div class="aui-item">
+    	<div class="hidden-info" style="display:none;"><h4>Key Fingerprint</h4><p>Informational only. Not required for future use.</p></div>
+      </div>
+    <div class="aui-item">
+        <input id="ssh-key-rez-fingerprint" readonly></input> 
+    </div>
+</div>
+
+   
 </body>
 </html>
 {/template}

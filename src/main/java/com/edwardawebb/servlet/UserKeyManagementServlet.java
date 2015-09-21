@@ -13,18 +13,15 @@ import org.slf4j.LoggerFactory;
 
 import com.atlassian.soy.renderer.SoyException;
 import com.atlassian.soy.renderer.SoyTemplateRenderer;
-import com.atlassian.stash.user.StashUser;
 import com.atlassian.stash.user.UserService;
 import com.google.common.collect.ImmutableMap;
 
 public class UserKeyManagementServlet extends HttpServlet{
     private static final Logger log = LoggerFactory.getLogger(UserKeyManagementServlet.class);
     private SoyTemplateRenderer soyTemplateRenderer;
-    private UserService userService;
 
-    public UserKeyManagementServlet(SoyTemplateRenderer soyTemplateRenderer, UserService userService) {
+    public UserKeyManagementServlet(SoyTemplateRenderer soyTemplateRenderer) {
         this.soyTemplateRenderer = soyTemplateRenderer;
-        this.userService = userService;
     }
     
     @Override
@@ -32,14 +29,8 @@ public class UserKeyManagementServlet extends HttpServlet{
     {
         String pathInfo = req.getPathInfo();
 
-        String userSlug = pathInfo.substring(1); // Strip leading slash
-        StashUser user = userService.getUserBySlug(userSlug);
-
-        if (user == null) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-        render(resp, "plugin.account.sshTab", ImmutableMap.<String, Object>of("user", user));
+        
+        render(resp, "plugin.account.sshTab", ImmutableMap.<String, Object>of("key", "value"));
     }
 
     

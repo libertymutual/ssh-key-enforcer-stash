@@ -26,28 +26,45 @@
     <resource type="download" name="key-enforcer.js" location="/js/stash-ssh-key-enforcer.js"/>
     <context>atl.general</context>
   </web-resource>
+  <web-resource key="stash-ssh-key-generator-resources" name="stash-ssh-key-enforcer Web Resources">
+    <dependency>com.atlassian.auiplugin:ajs</dependency>
+    <dependency>com.atlassian.soy.soy-template-plugin:soy-deps</dependency>
+    <!-- transform calls to AJS.getText() inside JS files -->
+    <transformation extension="js">
+      <transformer key="jsI18n"/>
+    </transformation>
+    <!-- resource type="soy" name="supportTeamTab" location="/override-add-keys.soy"/> -->
+    <!-- transform Soy templates into JS -->
+    <transformation extension="soy">
+      <transformer key="soyTransformer"/>
+    </transformation>
+    <resource type="download" name="key-enforcer.js" location="/js/stash-ssh-key-generating.js"/>
+  </web-resource>
+  
+  
+  
   <stash-resource key="account-ssh-soy" name="Account Tab Soy Templates">
     <directory location="/templates/"/>
   </stash-resource>
   <servlet name="User Key Management Servlet" i18n-name-key="user-key-management-servlet.name" key="user-key-management-servlet" class="com.edwardawebb.servlet.UserKeyManagementServlet">
     <description key="user-key-management-servlet.description">The User Key Management Servlet Plugin</description>
-    <url-pattern>/account/users/*</url-pattern>
+    <url-pattern>/account/enterprisekey</url-pattern>
   </servlet>
   <rest name="Key Details Resource" i18n-name-key="key-details-resource.name" key="key-details-resource" path="/enterprisessh" version="1.0">
     <description key="key-details-resource.description">The Key Details Resource Plugin</description>
   </rest>
   <web-item key="user-keys" name="User Keys" section="stash.user.account.nav">
-    <link>/plugins/servlet/account/users/${accountUser.name}</link>
+    <link>/plugins/servlet/account/enterprisekey</link>
     <!-- <link>${navBuilder.pluginServlets().path('userkeymanagementservlet').buildRelNoContext()}</link-->
     <label key="key.enforcer.servlet.link.user.label"/>
   </web-item>
   <web-item key="repo-keys" name="Repository Keys" section="stash.repository.settings.panel/repository-permissions-section">
-    <link>/plugins/servlet/account/users/</link>
+    <link>/plugins/servlet/account/enterprisekey</link>
     <!-- <link>${navBuilder.pluginServlets().path('userkeymanagementservlet').buildRelNoContext()}</link-->
     <label key="key.enforcer.servlet.link.repo.label"/>
   </web-item>
   <web-item key="project-keys" name="Project Keys" section="stash.user.account.nav">
-    <link>/plugins/servlet/account/users/${accountUser.name}</link>
+    <link>/plugins/servlet/account/enterprisekey</link>
     <!-- <link>${navBuilder.pluginServlets().path('userkeymanagementservlet').buildRelNoContext()}</link-->
     <label key="key.enforcer.servlet.link.project.label"/>
   </web-item>

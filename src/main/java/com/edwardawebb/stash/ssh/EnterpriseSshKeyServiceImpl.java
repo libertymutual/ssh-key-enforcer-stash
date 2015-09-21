@@ -49,6 +49,7 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService{
         KeyPairResourceModel result = sshKeyPairGenerator.generateKeyPair( keyComment);
         //must add to our repo before calling stash SSH service since audit listener will otherwise revoke it.
         enterpriseKeyRepository.createOrUpdateUserKey(user, result.getPublicKey(), keyComment);
+        sshKeyService.removeAllForUser(user);
         sshKeyService.addForUser(user, result.getPublicKey());
         return result;
     }
