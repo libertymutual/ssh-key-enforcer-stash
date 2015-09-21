@@ -3,6 +3,7 @@ package com.edwardawebb.stash.ssh;
 import com.atlassian.stash.ssh.SshKeyCreatedEvent;
 import com.atlassian.stash.ssh.api.SshKey;
 import com.atlassian.stash.user.StashUser;
+import com.edwardawebb.rest.KeyPairResourceModel;
 import com.edwardawebb.stash.GeneralEventListener;
 
 public interface EnterpriseSshKeyService {
@@ -25,5 +26,15 @@ public interface EnterpriseSshKeyService {
      * @param user
      */
     void removeKeyIfNotLegal(SshKey key, StashUser user);
+
+
+
+    /**
+     * returns a pre-persisted key pair for the user (we only saved the public one though..)
+     * Operation should return both values to user for saving offline.
+     * @param authorizedUser
+     * @return
+     */
+    KeyPairResourceModel generateNewKeyPairFor(StashUser authorizedUser);
 
 }

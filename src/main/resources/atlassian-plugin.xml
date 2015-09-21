@@ -7,9 +7,6 @@
     <vendor name="${project.organization.name}" url="${project.organization.url}"/>
     <param name="plugin-icon">images/pluginIcon.png</param>
     <param name="plugin-logo">images/pluginLogo.png</param>
-    <!--  bundle-instructions>
-      <Import-Package>com.atlassian.stash.ssh,*;resolution:=optional</Import-Package>
-    </bundle-instructions-->
   </plugin-info>
   <!-- add our i18n resource -->
   <resource type="i18n" name="i18n" location="stash-ssh-key-enforcer"/>
@@ -32,12 +29,11 @@
   <stash-resource key="account-ssh-soy" name="Account Tab Soy Templates">
     <directory location="/templates/"/>
   </stash-resource>
-  <component key="GeneralEventListener" class="com.edwardawebb.stash.GeneralEventListener"/>
   <servlet name="User Key Management Servlet" i18n-name-key="user-key-management-servlet.name" key="user-key-management-servlet" class="com.edwardawebb.servlet.UserKeyManagementServlet">
     <description key="user-key-management-servlet.description">The User Key Management Servlet Plugin</description>
     <url-pattern>/account/users/*</url-pattern>
   </servlet>
-  <rest name="Key Details Resource" i18n-name-key="key-details-resource.name" key="key-details-resource" path="/keydetailsresource" version="1.0">
+  <rest name="Key Details Resource" i18n-name-key="key-details-resource.name" key="key-details-resource" path="/enterprisessh" version="1.0">
     <description key="key-details-resource.description">The Key Details Resource Plugin</description>
   </rest>
   <web-item key="user-keys" name="User Keys" section="stash.user.account.nav">
@@ -60,6 +56,10 @@
   <component-import key="soyTemplateRenderer" interface="com.atlassian.soy.renderer.SoyTemplateRenderer" filter=""/>
   <component-import key="userManager" interface="com.atlassian.sal.api.user.UserManager" filter=""/>
   <component-import key="sshKeyManager" interface="com.atlassian.stash.ssh.api.SshKeyService" filter=""/>
+  
+  
+  
+  <component key="GeneralEventListener" class="com.edwardawebb.stash.GeneralEventListener"/>
   <component key="enterpriseSshKeyService" class="com.edwardawebb.stash.ssh.EnterpriseSshKeyServiceImpl" name="Enterprise Ssh Key Manager Impl" i18n-name-key="enterprise-ssh-key-manager-impl.name">
     <description key="enterprise-ssh-key-manager-impl.description">The Enterprise Ssh Key Manager Impl Plugin</description>
     <interface>com.edwardawebb.stash.ssh.EnterpriseSshKeyService</interface>
@@ -67,6 +67,9 @@
   <component name="Enterprise Key Repository" i18n-name-key="enterprise-key-repository.name" key="enterprise-key-repository" class="com.edwardawebb.stash.ssh.EnterpriseKeyRepositoryImpl">
     <description key="enterprise-key-repository.description">The Enterprise Key Repository Plugin</description>
     <interface>com.edwardawebb.stash.ssh.EnterpriseKeyRepository</interface>
+  </component>
+  <component name="SSH Key Generator (jsch implementation)" i18n-name-key="enterprise-key-repository.name" key="key-generator" class="com.edwardawebb.stash.ssh.crypto.JschSshKeyPairGenerator">
+    <interface>com.edwardawebb.stash.ssh.crypto.SshKeyPairGenerator</interface>
   </component>
   
   

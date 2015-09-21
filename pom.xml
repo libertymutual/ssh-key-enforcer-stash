@@ -70,6 +70,16 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch</artifactId>
+			<version>0.1.53</version>
+		</dependency>
+
+
+
+
+
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.10</version>
@@ -164,22 +174,6 @@
 							<dataVersion>${stash.data.version}</dataVersion>
 						</product>
 					</products>
-					<!-- Specify what to bundle in the OBR -->
-					<!-- <pluginDependencies> -->
-					<!-- <pluginDependency> -->
-					<!-- <groupId>com.atlassian.stash</groupId> -->
-					<!-- <artifactId>stash-ssh</artifactId> -->
-					<!-- </pluginDependency> -->
-					<!-- </pluginDependencies> -->
-					<!-- <instructions> -->
-					<!-- Specify what package to include. Ensure that any packages from 
-						OBRs are also listed. -->
-					<!-- <Import-Package> -->
-					<!-- com.atlassian.stash.ssh, -->
-					<!-- com.edwardawebb -->
-					<!-- </Import-Package> -->
-					<!-- <CONF_COMM/> -->
-					<!-- </instructions> -->
 				</configuration>
 			</plugin>
 			<plugin>
@@ -189,6 +183,27 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>2.4.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <relocations>
+                <relocation>
+                  <pattern>com.jcraft.jsch</pattern>
+                  <shadedPattern>com.shaded.jcraft.jsch</shadedPattern>
+                </relocation>
+              </relocations>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 		</plugins>
 	</build>
 	<properties>

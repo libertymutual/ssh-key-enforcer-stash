@@ -12,8 +12,20 @@
     <title>{$user.displayName} / Account Tab</title>
 </head>
 <body>
+<div class="aui-group">
     <h3>Hello, {$user.displayName}</h3>
-    <p>Welcome to my plugin tab in the account page.</p>
+    <p>You may create a new SSH Key Pair if your previous was lost or compromised.</p>
+    <p>Once created you will have the chance to download the public/private key as a file. Make sure to save them in a safe place. See [LINK]</p>
+</div>
+    
+    <div class="aui-group">
+    <div class="aui-item">
+       <button class="aui-button aui-button-primary">Create New Key Pair</button>
+    </div>
+    <div class="aui-item">
+        <div id="keyresults"></div>
+    </div>
+</div>
 </body>
 </html>
 {/template}

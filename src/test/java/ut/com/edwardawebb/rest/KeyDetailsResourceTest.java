@@ -25,7 +25,7 @@ public class KeyDetailsResourceTest {
 
     @Test
     public void messageIsValid() {
-        KeyDetailsResource resource = new KeyDetailsResource();
+        KeyDetailsResource resource = new KeyDetailsResource(null, null);
 
         Response response = resource.getMessage();
         final KeyDetailsResourceModel message = (KeyDetailsResourceModel) response.getEntity();
