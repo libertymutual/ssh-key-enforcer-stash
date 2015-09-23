@@ -74,9 +74,14 @@
   <component-import key="userManager" interface="com.atlassian.sal.api.user.UserManager" filter=""/>
   <component-import key="sshKeyManager" interface="com.atlassian.stash.ssh.api.SshKeyService" filter=""/>
   <component-import key="schedulerService" interface="com.atlassian.scheduler.SchedulerService"/>
+  <component-import key="mailService" interface="com.atlassian.stash.mail.MailService"/>
+  <component-import key="applicationPropertiesService" interface="com.atlassian.stash.server.ApplicationPropertiesService"/>
+  
+
   
   
   <component key="GeneralEventListener" class="com.edwardawebb.stash.ssh.events.GeneralEventListener"/>
+  <component key="NotificationService" class="com.edwardawebb.stash.ssh.notifications.NotificationService"/>
   <component key="enterpriseSshKeyService" class="com.edwardawebb.stash.ssh.EnterpriseSshKeyServiceImpl" name="Enterprise Ssh Key Manager Impl" i18n-name-key="enterprise-ssh-key-manager-impl.name">
     <description key="enterprise-ssh-key-manager-impl.description">The Enterprise Ssh Key Manager Impl Plugin</description>
     <interface>com.edwardawebb.stash.ssh.EnterpriseSshKeyService</interface>
