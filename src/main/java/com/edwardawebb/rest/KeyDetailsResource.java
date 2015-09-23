@@ -9,7 +9,6 @@ import javax.ws.rs.core.Response;
 
 import com.atlassian.stash.user.StashAuthenticationContext;
 import com.atlassian.stash.user.StashUser;
-import com.atlassian.stash.user.UserService;
 import com.edwardawebb.stash.ssh.EnterpriseKeyGenerationException;
 import com.edwardawebb.stash.ssh.EnterpriseSshKeyService;
 

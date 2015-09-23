@@ -37,4 +37,9 @@ public interface EnterpriseSshKeyService {
      */
     KeyPairResourceModel generateNewKeyPairFor(StashUser authorizedUser);
 
+
+
+
+    void replaceExpiredKeysAndNotifyUsers();
+
 }

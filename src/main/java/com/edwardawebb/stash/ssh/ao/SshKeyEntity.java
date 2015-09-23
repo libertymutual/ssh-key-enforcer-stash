@@ -1,17 +1,22 @@
-package com.edwardawebb.stash.ssh;
+package com.edwardawebb.stash.ssh.ao;
 
 import java.util.Date;
 
 import net.java.ao.Accessor;
 import net.java.ao.Entity;
 import net.java.ao.Mutator;
-import net.java.ao.Preload;
 import net.java.ao.schema.NotNull;
+import net.java.ao.schema.StringLength;
+import net.java.ao.schema.Table;
 
-@Preload
+@Table("ENTKEY")
 public interface SshKeyEntity extends Entity{
+    
+    @Mutator("KEYID")
+    Integer getKeyId();
     @NotNull
     @Mutator("TEXT")
+    @StringLength(value=767)
     String getText();
     @NotNull
     @Mutator("LABEL")
@@ -24,6 +29,8 @@ public interface SshKeyEntity extends Entity{
     Date getCreatedDate();
     
 
+    @Accessor("KEYID")
+    void setKeyId(int keyId);
     @Accessor("TEXT")
     void setText(String text);
     @Accessor("LABEL")

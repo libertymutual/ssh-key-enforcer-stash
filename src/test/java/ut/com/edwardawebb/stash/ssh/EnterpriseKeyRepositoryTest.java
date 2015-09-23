@@ -3,7 +3,8 @@ package ut.com.edwardawebb.stash.ssh;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.edwardawebb.stash.ssh.EnterpriseKeyRepositoryImpl;
+
+import com.edwardawebb.stash.ssh.ao.EnterpriseKeyRepositoryImpl;
 
 import static org.mockito.Mockito.*;
 
