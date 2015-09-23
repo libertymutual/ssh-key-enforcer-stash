@@ -17,4 +17,6 @@ public interface EnterpriseKeyRepository {
 
     void updateRecordWithKeyId(SshKeyEntity newRecord, SshKey newKey);
 
+    void removeRecordForSshKey(Integer integer);
+
 }

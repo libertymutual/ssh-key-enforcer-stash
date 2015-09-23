@@ -62,13 +62,15 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService{
     public void replaceExpiredKeysAndNotifyUsers() {
        List<Integer> expiredStashKeys = enterpriseKeyRepository.listOfExpiredKeyIds();
         
-       for (Integer integer : expiredStashKeys) {
-           sshKeyService.remove(integer);
-           log.warn("Expired Key: " + integer);
+       for (Integer stashKeyId : expiredStashKeys) {
+           log.warn("Removing Key: " + stashKeyId);
+           sshKeyService.remove(stashKeyId);
+           enterpriseKeyRepository.removeRecordForSshKey(stashKeyId);
+           log.warn("Expired Key: " + stashKeyId);
            
        }
     }
- 
+
 
 
 }

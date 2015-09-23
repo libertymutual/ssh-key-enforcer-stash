@@ -72,16 +72,21 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
         Calendar cal = new GregorianCalendar();
         cal.setTime(today);
         cal.add(Calendar.DAY_OF_YEAR,-90);
-        //cal.add(Calendar.MINUTE,-1);
-        ao.stream(SshKeyEntity.class, Query.select().where("CREATED < ?",cal.getTime()),new EntityStreamCallback<SshKeyEntity, Integer>(){
-
-            @Override
-            public void onRowRead(SshKeyEntity t) {
-                expiredIds.add(t.getKeyId());
-                
-            }
-        
-        });
+        //using ao.stream returns valid OID but all other fields absent.
+//        ao.stream(SshKeyEntity.class, Query.select().where("CREATED < ?",cal.getTime()),new EntityStreamCallback<SshKeyEntity, Integer>(){
+//
+//            @Override
+//            public void onRowRead(SshKeyEntity t) {
+//                log.warn("Reading row: " + t.getID() + "," + t.getLabel() + "," + t.getKeyId());
+//                expiredIds.add(t.getKeyId());
+//            }
+//        
+//        });
+        SshKeyEntity[] results = ao.find(SshKeyEntity.class, Query.select().where("CREATED < ?",cal.getTime()));
+        for (SshKeyEntity sshKeyEntity : results) {
+            log.warn("Reading row: " + sshKeyEntity.getID() + "," + sshKeyEntity.getLabel() + "," + sshKeyEntity.getKeyId());
+            expiredIds.add(sshKeyEntity.getKeyId());
+        }
         return expiredIds;
     }
 
@@ -97,6 +102,12 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
                 return null;
             }
         });
+    }
+
+    @Override
+    public void removeRecordForSshKey(Integer stashKeyId) {
+        SshKeyEntity[] recordToDelete = ao.find(SshKeyEntity.class, Query.select().where("KEYID = ?",stashKeyId));
+        ao.delete(recordToDelete);
     }
     
     

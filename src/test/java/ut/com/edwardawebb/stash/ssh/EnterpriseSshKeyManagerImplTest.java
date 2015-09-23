@@ -1,34 +1,131 @@
 package ut.com.edwardawebb.stash.ssh;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import com.edwardawebb.stash.ssh.EnterpriseSshKeyServiceImpl;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+import net.java.ao.DBParam;
+import net.java.ao.EntityManager;
+import net.java.ao.test.jdbc.Data;
+import net.java.ao.test.jdbc.DatabaseUpdater;
+import net.java.ao.test.jdbc.Jdbc;
+import net.java.ao.test.jdbc.NonTransactional;
+import net.java.ao.test.junit.ActiveObjectsJUnitRunner;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import com.atlassian.activeobjects.external.ActiveObjects;
+import com.atlassian.activeobjects.test.TestActiveObjects;
+import com.atlassian.stash.ssh.api.SshKeyService;
+import com.edwardawebb.stash.ssh.EnterpriseSshKeyService;
+import com.edwardawebb.stash.ssh.EnterpriseSshKeyServiceImpl;
+import com.edwardawebb.stash.ssh.ao.EnterpriseKeyRepository;
+import com.edwardawebb.stash.ssh.ao.EnterpriseKeyRepositoryImpl;
+import com.edwardawebb.stash.ssh.ao.SshKeyEntity;
+import com.edwardawebb.stash.ssh.scheduler.KeyRotationJobRunner;
+
+
+
 /**
- * @since 3.5
+ * Must run all methods that interact with service as @NonTransactional 
+ * or otherwise the multiple layers of transactions cause issues.
+ * Also http://grepcode.com/file/repo1.maven.org/maven2/net.java.dev.activeobjects/activeobjects-test/0.23.0/net/java/ao/test/jdbc/DynamicJdbcConfiguration.java#DynamicJdbcConfiguration.0jdbcSupplier
+ * has all the databtase types and connection info needed in maven arguments.
+ * @author Eddie Webb
+ *
  */
+@RunWith(ActiveObjectsJUnitRunner.class)
+@Data(EnterpriseSshKeyManagerImplTest.EnterpriseSshKeyRepositoryTestData.class)
+@Jdbc(net.java.ao.test.jdbc.DynamicJdbcConfiguration.class)
 public class EnterpriseSshKeyManagerImplTest {
+    private static final String PUBLIC_KEY_ONE ="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC0O2PpfWd0RuoveFkSLP8DaL2ZekQZJM7gzQFi/cavziK8jnAY+xtNIAF1K7EN64JSM2DTMU7BZUFkJvqqbugzc29A/LOfZ6GzvMhSiR7YR2J/eOkVZbmPPyC1qWDCc5Ne71pEJhU5OdlFd4Hj5XgDzNyMANoYlO+xm1IDzHBxDSrvY++VGrnZG1rJ6aSdxyRCoE7MVtQkLuIMDSVPTVfdqDV4oKlH2bzd4LyA1Jm01+MBmWq2qVcKcF6UYKaUILVreZZZSm2/PBbgQ+H5yzjNeEbvdnAr7bcn+xRdhEM0ZGm/RRDRIvwkTlWJ2y9M3KvnJEKbv/c9ZAlOmbs5K1OhfGL/jCU8h1EslwQ9euFp0wjKUMj5u9ll8QqpNcXxsfUnaN9qc2rrm5FS5t5TFAkbIX5fOTJCPb+seE146ax/cNovzOoJUPvF+qBfvJLQGX2L/4JdPqDQ6FkLbvJy194/K5oWag8w4F9ftYIfd/SOgatPMiKuhOls2zYufm34UBbksc7qxDD12JUiI/q7JNted53tnPVBSDLM5RYtohDq/w4MfyFmA51UeETSLumlwg9kOuqaWBYjr2Esn09EtkQNIhQxxt3w47O0RFghZgJdnP3VORju3v2l0Qfo7A/EbeDGKXQhCl6yeMv82lmUtzOhVN6IAApOwMH7Hmh/z209jw==";
+    private static final int EXPIRED_USER_ID = 1;
+    private static final int VALID_USER_ID = 2;
+    private static final int EXPIRED_STASH_KEY_ID = 100;
+    private static final int VALID_STASH_KEY_ID = 200;
+    
+    
+    //gets injected thanks to ActiveObjectsJUnitRunner.class  
+    private EntityManager entityManager;
 
+    private ActiveObjects ao ;
+    private EnterpriseKeyRepository keyRepo;
+    private EnterpriseSshKeyService ourKeyService;
+    private SshKeyService stashKeyService;
+    private KeyRotationJobRunner jobRunner;
+    
     @Before
-    public void setup() {
-
+    public void setup(){
+        ao = new TestActiveObjects(entityManager);
+        keyRepo = new EnterpriseKeyRepositoryImpl(ao);
+        stashKeyService = mock(SshKeyService.class);
+        ourKeyService = new EnterpriseSshKeyServiceImpl(stashKeyService,keyRepo,null);
     }
-
-    @After
-    public void tearDown() {
-
+    
+    @Test
+    public void whenExpireTaskIsCalledValidKeysAreIgnored(){
+        SshKeyEntity validKey = ao.get(SshKeyEntity.class, EnterpriseSshKeyRepositoryTestData.validKey.getID());
+        assertThat(validKey,notNullValue());
+        assertThat(validKey.getKeyId(),is(VALID_STASH_KEY_ID));
+        
+        ourKeyService.replaceExpiredKeysAndNotifyUsers();
+       
+        //key survived?
+        validKey = ao.get(SshKeyEntity.class, EnterpriseSshKeyRepositoryTestData.validKey.getID());
+        assertThat(validKey,notNullValue());
+        //stash's ssh service was not invoked
+        verify(stashKeyService,times(0)).remove(VALID_STASH_KEY_ID);
     }
+    
+    
+    @Test
+    @NonTransactional
+    public void whenExpireTaskIsCalledExpiredKeysAreDestroyed(){
+        SshKeyEntity validKey = ao.get(SshKeyEntity.class, EnterpriseSshKeyRepositoryTestData.expiredKey.getID());
+        assertThat(validKey,notNullValue());
+        assertThat(validKey.getKeyId(),is(EXPIRED_STASH_KEY_ID));
+        
+        ourKeyService.replaceExpiredKeysAndNotifyUsers();
+        
+        //key was purged?
+        validKey = ao.get(SshKeyEntity.class, EnterpriseSshKeyRepositoryTestData.expiredKey.getID());
+        assertThat(validKey,nullValue());
+        //stash ssh remve was called with ecxpired ssh key id
 
-    @Test(expected=Exception.class)
-    public void testSomething() throws Exception {
-
-        //EnterpriseSshKeyManagerImpl testClass = new EnterpriseSshKeyManagerImpl();
-
-        throw new Exception("EnterpriseSshKeyManagerImpl has no tests!");
-
+        //stash's ssh service was not invoked
+        verify(stashKeyService).remove(EXPIRED_STASH_KEY_ID);
     }
+    
+    
+    
+    public static class EnterpriseSshKeyRepositoryTestData implements DatabaseUpdater
+    {
+        private static SshKeyEntity expiredKey;
+        private static SshKeyEntity validKey;
+        
+        @Override
+        public void update(EntityManager em) throws Exception
+        {   
+            em.migrate(SshKeyEntity.class);
+            
+            //create a pre-expired key in DB for scheduler
+            Date today = new Date();
+            Calendar cal = new GregorianCalendar();
+            cal.setTime(today);
+            cal.add(Calendar.DAY_OF_YEAR,-91);
+            expiredKey = em.create(SshKeyEntity.class, new DBParam("USERID", EXPIRED_USER_ID), new DBParam("KEYID", EXPIRED_STASH_KEY_ID), new DBParam("TEXT", PUBLIC_KEY_ONE),new DBParam("LABEL","COMPROMISED"),new DBParam("CREATED", cal.getTime()));
 
+            cal.add(Calendar.DAY_OF_YEAR,2);
+            validKey = em.create(SshKeyEntity.class, new DBParam("USERID", VALID_USER_ID), new DBParam("KEYID", VALID_STASH_KEY_ID), new DBParam("TEXT", PUBLIC_KEY_ONE),new DBParam("LABEL","VALID"),new DBParam("CREATED", cal.getTime()));
+            
+        }
+        
+    }
 }
