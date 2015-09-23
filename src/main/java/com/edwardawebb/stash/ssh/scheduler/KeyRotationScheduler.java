@@ -21,8 +21,8 @@ import com.edwardawebb.stash.ssh.EnterpriseSshKeyService;
 public class KeyRotationScheduler implements DisposableBean, InitializingBean { 
 
      private static final JobId JOB_ID = JobId.of("com.edwardawebb.stash:stash-ssh-key-enforcer:KeyRotationJob"); 
-     //private static final long JOB_INTERVAL = TimeUnit.DAYS.toMillis(1L);
-     private static final long JOB_INTERVAL = TimeUnit.MINUTES.toMillis(1L);
+     private static final long JOB_INTERVAL = TimeUnit.DAYS.toMillis(1L); //TODO runs daily, add config
+     //private static final long JOB_INTERVAL = TimeUnit.MINUTES.toMillis(1L);
      private static final String JOB_RUNNER_KEY = "com.edwardawebb.stash:stash-ssh-key-enforcer:KeyRotationJobRunner"; 
      private static final Logger log = LoggerFactory.getLogger(KeyRotationScheduler.class);
      

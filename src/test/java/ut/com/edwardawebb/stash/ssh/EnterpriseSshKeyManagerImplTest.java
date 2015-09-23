@@ -27,13 +27,13 @@ import org.junit.runner.RunWith;
 import com.atlassian.activeobjects.external.ActiveObjects;
 import com.atlassian.activeobjects.test.TestActiveObjects;
 import com.atlassian.stash.ssh.api.SshKeyService;
+import com.atlassian.stash.user.UserService;
 import com.edwardawebb.stash.ssh.EnterpriseSshKeyService;
 import com.edwardawebb.stash.ssh.EnterpriseSshKeyServiceImpl;
 import com.edwardawebb.stash.ssh.ao.EnterpriseKeyRepository;
 import com.edwardawebb.stash.ssh.ao.EnterpriseKeyRepositoryImpl;
 import com.edwardawebb.stash.ssh.ao.SshKeyEntity;
 import com.edwardawebb.stash.ssh.notifications.NotificationService;
-import com.edwardawebb.stash.ssh.scheduler.KeyRotationJobRunner;
 
 /**
  * Must run all methods that interact with service as @NonTransactional or
@@ -65,7 +65,7 @@ public class EnterpriseSshKeyManagerImplTest {
     private EnterpriseSshKeyService ourKeyService;
     private NotificationService notificationService;
     private SshKeyService stashKeyService;
-    private KeyRotationJobRunner jobRunner;
+    private UserService userService;
 
     @Before
     public void setup() {
@@ -73,7 +73,8 @@ public class EnterpriseSshKeyManagerImplTest {
         keyRepo = new EnterpriseKeyRepositoryImpl(ao);
         stashKeyService = mock(SshKeyService.class);
         notificationService = mock(NotificationService.class);
-        ourKeyService = new EnterpriseSshKeyServiceImpl(stashKeyService, keyRepo, null, notificationService);
+        userService = mock(UserService.class);
+        ourKeyService = new EnterpriseSshKeyServiceImpl(stashKeyService, keyRepo, null, notificationService, userService);
     }
 
     @Test

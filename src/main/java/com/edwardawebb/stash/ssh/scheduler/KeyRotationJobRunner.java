@@ -20,8 +20,9 @@ public class KeyRotationJobRunner implements JobRunner{
     
     @Override
     public JobRunnerResponse runJob(JobRunnerRequest request) {
-        log.warn("Key Expire Job Called");
+        log.warn("Key Expire Job Starting");
         enterpriseKeyService.replaceExpiredKeysAndNotifyUsers();
+        log.warn("Key Expire Job Complete");
         return JobRunnerResponse.success();
     }
 
