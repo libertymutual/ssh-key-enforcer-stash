@@ -19,3 +19,4 @@ public interface EnterpriseKeyRepository {
     void removeRecord(SshKeyEntity key);
 
 }
+

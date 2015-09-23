@@ -10,7 +10,7 @@ import javax.ws.rs.core.Response;
 import com.atlassian.stash.user.StashAuthenticationContext;
 import com.atlassian.stash.user.StashUser;
 import com.edwardawebb.stash.ssh.EnterpriseKeyGenerationException;
-import com.edwardawebb.stash.ssh.EnterpriseSshKeyService;
+import com.edwardawebb.stash.ssh.keys.EnterpriseSshKeyService;
 
 /**
  * A resource of message.

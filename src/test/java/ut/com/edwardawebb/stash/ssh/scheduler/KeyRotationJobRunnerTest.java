@@ -7,7 +7,7 @@ import net.java.ao.test.jdbc.NonTransactional;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.edwardawebb.stash.ssh.EnterpriseSshKeyServiceImpl;
+import com.edwardawebb.stash.ssh.keys.EnterpriseSshKeyServiceImpl;
 import com.edwardawebb.stash.ssh.scheduler.KeyRotationJobRunner;
 
 

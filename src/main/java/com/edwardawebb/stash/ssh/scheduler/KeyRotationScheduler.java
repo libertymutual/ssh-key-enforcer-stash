@@ -15,7 +15,7 @@ import com.atlassian.scheduler.config.JobId;
 import com.atlassian.scheduler.config.JobRunnerKey;
 import com.atlassian.scheduler.config.RunMode;
 import com.atlassian.scheduler.config.Schedule;
-import com.edwardawebb.stash.ssh.EnterpriseSshKeyService;
+import com.edwardawebb.stash.ssh.keys.EnterpriseSshKeyService;
 
 
 public class KeyRotationScheduler implements DisposableBean, InitializingBean { 

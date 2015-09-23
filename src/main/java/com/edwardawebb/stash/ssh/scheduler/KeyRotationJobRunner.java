@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.atlassian.scheduler.JobRunner;
 import com.atlassian.scheduler.JobRunnerRequest;
 import com.atlassian.scheduler.JobRunnerResponse;
-import com.edwardawebb.stash.ssh.EnterpriseSshKeyService;
+import com.edwardawebb.stash.ssh.keys.EnterpriseSshKeyService;
 
 public class KeyRotationJobRunner implements JobRunner{
 

@@ -82,9 +82,9 @@
   
   <component key="GeneralEventListener" class="com.edwardawebb.stash.ssh.events.GeneralEventListener"/>
   <component key="NotificationService" class="com.edwardawebb.stash.ssh.notifications.NotificationService"/>
-  <component key="enterpriseSshKeyService" class="com.edwardawebb.stash.ssh.EnterpriseSshKeyServiceImpl" name="Enterprise Ssh Key Manager Impl" i18n-name-key="enterprise-ssh-key-manager-impl.name">
+  <component key="enterpriseSshKeyService" class="com.edwardawebb.stash.ssh.keys.EnterpriseSshKeyServiceImpl" name="Enterprise Ssh Key Manager Impl" i18n-name-key="enterprise-ssh-key-manager-impl.name">
     <description key="enterprise-ssh-key-manager-impl.description">The Enterprise Ssh Key Manager Impl Plugin</description>
-    <interface>com.edwardawebb.stash.ssh.EnterpriseSshKeyService</interface>
+    <interface>com.edwardawebb.stash.ssh.keys.EnterpriseSshKeyService</interface>
   </component>
   <component name="Enterprise Key Repository" i18n-name-key="enterprise-key-repository.name" key="enterprise-key-repository" class="com.edwardawebb.stash.ssh.ao.EnterpriseKeyRepositoryImpl">
     <description key="enterprise-key-repository.description">The Enterprise Key Repository Plugin</description>

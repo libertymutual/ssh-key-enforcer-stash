@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -27,12 +28,13 @@ import org.junit.runner.RunWith;
 import com.atlassian.activeobjects.external.ActiveObjects;
 import com.atlassian.activeobjects.test.TestActiveObjects;
 import com.atlassian.stash.ssh.api.SshKeyService;
+import com.atlassian.stash.user.StashUser;
 import com.atlassian.stash.user.UserService;
-import com.edwardawebb.stash.ssh.EnterpriseSshKeyService;
-import com.edwardawebb.stash.ssh.EnterpriseSshKeyServiceImpl;
 import com.edwardawebb.stash.ssh.ao.EnterpriseKeyRepository;
 import com.edwardawebb.stash.ssh.ao.EnterpriseKeyRepositoryImpl;
 import com.edwardawebb.stash.ssh.ao.SshKeyEntity;
+import com.edwardawebb.stash.ssh.keys.EnterpriseSshKeyService;
+import com.edwardawebb.stash.ssh.keys.EnterpriseSshKeyServiceImpl;
 import com.edwardawebb.stash.ssh.notifications.NotificationService;
 
 /**
@@ -74,6 +76,7 @@ public class EnterpriseSshKeyManagerImplTest {
         stashKeyService = mock(SshKeyService.class);
         notificationService = mock(NotificationService.class);
         userService = mock(UserService.class);
+        when(userService.getUserByName(EnterpriseSshKeyServiceImpl.ADMIN_ACCOUNT_NAME)).thenReturn(mock(StashUser.class));//defeat NPE check
         ourKeyService = new EnterpriseSshKeyServiceImpl(stashKeyService, keyRepo, null, notificationService, userService);
     }
 
