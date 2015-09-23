@@ -1,4 +1,4 @@
-package com.edwardawebb.rest;
+package com.edwardawebb.stash.ssh.rest;
 
 import java.security.KeyPair;
 

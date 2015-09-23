@@ -3,8 +3,8 @@ package com.edwardawebb.stash.ssh;
 import com.atlassian.stash.ssh.SshKeyCreatedEvent;
 import com.atlassian.stash.ssh.api.SshKey;
 import com.atlassian.stash.user.StashUser;
-import com.edwardawebb.rest.KeyPairResourceModel;
-import com.edwardawebb.stash.GeneralEventListener;
+import com.edwardawebb.stash.events.GeneralEventListener;
+import com.edwardawebb.stash.ssh.rest.KeyPairResourceModel;
 
 public interface EnterpriseSshKeyService {
 

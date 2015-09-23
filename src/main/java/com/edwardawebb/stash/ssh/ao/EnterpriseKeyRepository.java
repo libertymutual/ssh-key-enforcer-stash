@@ -1,5 +1,6 @@
 package com.edwardawebb.stash.ssh.ao;
 
+import java.util.Date;
 import java.util.List;
 
 import com.atlassian.stash.ssh.api.SshKey;
@@ -9,14 +10,12 @@ public interface EnterpriseKeyRepository {
     
     SshKeyEntity createOrUpdateUserKey(StashUser user, String text, String label);
     
-   // SshKeyEntity findCurrentValidKeyForUser(String username);
-    
     boolean isValidKeyForUser(StashUser user, String text);
 
-    List<Integer> listOfExpiredKeyIds();
+    List<SshKeyEntity> listOfExpiredKeyIds(Date oldestValidDate);
 
     void updateRecordWithKeyId(SshKeyEntity newRecord, SshKey newKey);
 
-    void removeRecordForSshKey(Integer integer);
+    void removeRecord(SshKeyEntity key);
 
 }

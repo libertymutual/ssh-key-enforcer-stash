@@ -1,4 +1,4 @@
-package com.edwardawebb.rest;
+package com.edwardawebb.stash.ssh.rest;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

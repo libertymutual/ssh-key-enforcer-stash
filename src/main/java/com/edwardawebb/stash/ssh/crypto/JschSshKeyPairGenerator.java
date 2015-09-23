@@ -4,8 +4,8 @@ import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
-import com.edwardawebb.rest.KeyPairResourceModel;
 import com.edwardawebb.stash.ssh.EnterpriseKeyGenerationException;
+import com.edwardawebb.stash.ssh.rest.KeyPairResourceModel;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.KeyPair;
 

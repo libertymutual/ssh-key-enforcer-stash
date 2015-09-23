@@ -1,4 +1,4 @@
-package com.edwardawebb.servlet;
+package com.edwardawebb.stash.ssh.servlet;
 
 import java.io.IOException;
 import java.util.Map;

@@ -8,8 +8,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.edwardawebb.rest.KeyDetailsResource;
-import com.edwardawebb.rest.KeyDetailsResourceModel;
+import com.edwardawebb.stash.ssh.rest.KeyDetailsResource;
+import com.edwardawebb.stash.ssh.rest.KeyDetailsResourceModel;
 
 public class KeyDetailsResourceTest {
 

@@ -7,7 +7,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 import net.java.ao.DBParam;
-import net.java.ao.EntityStreamCallback;
 import net.java.ao.Query;
 
 import org.slf4j.Logger;
@@ -17,6 +16,7 @@ import com.atlassian.activeobjects.external.ActiveObjects;
 import com.atlassian.sal.api.transaction.TransactionCallback;
 import com.atlassian.stash.ssh.api.SshKey;
 import com.atlassian.stash.user.StashUser;
+import com.google.common.collect.Lists;
 
 public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
     
@@ -66,12 +66,9 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
     }
 
     @Override
-    public List<Integer> listOfExpiredKeyIds() {
+    public List<SshKeyEntity> listOfExpiredKeyIds(Date oldestValidDate) {
         final List<Integer> expiredIds = new ArrayList<Integer>();
-        Date today = new Date();
-        Calendar cal = new GregorianCalendar();
-        cal.setTime(today);
-        cal.add(Calendar.DAY_OF_YEAR,-90);
+
         //using ao.stream returns valid OID but all other fields absent.
 //        ao.stream(SshKeyEntity.class, Query.select().where("CREATED < ?",cal.getTime()),new EntityStreamCallback<SshKeyEntity, Integer>(){
 //
@@ -82,12 +79,8 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
 //            }
 //        
 //        });
-        SshKeyEntity[] results = ao.find(SshKeyEntity.class, Query.select().where("CREATED < ?",cal.getTime()));
-        for (SshKeyEntity sshKeyEntity : results) {
-            log.warn("Reading row: " + sshKeyEntity.getID() + "," + sshKeyEntity.getLabel() + "," + sshKeyEntity.getKeyId());
-            expiredIds.add(sshKeyEntity.getKeyId());
-        }
-        return expiredIds;
+        SshKeyEntity[] results = ao.find(SshKeyEntity.class, Query.select().where("CREATED < ?",oldestValidDate));
+        return Lists.newArrayList(results);
     }
 
     @Override
@@ -105,9 +98,9 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
     }
 
     @Override
-    public void removeRecordForSshKey(Integer stashKeyId) {
-        SshKeyEntity[] recordToDelete = ao.find(SshKeyEntity.class, Query.select().where("KEYID = ?",stashKeyId));
-        ao.delete(recordToDelete);
+    public void removeRecord(SshKeyEntity key) {
+        //SshKeyEntity[] recordToDelete = ao.find(SshKeyEntity.class, Query.select().where("KEYID = ?",stashKeyId));
+        ao.delete(key);
     }
     
     

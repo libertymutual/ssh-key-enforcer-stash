@@ -46,7 +46,7 @@
   <stash-resource key="account-ssh-soy" name="Account Tab Soy Templates">
     <directory location="/templates/"/>
   </stash-resource>
-  <servlet name="User Key Management Servlet" i18n-name-key="user-key-management-servlet.name" key="user-key-management-servlet" class="com.edwardawebb.servlet.UserKeyManagementServlet">
+  <servlet name="User Key Management Servlet" i18n-name-key="user-key-management-servlet.name" key="user-key-management-servlet" class="com.edwardawebb.stash.ssh.servlet.UserKeyManagementServlet">
     <description key="user-key-management-servlet.description">The User Key Management Servlet Plugin</description>
     <url-pattern>/account/enterprisekey</url-pattern>
   </servlet>
@@ -76,7 +76,7 @@
   <component-import key="schedulerService" interface="com.atlassian.scheduler.SchedulerService"/>
   
   
-  <component key="GeneralEventListener" class="com.edwardawebb.stash.GeneralEventListener"/>
+  <component key="GeneralEventListener" class="com.edwardawebb.stash.ssh.events.GeneralEventListener"/>
   <component key="enterpriseSshKeyService" class="com.edwardawebb.stash.ssh.EnterpriseSshKeyServiceImpl" name="Enterprise Ssh Key Manager Impl" i18n-name-key="enterprise-ssh-key-manager-impl.name">
     <description key="enterprise-ssh-key-manager-impl.description">The Enterprise Ssh Key Manager Impl Plugin</description>
     <interface>com.edwardawebb.stash.ssh.EnterpriseSshKeyService</interface>

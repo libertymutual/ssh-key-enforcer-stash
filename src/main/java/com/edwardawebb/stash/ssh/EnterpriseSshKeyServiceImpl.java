@@ -1,5 +1,8 @@
 package com.edwardawebb.stash.ssh;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -8,12 +11,13 @@ import org.slf4j.LoggerFactory;
 import com.atlassian.stash.ssh.api.SshKey;
 import com.atlassian.stash.ssh.api.SshKeyService;
 import com.atlassian.stash.user.StashUser;
-import com.edwardawebb.rest.KeyPairResourceModel;
 import com.edwardawebb.stash.ssh.ao.EnterpriseKeyRepository;
 import com.edwardawebb.stash.ssh.ao.SshKeyEntity;
 import com.edwardawebb.stash.ssh.crypto.SshKeyPairGenerator;
+import com.edwardawebb.stash.ssh.rest.KeyPairResourceModel;
 
 public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService{
+    final private static int NINETY_DAYS = 90;
     
     final private SshKeyService sshKeyService;
     final private EnterpriseKeyRepository enterpriseKeyRepository;
@@ -60,14 +64,18 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService{
 
     @Override
     public void replaceExpiredKeysAndNotifyUsers() {
-       List<Integer> expiredStashKeys = enterpriseKeyRepository.listOfExpiredKeyIds();
+        Date today = new Date();
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(today);
+        cal.add(Calendar.DAY_OF_YEAR,-NINETY_DAYS);
+       List<SshKeyEntity> expiredStashKeys = enterpriseKeyRepository.listOfExpiredKeyIds(cal.getTime());
         
-       for (Integer stashKeyId : expiredStashKeys) {
-           log.warn("Removing Key: " + stashKeyId);
-           sshKeyService.remove(stashKeyId);
-           enterpriseKeyRepository.removeRecordForSshKey(stashKeyId);
-           log.warn("Expired Key: " + stashKeyId);
-           
+       for (SshKeyEntity keyRecord : expiredStashKeys) {
+           log.info("Removing Key: " + keyRecord.getKeyId() + " for user " + keyRecord.getUserId());
+           sshKeyService.remove(keyRecord.getKeyId());
+           enterpriseKeyRepository.removeRecord(keyRecord);
+           //notificatonService.notifyUser()
+           log.info("Key Removed" );
        }
     }
 

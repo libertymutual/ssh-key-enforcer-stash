@@ -1,4 +1,4 @@
-package com.edwardawebb.stash;
+package com.edwardawebb.stash.events;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
