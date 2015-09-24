@@ -1,7 +1,7 @@
-# SSH Key Enforcer for Stash
+# SSH Key Enforcer for BitBucket Server
 
 ## What it do..
-Layers additional controls over Stash's SSH key features that enforce the stronger controls required in an enterprise environment.
+Layers additional controls over -Stash's- Bitbucket's SSH key features that enforce the stronger controls required in an enterprise environment.
 
 ## Features
 - Block unamed keys being added directly to Projects or Repositories

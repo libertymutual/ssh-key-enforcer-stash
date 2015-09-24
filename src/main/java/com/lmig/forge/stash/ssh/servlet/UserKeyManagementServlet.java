@@ -54,7 +54,7 @@ public class UserKeyManagementServlet extends HttpServlet{
         resp.setContentType("text/html;charset=UTF-8");
         try {
             soyTemplateRenderer.render(resp.getWriter(),
-                    "com.edwardawebb.stash-ssh-key-enforcer:account-ssh-soy",
+                    "com.lmig.forge.stash.ssh.stash-ssh-key-enforcer:account-ssh-soy",
                     templateName,
                     data);
         } catch (SoyException e) {

@@ -1,4 +1,4 @@
-package it.com.edwardawebb.stash.ssh;
+package it.com.lmig.forge.stash.ssh;
 
 import org.junit.After;
 import org.junit.Before;

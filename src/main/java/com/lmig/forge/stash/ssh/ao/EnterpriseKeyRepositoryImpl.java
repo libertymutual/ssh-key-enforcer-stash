@@ -90,7 +90,7 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
 //
 //            @Override
 //            public void onRowRead(SshKeyEntity t) {
-//                log.warn("Reading row: " + t.getID() + "," + t.getLabel() + "," + t.getKeyId());
+//                log.debug("Reading row: " + t.getID() + "," + t.getLabel() + "," + t.getKeyId());
 //                expiredIds.add(t.getKeyId());
 //            }
 //        

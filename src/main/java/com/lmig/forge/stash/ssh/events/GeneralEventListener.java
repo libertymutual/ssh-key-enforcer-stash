@@ -91,21 +91,16 @@ public class GeneralEventListener {
                     logger.debug("The SSH Key is: " + key.getLabel() + "|with value: " + key.getText() + "|with user: "
                             + key.getUser());
                 }
-                //enterpriseSshKeyService.removeKeyIfNotLegal(key, stashEvent.getUser());
+                enterpriseSshKeyService.removeKeyIfNotLegal(key, stashEvent.getUser());
             } catch (IllegalArgumentException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             } catch (IllegalAccessException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             } catch (SecurityException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             } catch (NoSuchMethodException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         } 

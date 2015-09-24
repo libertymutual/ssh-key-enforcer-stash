@@ -36,10 +36,10 @@ import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
 
 public class KeyRotationScheduler implements DisposableBean, InitializingBean { 
 
-     private static final JobId JOB_ID = JobId.of("com.edwardawebb.stash:stash-ssh-key-enforcer:KeyRotationJob"); 
+     private static final JobId JOB_ID = JobId.of("com.lmig.forge.stash:stash-ssh-key-enforcer:KeyRotationJob"); 
      private static final long JOB_INTERVAL = TimeUnit.DAYS.toMillis(1L); //TODO runs daily, add config
-     //private static final long JOB_INTERVAL = TimeUnit.MINUTES.toMillis(1L);
-     private static final String JOB_RUNNER_KEY = "com.edwardawebb.stash:stash-ssh-key-enforcer:KeyRotationJobRunner"; 
+     //private static final long JOB_INTERVAL = TimeUnit.MINUTES.toMillis(1L);//live demo, expires on the minute.
+     private static final String JOB_RUNNER_KEY = "com.lmig.forge.stash:stash-ssh-key-enforcer:KeyRotationJobRunner"; 
      private static final Logger log = LoggerFactory.getLogger(KeyRotationScheduler.class);
      
      private final SchedulerService schedulerService;
@@ -58,11 +58,12 @@ public class KeyRotationScheduler implements DisposableBean, InitializingBean {
          schedulerService.scheduleJob(JOB_ID, JobConfig.forJobRunnerKey(JobRunnerKey.of(JOB_RUNNER_KEY)) 
                  .withRunMode(RunMode.RUN_ONCE_PER_CLUSTER) 
                  .withSchedule(Schedule.forInterval(JOB_INTERVAL, new Date(System.currentTimeMillis() + JOB_INTERVAL)))); 
-         log.warn("KEY Expiring Job Scheduled");
+         log.debug("KEY Expiring Job Scheduled");
      } 
 
      @Override 
      public void destroy() { 
          schedulerService.unregisterJobRunner(JobRunnerKey.of(JOB_RUNNER_KEY)); 
+         log.debug("KEY Expiring Job unregistered");
      } 
  }

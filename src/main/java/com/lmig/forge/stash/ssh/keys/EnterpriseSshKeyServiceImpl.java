@@ -68,7 +68,7 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
             return;
         } else {
             sshKeyService.remove(key.getId());
-            log.warn("Invalid or illegal key removed for user " + user.getId());
+            log.debug("Invalid or illegal key removed for user " + user.getId());
             // TODO issue custom audit event
         }
     }

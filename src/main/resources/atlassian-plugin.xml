@@ -42,7 +42,6 @@
   </web-resource>
   
   
-  
   <stash-resource key="account-ssh-soy" name="Account Tab Soy Templates">
     <directory location="/templates/"/>
   </stash-resource>

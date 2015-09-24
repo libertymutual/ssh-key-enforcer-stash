@@ -3,15 +3,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.edwardawebb</groupId>
+	<groupId>com.lmig.forge.stash.ssh</groupId>
 	<artifactId>stash-ssh-key-enforcer</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<organization>
-		<name>Example Company</name>
-		<url>http://www.example.com/</url>
+		<name>Liberty Mutual Insurance</name>
+		<url>https://libertymutual.com/</url>
 	</organization>
 	<name>stash-ssh-key-enforcer</name>
-	<description>This is the com.edwardawebb:stash-ssh-key-enforcer plugin for Atlassian Stash.</description>
 	<packaging>atlassian-plugin</packaging>
 	<dependencyManagement>
 		<dependencies>
@@ -196,6 +195,7 @@
 							<dataVersion>${stash.data.version}</dataVersion>
 						</product>
 					</products>
+<!-- 					<log4jProperties>src/main/resources/log4j.properties</log4jProperties> -->
 				</configuration>
 			</plugin>
 			<plugin>
@@ -216,6 +216,7 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
+							<createDependencyReducedPom>false</createDependencyReducedPom>
 							<relocations>
 								<relocation>
 									<pattern>com.jcraft.jsch</pattern>
@@ -319,4 +320,6 @@
 		<plugin.testrunner.version>1.2.3</plugin.testrunner.version>
 		<ao.version>0.28.0</ao.version>
 	</properties>
+	<url>https://forge.lmig.com</url>
+	<description>This plugin enables enterprise level SSH Key management over the default access provided in Bitbucket.</description>
 </project>

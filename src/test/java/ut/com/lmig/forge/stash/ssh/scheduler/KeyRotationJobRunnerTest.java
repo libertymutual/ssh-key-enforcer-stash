@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ut.com.edwardawebb.stash.ssh.scheduler;
+package ut.com.lmig.forge.stash.ssh.scheduler;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

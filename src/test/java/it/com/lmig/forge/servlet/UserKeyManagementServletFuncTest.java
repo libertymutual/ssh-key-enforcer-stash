@@ -1,4 +1,4 @@
-package it.com.edwardawebb.servlet;
+package it.com.lmig.forge.servlet;
 
 import static org.junit.Assert.assertTrue;
 

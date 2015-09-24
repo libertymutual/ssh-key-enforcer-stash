@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ut.com.edwardawebb.stash.ssh;
+package ut.com.lmig.forge.stash.ssh;
 
 import org.junit.After;
 import org.junit.Before;
