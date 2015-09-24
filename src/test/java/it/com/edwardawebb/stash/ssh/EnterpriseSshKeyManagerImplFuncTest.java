@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.edwardawebb.stash.ssh.keys.EnterpriseSshKeyServiceImpl;
+import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyServiceImpl;
 
 import static org.mockito.Mockito.*;
 
