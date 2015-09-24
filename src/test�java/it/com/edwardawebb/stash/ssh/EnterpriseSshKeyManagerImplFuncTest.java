@@ -4,14 +4,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.lmig.forge.stash.ssh.ao.EnterpriseKeyRepositoryImpl;
+import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyServiceImpl;
 
 import static org.mockito.Mockito.*;
 
 /**
  * @since 3.5
  */
-public class EnterpriseKeyRepositoryFuncTest {
+public class EnterpriseSshKeyManagerImplFuncTest {
 
     @Before
     public void setup() {
@@ -26,9 +26,9 @@ public class EnterpriseKeyRepositoryFuncTest {
     @Test(expected=Exception.class)
     public void testSomething() throws Exception {
 
-        //EnterpriseKeyRepository testClass = new EnterpriseKeyRepository();
+        //EnterpriseSshKeyManagerImpl testClass = new EnterpriseSshKeyManagerImpl();
 
-        throw new Exception("EnterpriseKeyRepository has no tests!");
+        throw new Exception("EnterpriseSshKeyManagerImpl has no tests!");
 
     }
 

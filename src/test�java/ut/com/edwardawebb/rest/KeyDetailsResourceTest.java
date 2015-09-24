@@ -14,29 +14,24 @@
  * limitations under the License.
  */
 
-package ut.com.edwardawebb.servlet;
+package ut.com.edwardawebb.rest;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Response;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-public class UserKeyManagementServletTest {
+import com.lmig.forge.stash.ssh.rest.KeyDetailsResource;
+import com.lmig.forge.stash.ssh.rest.KeyDetailsResourceModel;
 
-    HttpServletRequest mockRequest;
-    HttpServletResponse mockResponse;
+public class KeyDetailsResourceTest {
 
     @Before
     public void setup() {
-        mockRequest = mock(HttpServletRequest.class);
-        mockResponse = mock(HttpServletResponse.class);
+
     }
 
     @After
@@ -45,10 +40,12 @@ public class UserKeyManagementServletTest {
     }
 
     @Test
-    public void testSomething() {
-        String expected = "test";
-        when(mockRequest.getParameter(Mockito.anyString())).thenReturn(expected);
-        assertEquals(expected,mockRequest.getParameter("some string"));
+    public void messageIsValid() {
+        KeyDetailsResource resource = new KeyDetailsResource(null, null);
 
+        Response response = resource.getMessage();
+        final KeyDetailsResourceModel message = (KeyDetailsResourceModel) response.getEntity();
+
+        assertEquals("wrong message","Hello World",message.getMessage());
     }
 }

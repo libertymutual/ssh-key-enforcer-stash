@@ -8,7 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.edwardawebb.stash.ssh.rest.KeyDetailsResourceModel;
+import com.lmig.forge.stash.ssh.rest.KeyDetailsResourceModel;
 
 public class KeyDetailsResourceFuncTest {
 
