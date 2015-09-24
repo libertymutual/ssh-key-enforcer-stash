@@ -22,13 +22,11 @@ import java.lang.reflect.Method;
 import org.apache.log4j.Logger;
 
 import com.atlassian.event.api.EventListener;
-import com.atlassian.stash.event.AbstractAuthenticationEvent;
 import com.atlassian.stash.event.StashEvent;
 import com.atlassian.stash.event.permission.ProjectPermissionGrantRequestedEvent;
 import com.atlassian.stash.event.permission.RepositoryPermissionGrantRequestedEvent;
 import com.atlassian.stash.i18n.I18nService;
 import com.atlassian.stash.ssh.api.SshKey;
-import com.atlassian.stash.ssh.api.SshKeyService;
 import com.atlassian.stash.user.UserType;
 import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
 
@@ -38,12 +36,10 @@ public class GeneralEventListener {
 
     final private EnterpriseSshKeyService enterpriseSshKeyService;
     private I18nService i18nService;
-    final private SshKeyService sshKeyService;
 
-    public GeneralEventListener(SshKeyService sshKeyService, EnterpriseSshKeyService enterpriseSshKeyService,I18nService i18nService) {
+    public GeneralEventListener(EnterpriseSshKeyService enterpriseSshKeyService,I18nService i18nService) {
         this.enterpriseSshKeyService = enterpriseSshKeyService;
         this.i18nService = i18nService;
-        this.sshKeyService = sshKeyService;
     }
 
     @EventListener
@@ -72,20 +68,15 @@ public class GeneralEventListener {
 
         // IF YOU READ THIS,  I'm sorry.
         // I know reflection is BS and brittle, but it was the only way to get
-        // at the public "SshKey" using a non-prublic event.
-        // Reflection works using our own class that mimics Atlassian object.
-        // BUT this cannot be casted to the object (ours or atlassians)
+        // at the public "SshKey" using a non-public event.
+        // Reflection works
+        // BUT this cannot be casted to the atlassian object 
         // https://developer.atlassian.com/static/javadoc/stash/3.11.2/ssh/reference/com/atlassian/stash/ssh/SshKeyCreatedEvent.html
         // https://maven.atlassian.com/#nexus-search;classname~com.atlassian.stash.ssh.SshKeyCreatedEvent
-        // <pre>Note: in Stash 2.9, SshKeyEvent and all of it's subclasses will
-        // never be published. The classes are not OSGI exported and can
-        // therefore not be published. Instead, the events are translated into
-        // AuditEvents, which are published.</pre>
-        // -https://developer.atlassian.com/static/javadoc/stash/3.7.1/ssh/reference/com/atlassian/stash/internal/key/ssh/SshKeyAccessRevokedEvent.html
-        // Dependency included as provided compiles, but fails run time with no
-        // class def
+        // 
         // Dependency included as compile and it compiles, but fails at run time
-        // with some other class failing..
+        // with some other class failing.. and omitted throws NoClassDefFOund since the ssh-plugin does not export the class in question
+        // the osgi container won't let us have it in classpath.
 
         if (SSH_KEY_CREATED_EVENT_CLASS.equals(stashEvent.getClass().getCanonicalName())) {
             if (logger.isDebugEnabled()) {
@@ -100,7 +91,7 @@ public class GeneralEventListener {
                     logger.debug("The SSH Key is: " + key.getLabel() + "|with value: " + key.getText() + "|with user: "
                             + key.getUser());
                 }
-                enterpriseSshKeyService.removeKeyIfNotLegal(key, stashEvent.getUser());
+                //enterpriseSshKeyService.removeKeyIfNotLegal(key, stashEvent.getUser());
             } catch (IllegalArgumentException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

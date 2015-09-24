@@ -27,6 +27,8 @@ import com.lmig.forge.stash.ssh.rest.KeyPairResourceModel;
 
 public class JschSshKeyPairGenerator implements SshKeyPairGenerator {
 
+    private static int KEY_SIZE = 2048;
+    
     @Override
     public KeyPairResourceModel generateKeyPair(String comment) {
         JSch jsch=new JSch();
@@ -34,14 +36,16 @@ public class JschSshKeyPairGenerator implements SshKeyPairGenerator {
         KeyPair kpair;
         
         try {
-            kpair = KeyPair.genKeyPair(jsch, KeyPair.RSA);
+            kpair = KeyPair.genKeyPair(jsch, KeyPair.RSA, KEY_SIZE);
             result.setFingerprint(kpair.getFingerPrint());
             ByteArrayOutputStream pubos = new ByteArrayOutputStream();
             kpair.writePublicKey(pubos, comment);
-            result.setPublicKey(pubos.toString("UTF-8"));
+            pubos.close();
+            result.setPublicKey(new String(pubos.toByteArray()));
             ByteArrayOutputStream privos = new ByteArrayOutputStream();
             kpair.writePrivateKey(privos);
-            result.setPrivateKey(privos.toString("UTF-8"));
+            privos.close();
+            result.setPrivateKey(new String(privos.toByteArray()));
         } catch (UnsupportedEncodingException e) {
             throw new EnterpriseKeyGenerationException(e);
         } catch (Exception e) {

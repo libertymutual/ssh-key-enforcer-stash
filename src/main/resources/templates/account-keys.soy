@@ -24,30 +24,32 @@
        <button id="ssh-key-gen-button" class="aui-button aui-button-primary">Create New Key Pair</button>
     </div>
 </div>
-<div class="aui-group">
-    <div class="aui-item">
-    	<div class="hidden-info" style="display:none;"><h4>Private Key</h4><p>Save this locally as ~/.ssh/id_rsa</p></div>
-    </div>
-    <div class="aui-item">
-        <input id="ssh-key-rez-private" readonly></input>
-    </div>
-</div>
-<div class="aui-group">
-    <div class="aui-item">
-    	<div class="hidden-info" style="display:none;"><h4>Public Key</h4><p>Save this locally as ~/.ssh/id_rsa.pub</p></div>
-     </div>
-    <div class="aui-item">
-        <textarea id="ssh-key-rez-public" readonly></textarea>
-    </div>
-</div>
-    	
-<div class="aui-group">
-    <div class="aui-item">
-    	<div class="hidden-info" style="display:none;"><h4>Key Fingerprint</h4><p>Informational only. Not required for future use.</p></div>
-      </div>
-    <div class="aui-item">
-        <input id="ssh-key-rez-fingerprint" readonly></input> 
-    </div>
+<div id="keybox" style="display:none;">
+	<div class="aui-group">
+	    <div class="aui-item">
+	    	<div class="hidden-info"><h4>Private Key</h4><p>Save this locally as ~/.ssh/id_rsa</p></div>
+	    </div>
+	    <div class="aui-item">
+	        <textarea id="ssh-key-rez-private" readonly></textarea>
+	    </div>
+	</div>
+	<div class="aui-group">
+	    <div class="aui-item">
+	    	<div class="hidden-info" ><h4>Public Key</h4><p>Save this locally as ~/.ssh/id_rsa.pub</p></div>
+	     </div>
+	    <div class="aui-item">
+	        <textarea id="ssh-key-rez-public" readonly></textarea>
+	    </div>
+	</div>
+	    	
+	<div class="aui-group">
+	    <div class="aui-item">
+	    	<div class="hidden-info" ><h4>Key Fingerprint</h4><p>Informational only. Not required for future use.</p></div>
+	      </div>
+	    <div class="aui-item">
+	        <input id="ssh-key-rez-fingerprint" readonly></input> 
+	    </div>
+	</div>
 </div>
 
    

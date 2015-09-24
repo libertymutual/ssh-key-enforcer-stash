@@ -18,7 +18,7 @@ AJS.$( document ).ready(function() {
 	         AJS.$("#ssh-key-rez-private").val(data.privateKey);
 	         AJS.$("#ssh-key-rez-public").val(data.publicKey);
 	         AJS.$("#ssh-key-rez-fingerprint").val(data.fingerprint);
-	         AJS.$(".hidden-info").show();
+	         AJS.$("#keybox").show();
 	     } ,
 	     error: function(data) {
 	        AJS.messages.warning({
