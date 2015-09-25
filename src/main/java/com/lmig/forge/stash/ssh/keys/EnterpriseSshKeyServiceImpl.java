@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.atlassian.stash.ssh.api.SshKey;
 import com.atlassian.stash.ssh.api.SshKeyService;
 import com.atlassian.stash.user.StashUser;
+import com.atlassian.stash.user.UserService;
 import com.lmig.forge.stash.ssh.ao.EnterpriseKeyRepository;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
 import com.lmig.forge.stash.ssh.crypto.SshKeyPairGenerator;
@@ -35,26 +36,35 @@ import com.lmig.forge.stash.ssh.rest.KeyPairResourceModel;
 
 public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
     final private static int NINETY_DAYS = 90;
+    final public static String ALLOWED_SSH_GROUP ="ssh-gods";
     final private SshKeyService sshKeyService;
     final private EnterpriseKeyRepository enterpriseKeyRepository;
     final private SshKeyPairGenerator sshKeyPairGenerator;
     final private NotificationService notificationService;
+    final private UserService userService;
 
 
     private static final Logger log = LoggerFactory.getLogger(EnterpriseSshKeyServiceImpl.class);
 
     public EnterpriseSshKeyServiceImpl(SshKeyService sshKeyService, EnterpriseKeyRepository enterpriseKeyRepository,
-            SshKeyPairGenerator sshKeyPairGenerator, NotificationService notificationService) {
+            SshKeyPairGenerator sshKeyPairGenerator, NotificationService notificationService, UserService userService) {
         this.sshKeyService = sshKeyService;
         this.enterpriseKeyRepository = enterpriseKeyRepository;
         this.sshKeyPairGenerator = sshKeyPairGenerator;
         this.notificationService = notificationService;
+        this.userService = userService;
 
     }
 
     @Override
     public boolean isKeyValidForUser(SshKey key, StashUser stashUser) {
-        return enterpriseKeyRepository.isValidKeyForUser(stashUser, key.getText());
+        //allow bamboo <> stash keys for system accounts in special group.
+        if( userService.existsGroup(ALLOWED_SSH_GROUP) && userService.isUserInGroup(stashUser, ALLOWED_SSH_GROUP)){
+            return true;
+        }else{
+            //otherwise user must have gone through our wrapper
+            return enterpriseKeyRepository.isValidKeyForUser(stashUser, key.getText());
+        }
     }
 
     @Override
@@ -63,7 +73,7 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
             return;
         } else {
             sshKeyService.remove(key.getId());
-            log.debug("Invalid or illegal key removed for user " + user.getId());
+            log.warn("Invalid or illegal key removed for user " + user.getId());
             // TODO issue custom audit event
         }
     }

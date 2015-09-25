@@ -63,7 +63,6 @@ public class NotificationService {
         } else {
             throw new UserNotFoundException();
         }
-
     }
     
 

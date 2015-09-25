@@ -33,7 +33,8 @@ import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
 public class GeneralEventListener {
     private final Logger logger = Logger.getLogger(GeneralEventListener.class);
     private final static String SSH_KEY_CREATED_EVENT_CLASS = "com.atlassian.stash.ssh.SshKeyCreatedEvent";
-
+    
+    
     final private EnterpriseSshKeyService enterpriseSshKeyService;
     private I18nService i18nService;
 
@@ -64,33 +65,22 @@ public class GeneralEventListener {
     
 
     @EventListener
-    public void mylistener(StashEvent stashEvent) {
-
-        // IF YOU READ THIS,  I'm sorry.
-        // I know reflection is BS and brittle, but it was the only way to get
-        // at the public "SshKey" using a non-public event.
-        // Reflection works
-        // BUT this cannot be casted to the atlassian object 
-        // https://developer.atlassian.com/static/javadoc/stash/3.11.2/ssh/reference/com/atlassian/stash/ssh/SshKeyCreatedEvent.html
-        // https://maven.atlassian.com/#nexus-search;classname~com.atlassian.stash.ssh.SshKeyCreatedEvent
-        // 
-        // Dependency included as compile and it compiles, but fails at run time
-        // with some other class failing.. and omitted throws NoClassDefFOund since the ssh-plugin does not export the class in question
-        // the osgi container won't let us have it in classpath.
-
+    public void mylistener(StashEvent stashEvent) {       
         if (SSH_KEY_CREATED_EVENT_CLASS.equals(stashEvent.getClass().getCanonicalName())) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("SSH key was created by" + stashEvent.getUser().getDisplayName() + " from "
-                        + stashEvent.getSource());
-            }
+            // IF YOU READ THIS,  I'm sorry.
+            // I know reflection is BS and brittle, but it was the only way to get
+            // at the public "SshKey" using a non-public event.
+            // Reflection works
+            // BUT this cannot be casted to the atlassian object 
+            // https://developer.atlassian.com/static/javadoc/stash/3.11.2/ssh/reference/com/atlassian/stash/ssh/SshKeyCreatedEvent.html
+            // https://maven.atlassian.com/#nexus-search;classname~com.atlassian.stash.ssh.SshKeyCreatedEvent
+            // 
+            // Dependency included as compile and it compiles, but fails at run time
+            // with some other class failing.. and omitted throws NoClassDefFOund since the ssh-plugin does not export the class in question
+            // the osgi container won't let us have it in classpath.
             try {
                 Method method = stashEvent.getClass().getMethod("getKey");
-                SshKey key = (SshKey) method.invoke(stashEvent);
-
-                if (logger.isDebugEnabled()) {
-                    logger.debug("The SSH Key is: " + key.getLabel() + "|with value: " + key.getText() + "|with user: "
-                            + key.getUser());
-                }
+                SshKey key = (SshKey) method.invoke(stashEvent);                
                 enterpriseSshKeyService.removeKeyIfNotLegal(key, stashEvent.getUser());
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
@@ -104,7 +94,8 @@ public class GeneralEventListener {
                 e.printStackTrace();
             }
         } 
-
     }
+
+    
 
 }

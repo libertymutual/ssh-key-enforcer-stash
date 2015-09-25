@@ -43,6 +43,8 @@ import org.junit.runner.RunWith;
 
 import com.atlassian.activeobjects.external.ActiveObjects;
 import com.atlassian.activeobjects.test.TestActiveObjects;
+import com.atlassian.stash.internal.key.ssh.SimpleSshKey;
+import com.atlassian.stash.ssh.api.SshKey;
 import com.atlassian.stash.ssh.api.SshKeyService;
 import com.atlassian.stash.user.StashUser;
 import com.atlassian.stash.user.UserService;
@@ -73,6 +75,7 @@ public class EnterpriseSshKeyManagerImplTest {
     private static final String PUBLIC_KEY_ONE = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC0O2PpfWd0RuoveFkSLP8DaL2ZekQZJM7gzQFi/cavziK8jnAY+xtNIAF1K7EN64JSM2DTMU7BZUFkJvqqbugzc29A/LOfZ6GzvMhSiR7YR2J/eOkVZbmPPyC1qWDCc5Ne71pEJhU5OdlFd4Hj5XgDzNyMANoYlO+xm1IDzHBxDSrvY++VGrnZG1rJ6aSdxyRCoE7MVtQkLuIMDSVPTVfdqDV4oKlH2bzd4LyA1Jm01+MBmWq2qVcKcF6UYKaUILVreZZZSm2/PBbgQ+H5yzjNeEbvdnAr7bcn+xRdhEM0ZGm/RRDRIvwkTlWJ2y9M3KvnJEKbv/c9ZAlOmbs5K1OhfGL/jCU8h1EslwQ9euFp0wjKUMj5u9ll8QqpNcXxsfUnaN9qc2rrm5FS5t5TFAkbIX5fOTJCPb+seE146ax/cNovzOoJUPvF+qBfvJLQGX2L/4JdPqDQ6FkLbvJy194/K5oWag8w4F9ftYIfd/SOgatPMiKuhOls2zYufm34UBbksc7qxDD12JUiI/q7JNted53tnPVBSDLM5RYtohDq/w4MfyFmA51UeETSLumlwg9kOuqaWBYjr2Esn09EtkQNIhQxxt3w47O0RFghZgJdnP3VORju3v2l0Qfo7A/EbeDGKXQhCl6yeMv82lmUtzOhVN6IAApOwMH7Hmh/z209jw==";
     private static final int EXPIRED_USER_ID = 1;
     private static final int VALID_USER_ID = 2;
+    private static final int NAUGHTY_USER_ID = 3;
     private static final int EXPIRED_STASH_KEY_ID = 100;
     private static final int VALID_STASH_KEY_ID = 200;
 
@@ -94,7 +97,7 @@ public class EnterpriseSshKeyManagerImplTest {
         notificationService = mock(NotificationService.class);
         userService = mock(UserService.class);
         when(userService.getUserByName(KeyRotationJobRunner.ADMIN_ACCOUNT_NAME)).thenReturn(mock(StashUser.class));//defeat NPE check
-        ourKeyService = new EnterpriseSshKeyServiceImpl(stashKeyService, keyRepo, null, notificationService);
+        ourKeyService = new EnterpriseSshKeyServiceImpl(stashKeyService, keyRepo, null, notificationService,userService);
     }
 
     @Test
@@ -136,6 +139,55 @@ public class EnterpriseSshKeyManagerImplTest {
 
         // stash's ssh service was not invoked
         verify(notificationService).notifyUserOfExpiredKey(EXPIRED_USER_ID);
+    }
+    
+    
+    @Test
+    public void userInBlessedGroupMayByPassService(){
+        StashUser blessedUser = mock(StashUser.class);
+        when(userService.existsGroup(EnterpriseSshKeyServiceImpl.ALLOWED_SSH_GROUP)).thenReturn(true);
+        when(userService.isUserInGroup(blessedUser, EnterpriseSshKeyServiceImpl.ALLOWED_SSH_GROUP)).thenReturn(true);
+        SshKey newKey = new SimpleSshKey(1, "a comment", PUBLIC_KEY_ONE,blessedUser );
+        boolean isAllowed = ourKeyService.isKeyValidForUser(newKey, blessedUser);
+        
+        assertThat(isAllowed,is(true));
+    }
+    
+    
+    @Test
+    public void userNotInBlessedGroupAreNotAllowed(){
+        StashUser unblessedUser = mock(StashUser.class);
+        when(userService.existsGroup(EnterpriseSshKeyServiceImpl.ALLOWED_SSH_GROUP)).thenReturn(true);
+        when(userService.isUserInGroup(unblessedUser, EnterpriseSshKeyServiceImpl.ALLOWED_SSH_GROUP)).thenReturn(false);
+        SshKey newKey = new SimpleSshKey(1, "a comment", PUBLIC_KEY_ONE,unblessedUser );
+        boolean isAllowed = ourKeyService.isKeyValidForUser(newKey, unblessedUser);
+        
+        assertThat(isAllowed,is(false));        
+    }
+
+    @Test
+    public void userNotInBlessedGroupButUsedWrapperServiceAreAllowed(){
+        StashUser unblessedUser = mock(StashUser.class);
+        when(unblessedUser.getId()).thenReturn(VALID_USER_ID);
+        when(userService.existsGroup(EnterpriseSshKeyServiceImpl.ALLOWED_SSH_GROUP)).thenReturn(true);
+        when(userService.isUserInGroup(unblessedUser, EnterpriseSshKeyServiceImpl.ALLOWED_SSH_GROUP)).thenReturn(false);
+        //when(keyRepo.isValidKeyForUser(unblessedUser, PUBLIC_KEY_ONE)).thenReturn(true);
+        SshKey newKey = new SimpleSshKey(1, "a comment", PUBLIC_KEY_ONE,unblessedUser );
+        boolean isAllowed = ourKeyService.isKeyValidForUser(newKey, unblessedUser);
+        
+        assertThat(isAllowed,is(true));        
+    }
+    @Test
+    public void userNotInBlessedGroupAndDidNotUsedWrapperServiceAreNotAllowed(){
+        StashUser unblessedUser = mock(StashUser.class);
+        when(unblessedUser.getId()).thenReturn(NAUGHTY_USER_ID);
+        when(userService.existsGroup(EnterpriseSshKeyServiceImpl.ALLOWED_SSH_GROUP)).thenReturn(true);
+        when(userService.isUserInGroup(unblessedUser, EnterpriseSshKeyServiceImpl.ALLOWED_SSH_GROUP)).thenReturn(false);
+        //when(keyRepo.isValidKeyForUser(unblessedUser, PUBLIC_KEY_ONE)).thenReturn(false);
+        SshKey newKey = new SimpleSshKey(1, "a comment", PUBLIC_KEY_ONE,unblessedUser );
+        boolean isAllowed = ourKeyService.isKeyValidForUser(newKey, unblessedUser);
+        
+        assertThat(isAllowed,is(false));        
     }
     
  
