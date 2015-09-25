@@ -8,6 +8,7 @@ Layers additional controls over -Stash's- Bitbucket's SSH key features that enfo
 All keys must be created for specific users, and inherit their access.
 - Blocks upload of existing keys and generates new RSA 2048 bit keys for the user.
 User can download public and private key pair, and regenerate as needed.
+Special users designated by a Group may add keys directly, this supports the current Bamboo<>Stash integration which generates user keys when repositories are created in bamboo. This Group should only be grnated to admins or system accounts that provision pipelines.
 - Enforces Key expiration policy
 To mitigate risk, all user keys are expired after 90 days, and users are notified to re-generate
 
