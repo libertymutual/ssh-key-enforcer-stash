@@ -52,6 +52,7 @@ import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
 import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
 import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyServiceImpl;
 import com.lmig.forge.stash.ssh.notifications.NotificationService;
+import com.lmig.forge.stash.ssh.scheduler.KeyRotationJobRunner;
 
 /**
  * Must run all methods that interact with service as @NonTransactional or
@@ -92,8 +93,8 @@ public class EnterpriseSshKeyManagerImplTest {
         stashKeyService = mock(SshKeyService.class);
         notificationService = mock(NotificationService.class);
         userService = mock(UserService.class);
-        when(userService.getUserByName(EnterpriseSshKeyServiceImpl.ADMIN_ACCOUNT_NAME)).thenReturn(mock(StashUser.class));//defeat NPE check
-        ourKeyService = new EnterpriseSshKeyServiceImpl(stashKeyService, keyRepo, null, notificationService, userService);
+        when(userService.getUserByName(KeyRotationJobRunner.ADMIN_ACCOUNT_NAME)).thenReturn(mock(StashUser.class));//defeat NPE check
+        ourKeyService = new EnterpriseSshKeyServiceImpl(stashKeyService, keyRepo, null, notificationService);
     }
 
     @Test

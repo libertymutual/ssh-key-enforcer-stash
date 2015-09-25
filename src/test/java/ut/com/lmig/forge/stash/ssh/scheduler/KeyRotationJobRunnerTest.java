@@ -16,15 +16,17 @@
 
 package ut.com.lmig.forge.stash.ssh.scheduler;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import net.java.ao.test.jdbc.NonTransactional;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyServiceImpl;
+import com.atlassian.stash.user.EscalatedSecurityContext;
+import com.atlassian.stash.user.Permission;
+import com.atlassian.stash.user.SecurityService;
 import com.lmig.forge.stash.ssh.scheduler.KeyRotationJobRunner;
+import com.lmig.forge.stash.ssh.scheduler.KeyRotationOperation;
 
 
 
@@ -37,13 +39,20 @@ public class KeyRotationJobRunnerTest {
     }
     
     @Test
-    public void enterpriseServiceExpireFunctionIsCalledOnExecution(){
-        EnterpriseSshKeyServiceImpl service = mock(EnterpriseSshKeyServiceImpl.class);
-
-        KeyRotationJobRunner jobRunner = new KeyRotationJobRunner(service);
+    public void securityElevatedOperationsIsCalledByJob(){
+        SecurityService service = mock(SecurityService.class);
+        KeyRotationOperation kro = mock(KeyRotationOperation.class);
+        EscalatedSecurityContext esc = mock(EscalatedSecurityContext.class);
+        when(service.withPermission(any(Permission.class), anyString())).thenReturn(esc);
+        
+        KeyRotationJobRunner jobRunner = new KeyRotationJobRunner(kro, service);
         jobRunner.runJob(null);
         
-        verify(service).replaceExpiredKeysAndNotifyUsers();
+        try {
+            verify(esc).call(kro);
+        } catch (Throwable e) {
+            fail();
+        }
         
     }
     

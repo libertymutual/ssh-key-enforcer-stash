@@ -22,22 +22,37 @@ import org.slf4j.LoggerFactory;
 import com.atlassian.scheduler.JobRunner;
 import com.atlassian.scheduler.JobRunnerRequest;
 import com.atlassian.scheduler.JobRunnerResponse;
-import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
+import com.atlassian.stash.user.EscalatedSecurityContext;
+import com.atlassian.stash.user.Permission;
+import com.atlassian.stash.user.SecurityService;
 
 public class KeyRotationJobRunner implements JobRunner{
 
+    final public static String ADMIN_ACCOUNT_NAME = "admin";
+    final public static String PERMISSION_REASON = "Required by SSH Key Enforcer to purge expired keys";
     
-    private EnterpriseSshKeyService enterpriseKeyService;
+
+    private final SecurityService securityService;
+    private final KeyRotationOperation keyRotationOperation;
     private static final Logger log = LoggerFactory.getLogger(KeyRotationJobRunner.class);
     
-    public KeyRotationJobRunner(EnterpriseSshKeyService enterpriseKeyService) {
-        this.enterpriseKeyService = enterpriseKeyService;
+    public KeyRotationJobRunner(KeyRotationOperation keyRotationOperation,SecurityService securityService) {
+       
+        this.securityService = securityService;
+        this.keyRotationOperation = keyRotationOperation;
     }
     
     @Override
     public JobRunnerResponse runJob(JobRunnerRequest request) {
+        
         log.debug("Key Expire Job Starting");
-        enterpriseKeyService.replaceExpiredKeysAndNotifyUsers();
+
+        EscalatedSecurityContext elevatedContext = securityService.withPermission(Permission.SYS_ADMIN,PERMISSION_REASON);
+        try {
+            elevatedContext.call(keyRotationOperation);
+        } catch (Throwable e) {
+            return JobRunnerResponse.failed(e);
+        }
         log.debug("Key Expire Job Complete");
         return JobRunnerResponse.success();
     }

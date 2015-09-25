@@ -27,8 +27,6 @@ import org.slf4j.LoggerFactory;
 import com.atlassian.stash.ssh.api.SshKey;
 import com.atlassian.stash.ssh.api.SshKeyService;
 import com.atlassian.stash.user.StashUser;
-import com.atlassian.stash.user.UserService;
-import com.lmig.forge.stash.ssh.GeneralSshEnforcerException;
 import com.lmig.forge.stash.ssh.ao.EnterpriseKeyRepository;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
 import com.lmig.forge.stash.ssh.crypto.SshKeyPairGenerator;
@@ -37,23 +35,20 @@ import com.lmig.forge.stash.ssh.rest.KeyPairResourceModel;
 
 public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
     final private static int NINETY_DAYS = 90;
-    final public static String ADMIN_ACCOUNT_NAME = "admin";
     final private SshKeyService sshKeyService;
     final private EnterpriseKeyRepository enterpriseKeyRepository;
     final private SshKeyPairGenerator sshKeyPairGenerator;
     final private NotificationService notificationService;
-    final private UserService userService;
 
 
     private static final Logger log = LoggerFactory.getLogger(EnterpriseSshKeyServiceImpl.class);
 
     public EnterpriseSshKeyServiceImpl(SshKeyService sshKeyService, EnterpriseKeyRepository enterpriseKeyRepository,
-            SshKeyPairGenerator sshKeyPairGenerator, NotificationService notificationService,UserService userService) {
+            SshKeyPairGenerator sshKeyPairGenerator, NotificationService notificationService) {
         this.sshKeyService = sshKeyService;
         this.enterpriseKeyRepository = enterpriseKeyRepository;
         this.sshKeyPairGenerator = sshKeyPairGenerator;
         this.notificationService = notificationService;
-        this.userService = userService;
 
     }
 
@@ -94,15 +89,11 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
         cal.add(Calendar.DAY_OF_YEAR, -NINETY_DAYS);
         //cal.add(Calendar.MINUTE, -1); //live demo in UI. 
         List<SshKeyEntity> expiredStashKeys = enterpriseKeyRepository.listOfExpiredKeyIds(cal.getTime());
-        
-        if( null == userService.getUserByName(ADMIN_ACCOUNT_NAME) &&  null == userService.getUserByName(ADMIN_ACCOUNT_NAME) ){
-            throw new GeneralSshEnforcerException("There is no valid user named " + ADMIN_ACCOUNT_NAME + ". A service or user ID with rights to delete user keys (admin) must exist, and must have username: '" + ADMIN_ACCOUNT_NAME +"'");
-        }
+   
         
         for (SshKeyEntity keyRecord : expiredStashKeys) {
             try{
                 log.info("Removing Key for user " + keyRecord.getUserId());
-                userService.preauthenticate(ADMIN_ACCOUNT_NAME);
                 sshKeyService.remove(keyRecord.getKeyId());
                 enterpriseKeyRepository.removeRecord(keyRecord);
                 notificationService.notifyUserOfExpiredKey(keyRecord.getUserId());

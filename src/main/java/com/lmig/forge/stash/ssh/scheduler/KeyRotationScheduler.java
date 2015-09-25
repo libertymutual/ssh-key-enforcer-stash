@@ -31,7 +31,6 @@ import com.atlassian.scheduler.config.JobId;
 import com.atlassian.scheduler.config.JobRunnerKey;
 import com.atlassian.scheduler.config.RunMode;
 import com.atlassian.scheduler.config.Schedule;
-import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
 
 
 public class KeyRotationScheduler implements DisposableBean, InitializingBean { 
@@ -43,18 +42,18 @@ public class KeyRotationScheduler implements DisposableBean, InitializingBean {
      private static final Logger log = LoggerFactory.getLogger(KeyRotationScheduler.class);
      
      private final SchedulerService schedulerService;
-     private final EnterpriseSshKeyService enterpriseKeyService; 
+    private KeyRotationJobRunner keyRotationJobRunner; 
      
-     public KeyRotationScheduler(SchedulerService schedulerService,EnterpriseSshKeyService enterpriseKeyService) { 
+     public KeyRotationScheduler(SchedulerService schedulerService,KeyRotationJobRunner keyRotationJobRunner) { 
          this.schedulerService = schedulerService; 
-         this.enterpriseKeyService = enterpriseKeyService;
+         this.keyRotationJobRunner = keyRotationJobRunner;
      } 
 
      @Override 
      public void afterPropertiesSet() throws SchedulerServiceException { 
          //The JobRunner could be another component injected in the constructor, a 
          //private nested class, etc. It just needs to implement JobRunner 
-         schedulerService.registerJobRunner(JobRunnerKey.of(JOB_RUNNER_KEY), new KeyRotationJobRunner(enterpriseKeyService)); 
+         schedulerService.registerJobRunner(JobRunnerKey.of(JOB_RUNNER_KEY), keyRotationJobRunner); 
          schedulerService.scheduleJob(JOB_ID, JobConfig.forJobRunnerKey(JobRunnerKey.of(JOB_RUNNER_KEY)) 
                  .withRunMode(RunMode.RUN_ONCE_PER_CLUSTER) 
                  .withSchedule(Schedule.forInterval(JOB_INTERVAL, new Date(System.currentTimeMillis() + JOB_INTERVAL)))); 

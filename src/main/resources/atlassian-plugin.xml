@@ -92,9 +92,18 @@
   <component name="SSH Key Generator (jsch implementation)" i18n-name-key="enterprise-key-repository.name" key="key-generator" class="com.lmig.forge.stash.ssh.crypto.JschSshKeyPairGenerator">
     <interface>com.lmig.forge.stash.ssh.crypto.SshKeyPairGenerator</interface>
   </component>
-     <component key="keyRotationScheduler" class="com.lmig.forge.stash.ssh.scheduler.KeyRotationScheduler"
+    <component key="keyRotationScheduler" class="com.lmig.forge.stash.ssh.scheduler.KeyRotationScheduler"
              system="true" >
         <description>The plugin component that schedules the key expiration job.</description>
+    </component>   
+    
+    <component key="keyRotationJobRunner" class="com.lmig.forge.stash.ssh.scheduler.KeyRotationJobRunner"
+             system="true" >
+        <description>The job that is executed and makes calls needed to purge expires key.</description>
+    </component>
+    <component key="keyRotationOperation" class="com.lmig.forge.stash.ssh.scheduler.KeyRotationOperation"
+             system="true" >
+        <description>Wraps call to the EnterpriseKeyService in an "operation" which is aware of mock security context</description>
     </component>
   
   <!--  AO support for key meta -->
