@@ -1,4 +1,4 @@
-package it.com.lmig.forge.rest;
+package it.com.lmig.forge.stash.ssh.rest;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,9 +8,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.lmig.forge.stash.ssh.rest.KeyDetailsResourceModel;
+import com.lmig.forge.stash.ssh.rest.AdminConfigResourceModel;
 
-public class KeyDetailsResourceFuncTest {
+public class AdminConfigResourceFuncTest {
 
     @Before
     public void setup() {
@@ -26,12 +26,12 @@ public class KeyDetailsResourceFuncTest {
     public void messageIsValid() {
 
         String baseUrl = System.getProperty("baseurl");
-        String resourceUrl = baseUrl + "/rest/keydetailsresource/1.0/message";
+        String resourceUrl = baseUrl + "/rest/adminconfig/1.0/message";
 
         RestClient client = new RestClient();
         Resource resource = client.resource(resourceUrl);
 
-        KeyDetailsResourceModel message = resource.get(KeyDetailsResourceModel.class);
+        AdminConfigResourceModel message = resource.get(AdminConfigResourceModel.class);
 
         assertEquals("wrong message","Hello World",message.getMessage());
     }

@@ -16,11 +16,9 @@
 
 package com.lmig.forge.stash.ssh.keys;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,36 +28,38 @@ import com.atlassian.stash.user.StashUser;
 import com.atlassian.stash.user.UserService;
 import com.lmig.forge.stash.ssh.ao.EnterpriseKeyRepository;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
+import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 import com.lmig.forge.stash.ssh.crypto.SshKeyPairGenerator;
 import com.lmig.forge.stash.ssh.notifications.NotificationService;
 import com.lmig.forge.stash.ssh.rest.KeyPairResourceModel;
 
 public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
-    final private static int NINETY_DAYS = 90;
-    final public static String ALLOWED_SSH_GROUP ="ssh-gods";
     final private SshKeyService sshKeyService;
     final private EnterpriseKeyRepository enterpriseKeyRepository;
     final private SshKeyPairGenerator sshKeyPairGenerator;
     final private NotificationService notificationService;
     final private UserService userService;
+    final private PluginSettingsService pluginSettingsService;
 
 
     private static final Logger log = LoggerFactory.getLogger(EnterpriseSshKeyServiceImpl.class);
 
     public EnterpriseSshKeyServiceImpl(SshKeyService sshKeyService, EnterpriseKeyRepository enterpriseKeyRepository,
-            SshKeyPairGenerator sshKeyPairGenerator, NotificationService notificationService, UserService userService) {
+            SshKeyPairGenerator sshKeyPairGenerator, NotificationService notificationService, UserService userService,PluginSettingsService pluginSettingsService) {
         this.sshKeyService = sshKeyService;
         this.enterpriseKeyRepository = enterpriseKeyRepository;
         this.sshKeyPairGenerator = sshKeyPairGenerator;
         this.notificationService = notificationService;
         this.userService = userService;
+        this.pluginSettingsService = pluginSettingsService;
 
     }
 
     @Override
     public boolean isKeyValidForUser(SshKey key, StashUser stashUser) {
         //allow bamboo <> stash keys for system accounts in special group.
-        if( userService.existsGroup(ALLOWED_SSH_GROUP) && userService.isUserInGroup(stashUser, ALLOWED_SSH_GROUP)){
+        String userGroup = pluginSettingsService.getAuthorizedGroup();
+        if( userGroup != null && userService.existsGroup(userGroup) && userService.isUserInGroup(stashUser, userGroup)){
             return true;
         }else{
             //otherwise user must have gone through our wrapper
@@ -93,12 +93,10 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
 
     @Override
     public void replaceExpiredKeysAndNotifyUsers() {
-        Date today = new Date();
-        Calendar cal = new GregorianCalendar();
-        cal.setTime(today);
-        cal.add(Calendar.DAY_OF_YEAR, -NINETY_DAYS);
+        DateTime dateTime = new DateTime();
+       
         //cal.add(Calendar.MINUTE, -1); //live demo in UI. 
-        List<SshKeyEntity> expiredStashKeys = enterpriseKeyRepository.listOfExpiredKeyIds(cal.getTime());
+        List<SshKeyEntity> expiredStashKeys = enterpriseKeyRepository.listOfExpiredKeyIds( dateTime.minusDays(pluginSettingsService.getDaysAllowedForUserKeys()).toDate());
    
         
         for (SshKeyEntity keyRecord : expiredStashKeys) {

@@ -1,4 +1,4 @@
-package it.com.lmig.forge.servlet;
+package it.com.lmig.forge.stash.ssh.keys;
 
 import static org.junit.Assert.assertTrue;
 

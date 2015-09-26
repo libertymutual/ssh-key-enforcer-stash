@@ -17,9 +17,7 @@
 package com.lmig.forge.stash.ssh.ao;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import net.java.ao.DBParam;

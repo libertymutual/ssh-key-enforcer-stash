@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import com.atlassian.soy.renderer.SoyException;
 import com.atlassian.soy.renderer.SoyTemplateRenderer;
-import com.atlassian.stash.user.UserService;
 import com.google.common.collect.ImmutableMap;
 
 public class UserKeyManagementServlet extends HttpServlet{

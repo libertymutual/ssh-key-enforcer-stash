@@ -1,12 +1,8 @@
-package it.com.lmig.forge.stash.ssh;
+package it.com.lmig.forge.stash.ssh.keys;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.lmig.forge.stash.ssh.ao.EnterpriseKeyRepositoryImpl;
-
-import static org.mockito.Mockito.*;
 
 /**
  * @since 3.5

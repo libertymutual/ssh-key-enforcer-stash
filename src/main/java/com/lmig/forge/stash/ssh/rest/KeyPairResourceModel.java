@@ -16,8 +16,6 @@
 
 package com.lmig.forge.stash.ssh.rest;
 
-import java.security.KeyPair;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;

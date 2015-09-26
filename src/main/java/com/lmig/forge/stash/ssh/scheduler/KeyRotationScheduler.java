@@ -17,7 +17,6 @@
 package com.lmig.forge.stash.ssh.scheduler;
 
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,32 +30,36 @@ import com.atlassian.scheduler.config.JobId;
 import com.atlassian.scheduler.config.JobRunnerKey;
 import com.atlassian.scheduler.config.RunMode;
 import com.atlassian.scheduler.config.Schedule;
+import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 
 
 public class KeyRotationScheduler implements DisposableBean, InitializingBean { 
 
      private static final JobId JOB_ID = JobId.of("com.lmig.forge.stash:stash-ssh-key-enforcer:KeyRotationJob"); 
-     private static final long JOB_INTERVAL = TimeUnit.DAYS.toMillis(1L); //TODO runs daily, add config
-     //private static final long JOB_INTERVAL = TimeUnit.MINUTES.toMillis(1L);//live demo, expires on the minute.
      private static final String JOB_RUNNER_KEY = "com.lmig.forge.stash:stash-ssh-key-enforcer:KeyRotationJobRunner"; 
      private static final Logger log = LoggerFactory.getLogger(KeyRotationScheduler.class);
      
      private final SchedulerService schedulerService;
-    private KeyRotationJobRunner keyRotationJobRunner; 
+    private final KeyRotationJobRunner keyRotationJobRunner;
+    private final PluginSettingsService pluginSettingsService; 
      
-     public KeyRotationScheduler(SchedulerService schedulerService,KeyRotationJobRunner keyRotationJobRunner) { 
+     public KeyRotationScheduler(SchedulerService schedulerService,KeyRotationJobRunner keyRotationJobRunner,PluginSettingsService pluginSettingsService) { 
          this.schedulerService = schedulerService; 
          this.keyRotationJobRunner = keyRotationJobRunner;
+         this.pluginSettingsService  = pluginSettingsService;
      } 
 
      @Override 
+     /**
+      * this occurs on start and when the settings/config of server are updated. Includes any changes made via {@link PluginSettingsService}
+      */
      public void afterPropertiesSet() throws SchedulerServiceException { 
          //The JobRunner could be another component injected in the constructor, a 
          //private nested class, etc. It just needs to implement JobRunner 
          schedulerService.registerJobRunner(JobRunnerKey.of(JOB_RUNNER_KEY), keyRotationJobRunner); 
          schedulerService.scheduleJob(JOB_ID, JobConfig.forJobRunnerKey(JobRunnerKey.of(JOB_RUNNER_KEY)) 
                  .withRunMode(RunMode.RUN_ONCE_PER_CLUSTER) 
-                 .withSchedule(Schedule.forInterval(JOB_INTERVAL, new Date(System.currentTimeMillis() + JOB_INTERVAL)))); 
+                 .withSchedule(Schedule.forInterval(pluginSettingsService.getMillisBetweenRuns(), new Date(System.currentTimeMillis() + pluginSettingsService.getMillisBetweenRuns())))); 
          log.debug("KEY Expiring Job Scheduled");
      } 
 

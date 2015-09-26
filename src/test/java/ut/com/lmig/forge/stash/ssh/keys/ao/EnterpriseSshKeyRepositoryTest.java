@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ut.com.lmig.forge.stash.ssh.ao;
+package ut.com.lmig.forge.stash.ssh.keys.ao;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;

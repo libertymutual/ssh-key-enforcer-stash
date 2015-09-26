@@ -16,7 +16,6 @@
 
 package com.lmig.forge.stash.ssh.crypto;
 
-import com.atlassian.stash.user.StashUser;
 import com.lmig.forge.stash.ssh.rest.KeyPairResourceModel;
 
 public interface SshKeyPairGenerator {

@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import com.atlassian.stash.i18n.I18nService;
 import com.atlassian.stash.mail.MailMessage;
 import com.atlassian.stash.mail.MailService;
-import com.atlassian.stash.mail.SoyMailBuilder;
 import com.atlassian.stash.server.ApplicationPropertiesService;
 import com.atlassian.stash.user.StashUser;
 import com.atlassian.stash.user.UserService;

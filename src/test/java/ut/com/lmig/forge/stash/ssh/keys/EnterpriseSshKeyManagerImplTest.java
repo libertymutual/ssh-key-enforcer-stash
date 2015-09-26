@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package ut.com.lmig.forge.stash.ssh;
+package ut.com.lmig.forge.stash.ssh.keys;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 
 import net.java.ao.DBParam;
 import net.java.ao.EntityManager;
@@ -37,6 +37,7 @@ import net.java.ao.test.jdbc.Jdbc;
 import net.java.ao.test.jdbc.NonTransactional;
 import net.java.ao.test.junit.ActiveObjectsJUnitRunner;
 
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,6 +52,7 @@ import com.atlassian.stash.user.UserService;
 import com.lmig.forge.stash.ssh.ao.EnterpriseKeyRepository;
 import com.lmig.forge.stash.ssh.ao.EnterpriseKeyRepositoryImpl;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
+import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
 import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyServiceImpl;
 import com.lmig.forge.stash.ssh.notifications.NotificationService;
@@ -72,12 +74,14 @@ import com.lmig.forge.stash.ssh.scheduler.KeyRotationJobRunner;
 @Data(EnterpriseSshKeyManagerImplTest.EnterpriseSshKeyRepositoryTestData.class)
 @Jdbc(net.java.ao.test.jdbc.DynamicJdbcConfiguration.class)
 public class EnterpriseSshKeyManagerImplTest {
-    private static final String PUBLIC_KEY_ONE = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC0O2PpfWd0RuoveFkSLP8DaL2ZekQZJM7gzQFi/cavziK8jnAY+xtNIAF1K7EN64JSM2DTMU7BZUFkJvqqbugzc29A/LOfZ6GzvMhSiR7YR2J/eOkVZbmPPyC1qWDCc5Ne71pEJhU5OdlFd4Hj5XgDzNyMANoYlO+xm1IDzHBxDSrvY++VGrnZG1rJ6aSdxyRCoE7MVtQkLuIMDSVPTVfdqDV4oKlH2bzd4LyA1Jm01+MBmWq2qVcKcF6UYKaUILVreZZZSm2/PBbgQ+H5yzjNeEbvdnAr7bcn+xRdhEM0ZGm/RRDRIvwkTlWJ2y9M3KvnJEKbv/c9ZAlOmbs5K1OhfGL/jCU8h1EslwQ9euFp0wjKUMj5u9ll8QqpNcXxsfUnaN9qc2rrm5FS5t5TFAkbIX5fOTJCPb+seE146ax/cNovzOoJUPvF+qBfvJLQGX2L/4JdPqDQ6FkLbvJy194/K5oWag8w4F9ftYIfd/SOgatPMiKuhOls2zYufm34UBbksc7qxDD12JUiI/q7JNted53tnPVBSDLM5RYtohDq/w4MfyFmA51UeETSLumlwg9kOuqaWBYjr2Esn09EtkQNIhQxxt3w47O0RFghZgJdnP3VORju3v2l0Qfo7A/EbeDGKXQhCl6yeMv82lmUtzOhVN6IAApOwMH7Hmh/z209jw==";
+    private static final String APPROVED_PUBLIC_KEY_ONE = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC0O2PpfWd0RuoveFkSLP8DaL2ZekQZJM7gzQFi/cavziK8jnAY+xtNIAF1K7EN64JSM2DTMU7BZUFkJvqqbugzc29A/LOfZ6GzvMhSiR7YR2J/eOkVZbmPPyC1qWDCc5Ne71pEJhU5OdlFd4Hj5XgDzNyMANoYlO+xm1IDzHBxDSrvY++VGrnZG1rJ6aSdxyRCoE7MVtQkLuIMDSVPTVfdqDV4oKlH2bzd4LyA1Jm01+MBmWq2qVcKcF6UYKaUILVreZZZSm2/PBbgQ+H5yzjNeEbvdnAr7bcn+xRdhEM0ZGm/RRDRIvwkTlWJ2y9M3KvnJEKbv/c9ZAlOmbs5K1OhfGL/jCU8h1EslwQ9euFp0wjKUMj5u9ll8QqpNcXxsfUnaN9qc2rrm5FS5t5TFAkbIX5fOTJCPb+seE146ax/cNovzOoJUPvF+qBfvJLQGX2L/4JdPqDQ6FkLbvJy194/K5oWag8w4F9ftYIfd/SOgatPMiKuhOls2zYufm34UBbksc7qxDD12JUiI/q7JNted53tnPVBSDLM5RYtohDq/w4MfyFmA51UeETSLumlwg9kOuqaWBYjr2Esn09EtkQNIhQxxt3w47O0RFghZgJdnP3VORju3v2l0Qfo7A/EbeDGKXQhCl6yeMv82lmUtzOhVN6IAApOwMH7Hmh/z209jw==";
+    private static final String UNAPPROVED_PUBLIC_KEY_ONE = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC0O2PpfWd0RuoveFkSLP8DaL2ZekQZJM7gzQFi/cavziK8jnAY+xtNIAF1K7EN64JSM2DTMU7BZUFkJvqqbugzc29A/LOfZ6GzvMhSiR7YR2J/eOkVZbmPPyC1qWDCc5Ne71pEJhU5OdlFd4Hj5XgDzNyMANoYlO+xm1IDzHBxDSrvY++VGrnZG1rJ6aSdxyRCoE7MVtQkLuIMDSVPTVfdqDV4oKlH2bzd4LyA1Jm01+MBmWq2qVcKcF6UYKaUILVreZZZSm2/PBbgQ+H5yzjNeEbvdnAr7bcn+xRdhEM0ZGm/RRDRIvwkTlWJ2y9M3KvnJEKbv/c9ZAlOmbs5K1OhfGL/jCU8h1EslwQ9euFp0wjKUMj5u9ll8QqpNcXxsfUnaN9qc2rrm5FS5t5TFAkbIX5fOTJCPb+seE146ax/cNovzOoJUPvF+qBfvJLQGX2L/4JdPqDQ6FkLbvJy194/K5oWag8w4F9ftYIfd/SOgatPMiKuhOls2zYufm34UBbksc7qxDD1DG";
     private static final int EXPIRED_USER_ID = 1;
     private static final int VALID_USER_ID = 2;
-    private static final int NAUGHTY_USER_ID = 3;
     private static final int EXPIRED_STASH_KEY_ID = 100;
     private static final int VALID_STASH_KEY_ID = 200;
+    private static final int DAYS_ALLOWED = 90;
+    private static final String AUTHED_GROUP = "the-monkeys";
 
     // gets injected thanks to ActiveObjectsJUnitRunner.class
     private EntityManager entityManager;
@@ -88,6 +92,9 @@ public class EnterpriseSshKeyManagerImplTest {
     private NotificationService notificationService;
     private SshKeyService stashKeyService;
     private UserService userService;
+    private PluginSettingsService pluginSettingsService;
+    private StashUser unblessedUser ;
+    private StashUser blessedUser;
 
     @Before
     public void setup() {
@@ -96,8 +103,21 @@ public class EnterpriseSshKeyManagerImplTest {
         stashKeyService = mock(SshKeyService.class);
         notificationService = mock(NotificationService.class);
         userService = mock(UserService.class);
+        when(userService.existsGroup(anyString())).thenReturn(true);
+        pluginSettingsService = mock(PluginSettingsService.class);
+        when(pluginSettingsService.getMillisBetweenRuns()).thenReturn(60000L);
+        when(pluginSettingsService.getDaysAllowedForUserKeys()).thenReturn(DAYS_ALLOWED);
+        when(pluginSettingsService.getDaysAllowedForBambooKeys()).thenReturn(DAYS_ALLOWED);
+        when(pluginSettingsService.getAuthorizedGroup()).thenReturn(AUTHED_GROUP);
         when(userService.getUserByName(KeyRotationJobRunner.ADMIN_ACCOUNT_NAME)).thenReturn(mock(StashUser.class));//defeat NPE check
-        ourKeyService = new EnterpriseSshKeyServiceImpl(stashKeyService, keyRepo, null, notificationService,userService);
+        ourKeyService = new EnterpriseSshKeyServiceImpl(stashKeyService, keyRepo, null, notificationService,userService, pluginSettingsService);
+   
+         unblessedUser = mock(StashUser.class);
+        when(unblessedUser.getId()).thenReturn(VALID_USER_ID);
+        when(userService.isUserInGroup(unblessedUser, AUTHED_GROUP)).thenReturn(false);        
+         blessedUser = mock(StashUser.class);
+        when(blessedUser.getId()).thenReturn(VALID_USER_ID);
+        when(userService.isUserInGroup(blessedUser, AUTHED_GROUP)).thenReturn(true);
     }
 
     @Test
@@ -143,11 +163,8 @@ public class EnterpriseSshKeyManagerImplTest {
     
     
     @Test
-    public void userInBlessedGroupMayByPassService(){
-        StashUser blessedUser = mock(StashUser.class);
-        when(userService.existsGroup(EnterpriseSshKeyServiceImpl.ALLOWED_SSH_GROUP)).thenReturn(true);
-        when(userService.isUserInGroup(blessedUser, EnterpriseSshKeyServiceImpl.ALLOWED_SSH_GROUP)).thenReturn(true);
-        SshKey newKey = new SimpleSshKey(1, "a comment", PUBLIC_KEY_ONE,blessedUser );
+    public void userInBlessedGroupMayByPassDirectService(){
+        SshKey newKey = new SimpleSshKey(1, "a comment", UNAPPROVED_PUBLIC_KEY_ONE,blessedUser );
         boolean isAllowed = ourKeyService.isKeyValidForUser(newKey, blessedUser);
         
         assertThat(isAllowed,is(true));
@@ -155,11 +172,9 @@ public class EnterpriseSshKeyManagerImplTest {
     
     
     @Test
-    public void userNotInBlessedGroupAreNotAllowed(){
-        StashUser unblessedUser = mock(StashUser.class);
-        when(userService.existsGroup(EnterpriseSshKeyServiceImpl.ALLOWED_SSH_GROUP)).thenReturn(true);
-        when(userService.isUserInGroup(unblessedUser, EnterpriseSshKeyServiceImpl.ALLOWED_SSH_GROUP)).thenReturn(false);
-        SshKey newKey = new SimpleSshKey(1, "a comment", PUBLIC_KEY_ONE,unblessedUser );
+    public void userNotInBlessedGroupAreNotAllowedDirect(){
+        
+        SshKey newKey = new SimpleSshKey(1, "a comment", UNAPPROVED_PUBLIC_KEY_ONE ,unblessedUser );
         boolean isAllowed = ourKeyService.isKeyValidForUser(newKey, unblessedUser);
         
         assertThat(isAllowed,is(false));        
@@ -167,27 +182,11 @@ public class EnterpriseSshKeyManagerImplTest {
 
     @Test
     public void userNotInBlessedGroupButUsedWrapperServiceAreAllowed(){
-        StashUser unblessedUser = mock(StashUser.class);
-        when(unblessedUser.getId()).thenReturn(VALID_USER_ID);
-        when(userService.existsGroup(EnterpriseSshKeyServiceImpl.ALLOWED_SSH_GROUP)).thenReturn(true);
-        when(userService.isUserInGroup(unblessedUser, EnterpriseSshKeyServiceImpl.ALLOWED_SSH_GROUP)).thenReturn(false);
         //when(keyRepo.isValidKeyForUser(unblessedUser, PUBLIC_KEY_ONE)).thenReturn(true);
-        SshKey newKey = new SimpleSshKey(1, "a comment", PUBLIC_KEY_ONE,unblessedUser );
+        SshKey newKey = new SimpleSshKey(1, "a comment", APPROVED_PUBLIC_KEY_ONE,unblessedUser );
         boolean isAllowed = ourKeyService.isKeyValidForUser(newKey, unblessedUser);
         
         assertThat(isAllowed,is(true));        
-    }
-    @Test
-    public void userNotInBlessedGroupAndDidNotUsedWrapperServiceAreNotAllowed(){
-        StashUser unblessedUser = mock(StashUser.class);
-        when(unblessedUser.getId()).thenReturn(NAUGHTY_USER_ID);
-        when(userService.existsGroup(EnterpriseSshKeyServiceImpl.ALLOWED_SSH_GROUP)).thenReturn(true);
-        when(userService.isUserInGroup(unblessedUser, EnterpriseSshKeyServiceImpl.ALLOWED_SSH_GROUP)).thenReturn(false);
-        //when(keyRepo.isValidKeyForUser(unblessedUser, PUBLIC_KEY_ONE)).thenReturn(false);
-        SshKey newKey = new SimpleSshKey(1, "a comment", PUBLIC_KEY_ONE,unblessedUser );
-        boolean isAllowed = ourKeyService.isKeyValidForUser(newKey, unblessedUser);
-        
-        assertThat(isAllowed,is(false));        
     }
     
  
@@ -200,18 +199,14 @@ public class EnterpriseSshKeyManagerImplTest {
             em.migrate(SshKeyEntity.class);
 
             // create a pre-expired key in DB for scheduler
-            Date today = new Date();
-            Calendar cal = new GregorianCalendar();
-            cal.setTime(today);
-            cal.add(Calendar.DAY_OF_YEAR, -91);
+            DateTime now = new DateTime();
             expiredKey = em.create(SshKeyEntity.class, new DBParam("USERID", EXPIRED_USER_ID), new DBParam("KEYID",
-                    EXPIRED_STASH_KEY_ID), new DBParam("TEXT", PUBLIC_KEY_ONE), new DBParam("LABEL", "COMPROMISED"),
-                    new DBParam("CREATED", cal.getTime()));
+                    EXPIRED_STASH_KEY_ID), new DBParam("TEXT", APPROVED_PUBLIC_KEY_ONE), new DBParam("LABEL", "COMPROMISED"),
+                    new DBParam("CREATED", now.minusDays(DAYS_ALLOWED+1).toDate()));
 
-            cal.add(Calendar.DAY_OF_YEAR, 2);
             validKey = em.create(SshKeyEntity.class, new DBParam("USERID", VALID_USER_ID), new DBParam("KEYID",
-                    VALID_STASH_KEY_ID), new DBParam("TEXT", PUBLIC_KEY_ONE), new DBParam("LABEL", "VALID"),
-                    new DBParam("CREATED", cal.getTime()));
+                    VALID_STASH_KEY_ID), new DBParam("TEXT", APPROVED_PUBLIC_KEY_ONE), new DBParam("LABEL", "VALID"),
+                    new DBParam("CREATED",  now.minusDays(DAYS_ALLOWED-1).toDate()));
 
         }
 

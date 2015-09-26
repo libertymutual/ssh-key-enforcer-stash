@@ -16,7 +16,6 @@
 
 package com.lmig.forge.stash.ssh;
 
-import java.security.NoSuchAlgorithmException;
 
 public class EnterpriseKeyGenerationException extends RuntimeException {
 
