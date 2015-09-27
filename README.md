@@ -43,7 +43,7 @@ Admins may update the values capture in JSON below via `/rest/enterprisessh/1.0/
 }
 ```
 
-**NOTE**: daysToKeepBambooKeys is not currently enforced
+**NOTE**: daysToKeepBambooKeys is not currently enforced - See Issue #8
 
 ## License
    Copyright 2015 Liberty Mutual Insurance
