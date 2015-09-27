@@ -28,6 +28,7 @@ import com.atlassian.stash.user.StashUser;
 import com.atlassian.stash.user.UserService;
 import com.lmig.forge.stash.ssh.ao.EnterpriseKeyRepository;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
+import com.lmig.forge.stash.ssh.ao.SshKeyEntity.KeyType;
 import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 import com.lmig.forge.stash.ssh.crypto.SshKeyPairGenerator;
 import com.lmig.forge.stash.ssh.notifications.NotificationService;
@@ -60,6 +61,7 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
         //allow bamboo <> stash keys for system accounts in special group.
         String userGroup = pluginSettingsService.getAuthorizedGroup();
         if( userGroup != null && userService.existsGroup(userGroup) && userService.isUserInGroup(stashUser, userGroup)){
+            enterpriseKeyRepository.saveExternallyGeneratedKeyDetails(key,stashUser,SshKeyEntity.KeyType.BAMBOO);
             return true;
         }else{
             //otherwise user must have gone through our wrapper
@@ -90,13 +92,15 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
         enterpriseKeyRepository.updateRecordWithKeyId(newRecord, newKey);
         return result;
     }
+    
+    
 
     @Override
     public void replaceExpiredKeysAndNotifyUsers() {
         DateTime dateTime = new DateTime();
        
         //cal.add(Calendar.MINUTE, -1); //live demo in UI. 
-        List<SshKeyEntity> expiredStashKeys = enterpriseKeyRepository.listOfExpiredKeyIds( dateTime.minusDays(pluginSettingsService.getDaysAllowedForUserKeys()).toDate());
+        List<SshKeyEntity> expiredStashKeys = enterpriseKeyRepository.listOfExpiredKeys( dateTime.minusDays(pluginSettingsService.getDaysAllowedForUserKeys()).toDate(), KeyType.USER);
    
         
         for (SshKeyEntity keyRecord : expiredStashKeys) {

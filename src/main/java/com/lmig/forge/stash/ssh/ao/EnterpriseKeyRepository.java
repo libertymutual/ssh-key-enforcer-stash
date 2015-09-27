@@ -21,6 +21,7 @@ import java.util.List;
 
 import com.atlassian.stash.ssh.api.SshKey;
 import com.atlassian.stash.user.StashUser;
+import com.lmig.forge.stash.ssh.ao.SshKeyEntity.KeyType;
 
 public interface EnterpriseKeyRepository {
     
@@ -28,11 +29,13 @@ public interface EnterpriseKeyRepository {
     
     boolean isValidKeyForUser(StashUser user, String text);
 
-    List<SshKeyEntity> listOfExpiredKeyIds(Date oldestValidDate);
+    List<SshKeyEntity> listOfExpiredKeys(Date oldestValidDate, KeyType keyType);
 
     void updateRecordWithKeyId(SshKeyEntity newRecord, SshKey newKey);
 
     void removeRecord(SshKeyEntity key);
+
+    void saveExternallyGeneratedKeyDetails(SshKey key, StashUser stashUser, KeyType bamboo);
 
 }
 
