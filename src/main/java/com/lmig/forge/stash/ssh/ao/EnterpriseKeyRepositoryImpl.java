@@ -45,7 +45,7 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
 
     @Override
     public SshKeyEntity createOrUpdateUserKey(StashUser user, String text, String label) {        
-        SshKeyEntity key = findSingleKey(user,KeyType.USER);
+        SshKeyEntity key = findSingleUserKey(user);
         if(null != key){
             key.setText(text);
             key.setLabel(label);
@@ -59,20 +59,13 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
     
 
     @Override
-    public void saveExternallyGeneratedKeyDetails(SshKey key, StashUser user, KeyType keyType) {
-        SshKeyEntity entity = findSingleKey(user, KeyType.BAMBOO);
-        if(null != entity){
-            entity.setText(key.getText());
-            entity.setLabel(key.getLabel());
-            entity.setCreatedDate(new Date());
-            entity.save();
-        }else{
-            entity = ao.create(SshKeyEntity.class, new DBParam("TYPE",keyType), new DBParam("USERID", user.getId()), new DBParam("TEXT", key.getText()),new DBParam("LABEL",key.getLabel()),new DBParam("CREATED", new Date()));
-        }
+    public SshKeyEntity saveExternallyGeneratedKeyDetails(SshKey key, StashUser user, KeyType keyType) {
+        SshKeyEntity entity =ao.create(SshKeyEntity.class, new DBParam("TYPE",keyType), new DBParam("USERID", user.getId()),  new DBParam("KEYID",key.getId()), new DBParam("TEXT", key.getText()),new DBParam("LABEL",key.getLabel()),new DBParam("CREATED", new Date()));
+        return entity;
     }
 
-    private SshKeyEntity findSingleKey(StashUser user, KeyType keyType) {
-        SshKeyEntity[] keys = ao.find(SshKeyEntity.class, Query.select().where("USERID = ? AND TYPE = ?", user.getId(), keyType));
+    private SshKeyEntity findSingleUserKey(StashUser user) {
+        SshKeyEntity[] keys = ao.find(SshKeyEntity.class, Query.select().where("USERID = ? AND TYPE = ?", user.getId(), KeyType.USER));
         if( null != keys && keys.length == 1 ){
             SshKeyEntity key = keys[0];
             return key;
@@ -83,7 +76,7 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
 
     @Override
     public boolean isValidKeyForUser(StashUser user, String text) {
-        SshKeyEntity key = findSingleKey(user, KeyType.USER);
+        SshKeyEntity key = findSingleUserKey(user);
         if(null != key){
             return key.getText().equals(text);
         }
@@ -115,6 +108,19 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
     public void removeRecord(SshKeyEntity key) {
         //SshKeyEntity[] recordToDelete = ao.find(SshKeyEntity.class, Query.select().where("KEYID = ?",stashKeyId));
         ao.delete(key);
+    }
+
+    @Override
+    public void forgetRecordMatching(SshKey key) {
+       int recordsDeleted = ao.deleteWithSQL(SshKeyEntity.class, "KEYID = ?", key.getId());
+       log.warn("Deleted " + recordsDeleted + " meta record related to key: " + key.getId());
+        
+    }
+
+    @Override
+    public List<SshKeyEntity> keysForUser(StashUser user) {
+        SshKeyEntity[] results = ao.find(SshKeyEntity.class,Query.select().where("USERID = ?", user.getId()));
+        return Lists.newArrayList(results);
     }
 
     

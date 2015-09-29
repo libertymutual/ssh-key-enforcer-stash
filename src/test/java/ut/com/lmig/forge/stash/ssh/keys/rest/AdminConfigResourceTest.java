@@ -19,11 +19,13 @@ import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 import com.lmig.forge.stash.ssh.rest.AdminConfigResource;
 import com.lmig.forge.stash.ssh.rest.AdminConfigResourceModel;
 
-public class AdminConfigResourceTest { private static final String TEST_CONFIG_GROUP ="ssh=gods";
-private final AdminConfigResourceModel sampleConfig = new AdminConfigResourceModel(null,TEST_CONFIG_GROUP, AdminConfigResourceModel.DEFAULT_DAYS_USER, AdminConfigResourceModel.DEFAULT_DAYS_BAMBOO, AdminConfigResourceModel.DEFAULT_MILLIS_BETWEEN_RUNS);
-private UserManager userManager = mock(UserManager.class);
-private StashAuthenticationContext stashAuthenticationContext = mock(StashAuthenticationContext.class);
-private PluginSettingsService pluginSettingsService = mock(PluginSettingsService.class);
+public class AdminConfigResourceTest { 
+    private static final String TEST_CONFIG_GROUP ="ssh-gods";
+    private static final String TEST_CONFIG_USER ="bamboolinker";
+    private final AdminConfigResourceModel sampleConfig = new AdminConfigResourceModel(null,TEST_CONFIG_GROUP, AdminConfigResourceModel.DEFAULT_DAYS_USER, AdminConfigResourceModel.DEFAULT_DAYS_BAMBOO, AdminConfigResourceModel.DEFAULT_MILLIS_BETWEEN_RUNS,TEST_CONFIG_USER);
+    private UserManager userManager = mock(UserManager.class);
+    private StashAuthenticationContext stashAuthenticationContext = mock(StashAuthenticationContext.class);
+    private PluginSettingsService pluginSettingsService = mock(PluginSettingsService.class);
 
 
     @Before

@@ -25,6 +25,7 @@ import com.atlassian.scheduler.JobRunnerResponse;
 import com.atlassian.stash.user.EscalatedSecurityContext;
 import com.atlassian.stash.user.Permission;
 import com.atlassian.stash.user.SecurityService;
+import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 
 public class KeyRotationJobRunner implements JobRunner{
 
@@ -34,26 +35,30 @@ public class KeyRotationJobRunner implements JobRunner{
 
     private final SecurityService securityService;
     private final KeyRotationOperation keyRotationOperation;
+    private final PluginSettingsService pluginSettingService;
     private static final Logger log = LoggerFactory.getLogger(KeyRotationJobRunner.class);
     
-    public KeyRotationJobRunner(KeyRotationOperation keyRotationOperation,SecurityService securityService) {
+    public KeyRotationJobRunner(KeyRotationOperation keyRotationOperation,SecurityService securityService, PluginSettingsService pluginSettingService) {
        
         this.securityService = securityService;
         this.keyRotationOperation = keyRotationOperation;
+        this.pluginSettingService =pluginSettingService;
     }
     
     @Override
     public JobRunnerResponse runJob(JobRunnerRequest request) {
-        
-        log.debug("Key Expire Job Starting");
-
-        EscalatedSecurityContext elevatedContext = securityService.withPermission(Permission.SYS_ADMIN,PERMISSION_REASON);
-        try {
-            elevatedContext.call(keyRotationOperation);
-        } catch (Throwable e) {
-            return JobRunnerResponse.failed(e);
+        if( pluginSettingService.getDaysAllowedForUserKeys() > 0 ){
+            log.debug("Key Expire Job Starting");    
+            EscalatedSecurityContext elevatedContext = securityService.withPermission(Permission.SYS_ADMIN,PERMISSION_REASON);
+            try {
+                elevatedContext.call(keyRotationOperation);
+            } catch (Throwable e) {
+                return JobRunnerResponse.failed(e);
+            }
+            log.debug("Key Expire Job Complete");
+        }else{
+            log.debug("Key Expire Job Skipping since  '" + PluginSettingsService.SETTINGS_KEY_DAYS_KEEP_USERS + "' is 0/not set.");
         }
-        log.debug("Key Expire Job Complete");
         return JobRunnerResponse.success();
     }
 

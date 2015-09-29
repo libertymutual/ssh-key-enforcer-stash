@@ -16,10 +16,14 @@
 
 package com.lmig.forge.stash.ssh.keys;
 
+import java.util.List;
+
 import com.atlassian.stash.ssh.SshKeyCreatedEvent;
 import com.atlassian.stash.ssh.api.SshKey;
 import com.atlassian.stash.user.StashUser;
+import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
 import com.lmig.forge.stash.ssh.events.GeneralEventListener;
+import com.lmig.forge.stash.ssh.rest.KeyDetailsResourceModel;
 import com.lmig.forge.stash.ssh.rest.KeyPairResourceModel;
 
 public interface EnterpriseSshKeyService {
@@ -57,5 +61,18 @@ public interface EnterpriseSshKeyService {
 
 
     void replaceExpiredKeysAndNotifyUsers();
+
+
+
+    /**
+     * Remove our meta for any keys deleted via traditional UI/API
+     * @param key
+     */
+    void forgetDeletedKey(SshKey key);
+
+
+
+
+    List<SshKeyEntity> getKeysForUser(String username);
 
 }

@@ -18,14 +18,21 @@ package com.lmig.forge.stash.ssh.rest;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-@XmlRootElement(name = "message")
+
+import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
+import com.lmig.forge.stash.ssh.ao.SshKeyEntity.KeyType;
+@XmlRootElement(name = "keyDetails")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class KeyDetailsResourceModel {
 
-    @XmlElement(name = "value")
+
     private String message;
+    private String publicKey;
+    private String label;
+    private int userId;
+    private int stashKeyId;
+    private KeyType keyType;
 
     public KeyDetailsResourceModel() {
     }
@@ -33,12 +40,14 @@ public class KeyDetailsResourceModel {
     public KeyDetailsResourceModel(String message) {
         this.message = message;
     }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+    
+    public static KeyDetailsResourceModel from(SshKeyEntity keyEntity){
+        KeyDetailsResourceModel result = new KeyDetailsResourceModel();
+        result.keyType = keyEntity.getKeyType();
+        result.publicKey = keyEntity.getText();
+        result.label = keyEntity.getLabel();
+        result.userId = keyEntity.getUserId();
+        result.stashKeyId = keyEntity.getKeyId();
+        return result;
     }
 }

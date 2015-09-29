@@ -32,6 +32,7 @@ import com.lmig.forge.stash.ssh.ao.SshKeyEntity.KeyType;
 import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 import com.lmig.forge.stash.ssh.crypto.SshKeyPairGenerator;
 import com.lmig.forge.stash.ssh.notifications.NotificationService;
+import com.lmig.forge.stash.ssh.rest.KeyDetailsResourceModel;
 import com.lmig.forge.stash.ssh.rest.KeyPairResourceModel;
 
 public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
@@ -59,13 +60,18 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
     @Override
     public boolean isKeyValidForUser(SshKey key, StashUser stashUser) {
         //allow bamboo <> stash keys for system accounts in special group.
+        String bambooUser =  pluginSettingsService.getAuthorizedUser();
         String userGroup = pluginSettingsService.getAuthorizedGroup();
-        if( userGroup != null && userService.existsGroup(userGroup) && userService.isUserInGroup(stashUser, userGroup)){
+        if(enterpriseKeyRepository.isValidKeyForUser(stashUser, key.getText())){
+            return true;
+        }else if( bambooUser != null && bambooUser.equals(stashUser.getName())){
             enterpriseKeyRepository.saveExternallyGeneratedKeyDetails(key,stashUser,SshKeyEntity.KeyType.BAMBOO);
             return true;
+        }else if( userGroup != null && userService.existsGroup(userGroup) && userService.isUserInGroup(stashUser, userGroup)){
+            enterpriseKeyRepository.saveExternallyGeneratedKeyDetails(key,stashUser,SshKeyEntity.KeyType.BYPASS);
+            return true;
         }else{
-            //otherwise user must have gone through our wrapper
-            return enterpriseKeyRepository.isValidKeyForUser(stashUser, key.getText());
+            return false;
         }
     }
 
@@ -98,8 +104,6 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
     @Override
     public void replaceExpiredKeysAndNotifyUsers() {
         DateTime dateTime = new DateTime();
-       
-        //cal.add(Calendar.MINUTE, -1); //live demo in UI. 
         List<SshKeyEntity> expiredStashKeys = enterpriseKeyRepository.listOfExpiredKeys( dateTime.minusDays(pluginSettingsService.getDaysAllowedForUserKeys()).toDate(), KeyType.USER);
    
         
@@ -115,6 +119,22 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public void forgetDeletedKey(SshKey key) {
+        try{
+            enterpriseKeyRepository.forgetRecordMatching(key);
+        }catch(Exception e){
+            log.error("Could not remove meta for key: " + key.getId() + ", was likely not tracked by SSH Key Enforcer");
+        }
+        
+    }
+
+    @Override
+    public List<SshKeyEntity> getKeysForUser(String username) {
+        StashUser user = userService.getUserByName(username);
+        return enterpriseKeyRepository.keysForUser(user);
     }
     
    

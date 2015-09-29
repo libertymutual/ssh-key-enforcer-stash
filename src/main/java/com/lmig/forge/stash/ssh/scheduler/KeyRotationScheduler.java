@@ -17,6 +17,7 @@
 package com.lmig.forge.stash.ssh.scheduler;
 
 import java.util.Date;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ import com.atlassian.scheduler.config.JobId;
 import com.atlassian.scheduler.config.JobRunnerKey;
 import com.atlassian.scheduler.config.RunMode;
 import com.atlassian.scheduler.config.Schedule;
+import com.atlassian.scheduler.status.JobDetails;
 import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 
 
@@ -53,14 +55,19 @@ public class KeyRotationScheduler implements DisposableBean, InitializingBean {
      /**
       * this occurs on start and when the settings/config of server are updated. Includes any changes made via {@link PluginSettingsService}
       */
-     public void afterPropertiesSet() throws SchedulerServiceException { 
-         //The JobRunner could be another component injected in the constructor, a 
-         //private nested class, etc. It just needs to implement JobRunner 
-         schedulerService.registerJobRunner(JobRunnerKey.of(JOB_RUNNER_KEY), keyRotationJobRunner); 
-         schedulerService.scheduleJob(JOB_ID, JobConfig.forJobRunnerKey(JobRunnerKey.of(JOB_RUNNER_KEY)) 
-                 .withRunMode(RunMode.RUN_ONCE_PER_CLUSTER) 
-                 .withSchedule(Schedule.forInterval(pluginSettingsService.getMillisBetweenRuns(), new Date(System.currentTimeMillis() + pluginSettingsService.getMillisBetweenRuns())))); 
-         log.debug("KEY Expiring Job Scheduled");
+     public void afterPropertiesSet() throws SchedulerServiceException {     
+         if(pluginSettingsService.getMillisBetweenRuns() > 0){
+             schedulerService.registerJobRunner(JobRunnerKey.of(JOB_RUNNER_KEY), keyRotationJobRunner); 
+             schedulerService.scheduleJob(JOB_ID, JobConfig.forJobRunnerKey(JobRunnerKey.of(JOB_RUNNER_KEY)) 
+                     .withRunMode(RunMode.RUN_ONCE_PER_CLUSTER) 
+                     .withSchedule(Schedule.forInterval(pluginSettingsService.getMillisBetweenRuns(), new Date(System.currentTimeMillis() + pluginSettingsService.getMillisBetweenRuns())))); 
+             log.debug("KEY Expiring Job Scheduled");
+         }else{
+            List<JobDetails> existingSchedules =  schedulerService.getJobsByJobRunnerKey(JobRunnerKey.of(JOB_RUNNER_KEY));
+            if( existingSchedules.size() > 0 ){
+                schedulerService.unregisterJobRunner(JobRunnerKey.of(JOB_RUNNER_KEY));
+            }
+         }
      } 
 
      @Override 

@@ -36,7 +36,8 @@ Admins may update the values capture in JSON below via `/rest/enterprisessh/1.0/
 
 ```json
 {
-  "authorizedGroup": "auto-provisioners",
+  "authorizedGroup": "admins",
+  "bambooUser":"bamboolinker",
   "daysToKeepUserKeys": 30,
   "daysToKeepBambooKeys": 365,
   "millisBetweenRuns": 86400000
@@ -44,6 +45,8 @@ Admins may update the values capture in JSON below via `/rest/enterprisessh/1.0/
 ```
 
 **NOTE**: daysToKeepBambooKeys is not currently enforced - See Issue #8
+
+**NOTE**: Set any property to 0/null to disable
 
 ## License
    Copyright 2015 Liberty Mutual Insurance

@@ -30,12 +30,18 @@ public interface EnterpriseKeyRepository {
     boolean isValidKeyForUser(StashUser user, String text);
 
     List<SshKeyEntity> listOfExpiredKeys(Date oldestValidDate, KeyType keyType);
+    
+    List<SshKeyEntity> keysForUser(StashUser user);
 
     void updateRecordWithKeyId(SshKeyEntity newRecord, SshKey newKey);
 
     void removeRecord(SshKeyEntity key);
 
-    void saveExternallyGeneratedKeyDetails(SshKey key, StashUser stashUser, KeyType bamboo);
+    SshKeyEntity saveExternallyGeneratedKeyDetails(SshKey key, StashUser stashUser, KeyType bamboo);
+
+    void forgetRecordMatching(SshKey key);
+    
+    
 
 }
 

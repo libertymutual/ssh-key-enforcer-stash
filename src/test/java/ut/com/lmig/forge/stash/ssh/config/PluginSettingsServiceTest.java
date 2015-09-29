@@ -8,7 +8,9 @@ import static org.mockito.Mockito.when;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import ut.com.lmig.forge.stash.ssh.SshEnforcerTestHelper;
 
@@ -27,7 +29,9 @@ public class PluginSettingsServiceTest {
     private PluginSettings pluginSettings;
    
     
-
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+    
     
     
     @Before
@@ -56,15 +60,58 @@ public class PluginSettingsServiceTest {
     @Test
     public void configCanBeUpdated() {
         String group ="FOO";
+        String user="baz";
         int userDays = 7;
         int bambooDays = 30;
-        long millis = 60000;
+        long millis = 300000; //5 minutes
         
-        pluginSettingsService.updateAdminConfigResourcesModel(new AdminConfigResourceModel(null, group, userDays, bambooDays, millis));
-
+        pluginSettingsService.updateAdminConfigResourcesModel(new AdminConfigResourceModel(null, group, userDays, bambooDays, millis, user));
+        
         verify(pluginSettings).put(PluginSettingsService.SETTINGS_KEY_AUTHORIZED_GROUP, group); 
         verify(pluginSettings).put(PluginSettingsService.SETTINGS_KEY_DAYS_KEEP_USERS, String.valueOf(userDays)); 
         verify(pluginSettings).put(PluginSettingsService.SETTINGS_KEY_DAYS_KEEP_BAMBOO, String.valueOf(bambooDays)); 
+        verify(pluginSettings).put(PluginSettingsService.SETTINGS_KEY_MILLIS_INTERVAL, String.valueOf(millis)); 
+    }
+    @Test
+    public void scheduledIntervalMustBeFiveMinutesOrMore() {
+        String group ="FOO";
+        String user="baz";
+        int userDays = 7;
+        int bambooDays = 30;
+        long millis = 60000; // 1 minute
+        
+        //bad attempt throws exception
+        expectedException.expect(IllegalArgumentException.class);
+        pluginSettingsService.updateAdminConfigResourcesModel(new AdminConfigResourceModel(null, group, userDays, bambooDays, millis, user));
+
+    }
+    @Test
+    public void daysMustBePositive() {
+        String group ="FOO";
+        String user="baz";
+        int userDays = 1;
+        int bambooDays = -1;
+        long millis = 60000; // 1 minute    
+        //bad attempt throws exception
+        expectedException.expect(IllegalArgumentException.class);
+        pluginSettingsService.updateAdminConfigResourcesModel(new AdminConfigResourceModel(null, group, userDays, bambooDays, millis, user));
+        userDays = -1; //swap the negatives
+        bambooDays = 1;
+       //bad attempt throws exception
+        expectedException.expect(IllegalArgumentException.class);
+        pluginSettingsService.updateAdminConfigResourcesModel(new AdminConfigResourceModel(null, group, userDays, bambooDays, millis, user));
+
+    }
+    @Test
+    public void scheduledIntervalAllowsZeroToDisable() {
+        String group ="FOO";
+        String user="baz";
+        int userDays = 7;
+        int bambooDays = 30;
+        long millis = 0; // disable
+        
+        pluginSettingsService.updateAdminConfigResourcesModel(new AdminConfigResourceModel(null, group, userDays, bambooDays, millis, user));
+
         verify(pluginSettings).put(PluginSettingsService.SETTINGS_KEY_MILLIS_INTERVAL, String.valueOf(millis)); 
     }
 }

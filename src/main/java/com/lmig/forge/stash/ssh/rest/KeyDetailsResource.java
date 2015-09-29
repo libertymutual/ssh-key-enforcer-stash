@@ -16,52 +16,76 @@
 
 package com.lmig.forge.stash.ssh.rest;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.atlassian.annotations.PublicApi;
 import com.atlassian.stash.user.StashAuthenticationContext;
 import com.atlassian.stash.user.StashUser;
 import com.lmig.forge.stash.ssh.EnterpriseKeyGenerationException;
+import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
 import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
 
 /**
  * A resource of message.
  */
 @Path("/keys")
+@PublicApi
 public class KeyDetailsResource {
     private final EnterpriseSshKeyService enterpriseKeyService;
     private final StashAuthenticationContext stashAuthenticationContext;
 
-
-    public KeyDetailsResource(EnterpriseSshKeyService enterpriseKeyService,StashAuthenticationContext stashAuthenticationContext) {
+    public KeyDetailsResource(EnterpriseSshKeyService enterpriseKeyService,
+            StashAuthenticationContext stashAuthenticationContext) {
         this.enterpriseKeyService = enterpriseKeyService;
         this.stashAuthenticationContext = stashAuthenticationContext;
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response getMessage()
-    {
-       return Response.ok(new KeyDetailsResourceModel("Hello World")).build();
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public Response getMessage() {
+        return Response.ok(new KeyDetailsResourceModel("Hello World")).build();
     }
-    
+
     @POST
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response generateNewPair()
-    {   
-        
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public Response generateNewPair() {
+
         StashUser user = stashAuthenticationContext.getCurrentUser();
         KeyPairResourceModel keyPair;
-        try{
-           keyPair = enterpriseKeyService.generateNewKeyPairFor(user);
-        }catch(EnterpriseKeyGenerationException e){
+        try {
+            keyPair = enterpriseKeyService.generateNewKeyPairFor(user);
+        } catch (EnterpriseKeyGenerationException e) {
             return Response.serverError().build();
         }
-        
-       return Response.ok(keyPair).build();
+
+        return Response.ok(keyPair).build();
     }
+
+    @GET
+    @Path("/user/{username}")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public Response getAllKeysForUser(@PathParam("username") String username) {
+
+        try {
+            List<SshKeyEntity> keyEntities = enterpriseKeyService.getKeysForUser(username);
+            List<KeyDetailsResourceModel> keyResources = new ArrayList<KeyDetailsResourceModel>();
+            for (SshKeyEntity keyEntitiy : keyEntities) {
+                keyResources.add(KeyDetailsResourceModel.from(keyEntitiy));
+            }
+            return Response.ok(keyResources).build();
+        } catch (EnterpriseKeyGenerationException e) {
+            return Response.serverError().build();
+        }
+
+    }
+
 }

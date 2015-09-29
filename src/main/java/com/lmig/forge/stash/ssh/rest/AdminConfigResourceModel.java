@@ -12,9 +12,11 @@ public class AdminConfigResourceModel {
     public static final int DEFAULT_DAYS_BAMBOO = 365;
     public static final long DEFAULT_MILLIS_BETWEEN_RUNS = 1000 * 60 * 60 * 24; //one day
     @XmlElement(name = "message")
-    private String message;
+    private String message="";
     @XmlElement(name = "authorizedGroup")
     private String authorizedGroup;
+    @XmlElement(name = "bambooUser")
+    private String bambooUser;
     @XmlElement(name = "daysToKeepUserKeys")
     private int daysToKeepUserKeys = DEFAULT_DAYS_USER;
     @XmlElement(name = "daysToKeepBambooKeys")
@@ -22,17 +24,23 @@ public class AdminConfigResourceModel {
     @XmlElement(name = "millisBetweenRuns")
     private long millisBetweenRuns = DEFAULT_MILLIS_BETWEEN_RUNS;
 
+
     public AdminConfigResourceModel() {
     }
 
+
+
     public AdminConfigResourceModel(String message, String authorizedGroup, int daysToKeepUserKeys,
-            int daysToKeepBambooKeys, long millisBetweenRuns) {
+            int daysToKeepBambooKeys, long millisBetweenRuns, String bambooUser) {
         this.message = message;
         this.authorizedGroup = authorizedGroup;
         this.daysToKeepUserKeys = daysToKeepUserKeys;
         this.daysToKeepBambooKeys = daysToKeepBambooKeys;
         this.millisBetweenRuns = millisBetweenRuns;
+        this.bambooUser = bambooUser;
     }
+
+
 
     public String getMessage() {
         return message;
@@ -72,6 +80,13 @@ public class AdminConfigResourceModel {
 
     public void setMillisBetweenRuns(long millisBetweenRuns) {
         this.millisBetweenRuns = millisBetweenRuns;
+    }
+
+    public String getBambooUser() {
+       return bambooUser;
+    }
+    public void setBambooUser(String username){
+        this.bambooUser = username;
     }
 
 }

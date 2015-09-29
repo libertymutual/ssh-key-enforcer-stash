@@ -13,6 +13,7 @@ public class PluginSettingsService {
     public static final String SETTINGS_KEY_DAYS_KEEP_USERS = AdminConfigResourceModel.class.getName() + ".daysToKeepUserKeys";
     public static final String SETTINGS_KEY_DAYS_KEEP_BAMBOO = AdminConfigResourceModel.class.getName() + ".daysToKeepBambooKeys";
     public static final String SETTINGS_KEY_MILLIS_INTERVAL = AdminConfigResourceModel.class.getName() + ".millisBetweenRuns";
+    public static final String SETTINGS_KEY_BAMBOO_USER = AdminConfigResourceModel.class.getName() + ".bambooUser";;
     
     private final PluginSettingsFactory pluginSettingsFactory;
     private AdminConfigResourceModel cachedModel;
@@ -33,6 +34,11 @@ public class PluginSettingsService {
         if (authorizedGroup != null)
         {
           config.setAuthorizedGroup(authorizedGroup);
+        } 
+        String bambooUser = (String) settings.get(SETTINGS_KEY_BAMBOO_USER);
+        if (bambooUser != null)
+        {
+          config.setBambooUser(bambooUser);
         } 
         
         String daysToKeepUserKeys = (String) settings.get(SETTINGS_KEY_DAYS_KEEP_USERS);
@@ -56,12 +62,13 @@ public class PluginSettingsService {
    @Transactional
     public AdminConfigResourceModel updateAdminConfigResourcesModel(final AdminConfigResourceModel updatedConfig) {
 
-       Validate.isTrue(updatedConfig.getDaysToKeepBambooKeys() >= 1,"must keep keys at least 1 day");
-       Validate.isTrue(updatedConfig.getDaysToKeepUserKeys() >= 1,"must keep keys at least 1 day");
-       Validate.isTrue(updatedConfig.getMillisBetweenRuns() >= 60000,"Must space at least 1 minute apart");
+       Validate.isTrue(updatedConfig.getDaysToKeepBambooKeys() >= 0,"must keep keys at least 1 day (or 0 to disable)");
+       Validate.isTrue(updatedConfig.getDaysToKeepUserKeys() >= 0,"must keep keys at least 1 day (or 0 to disable)");
+       Validate.isTrue(updatedConfig.getMillisBetweenRuns() >= 300000 || updatedConfig.getMillisBetweenRuns() ==0,"Must space at least 5 minutes apart (or 0 to disable all jobs)");
         PluginSettings settings = pluginSettingsFactory.createGlobalSettings();
-        
+
         settings.put(SETTINGS_KEY_AUTHORIZED_GROUP, updatedConfig.getAuthorizedGroup());
+        settings.put(SETTINGS_KEY_BAMBOO_USER, updatedConfig.getBambooUser());
         settings.put(SETTINGS_KEY_DAYS_KEEP_USERS, String.valueOf(updatedConfig.getDaysToKeepUserKeys()));
         settings.put(SETTINGS_KEY_DAYS_KEEP_BAMBOO,  String.valueOf(updatedConfig.getDaysToKeepBambooKeys()));
         settings.put(SETTINGS_KEY_MILLIS_INTERVAL,  String.valueOf(updatedConfig.getMillisBetweenRuns()));
@@ -84,6 +91,10 @@ public class PluginSettingsService {
     }
     public long  getMillisBetweenRuns() {
         return getAdminConfigResourcesModel().getMillisBetweenRuns();
+    }
+
+    public String getAuthorizedUser() {
+        return getAdminConfigResourcesModel().getBambooUser();
     }
 
 }
