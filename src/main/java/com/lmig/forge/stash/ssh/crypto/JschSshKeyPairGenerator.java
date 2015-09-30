@@ -33,7 +33,7 @@ public class JschSshKeyPairGenerator implements SshKeyPairGenerator {
     public KeyPairResourceModel generateKeyPair(String comment) {
         JSch jsch=new JSch();
         KeyPairResourceModel result = new KeyPairResourceModel();
-        KeyPair kpair;
+        KeyPair kpair = null;
         
         try {
             kpair = KeyPair.genKeyPair(jsch, KeyPair.RSA, KEY_SIZE);
@@ -50,8 +50,11 @@ public class JschSshKeyPairGenerator implements SshKeyPairGenerator {
             throw new EnterpriseKeyGenerationException(e);
         } catch (Exception e) {
             throw new EnterpriseKeyGenerationException(e);
+        }finally{
+            if( null != kpair ){
+                kpair.dispose();
+            }
         }
-        kpair.dispose();
         return result;
     }
 
