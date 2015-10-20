@@ -23,6 +23,8 @@ public class AdminConfigResourceModel {
     private int daysToKeepBambooKeys = DEFAULT_DAYS_BAMBOO;
     @XmlElement(name = "millisBetweenRuns")
     private long millisBetweenRuns = DEFAULT_MILLIS_BETWEEN_RUNS;
+    @XmlElement(name = "internalKeyPolicyLink")
+    private String internalKeyPolicyLink ;
 
 
     public AdminConfigResourceModel() {
@@ -88,5 +90,18 @@ public class AdminConfigResourceModel {
     public void setBambooUser(String username){
         this.bambooUser = username;
     }
+
+
+
+    public String getInternalKeyPolicyLink() {
+        return internalKeyPolicyLink;
+    }
+
+
+
+    public void setInternalKeyPolicyLink(String internalKeyPolicyLink) {
+        this.internalKeyPolicyLink = internalKeyPolicyLink;
+    }
+    
 
 }

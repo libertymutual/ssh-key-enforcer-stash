@@ -45,7 +45,8 @@ Admins may update the values capture in JSON below via `/rest/enterprisessh/1.0/
   "bambooUser":"bamboolinker",
   "daysToKeepUserKeys": 30,
   "daysToKeepBambooKeys": 365,
-  "millisBetweenRuns": 86400000
+  "millisBetweenRuns": 86400000,
+  "internalKeyPolicyLink":"https://someplace.com/page"
 }
 ```
 

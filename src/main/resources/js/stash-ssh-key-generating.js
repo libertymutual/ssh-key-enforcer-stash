@@ -29,5 +29,12 @@ AJS.$( document ).ready(function() {
 	  });
 	 
 	});
-	
+
+
+
+	AJS.$("#dialog-show-link").click(function() {
+        AJS.dialog2("#policy-dialog").show();
+
+    });
+
 });
