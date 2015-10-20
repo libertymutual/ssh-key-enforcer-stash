@@ -79,17 +79,17 @@
 			<version>${ao.version}</version>
 			<scope>test</scope>
 		</dependency>
-<dependency>
-  <groupId>com.atlassian.activeobjects</groupId>
-  <artifactId>activeobjects-test</artifactId>
-  <version>${ao.version}</version>
-  <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>org.hsqldb</groupId>
-    <artifactId>hsqldb</artifactId>
-    <version>2.3.3</version>
-</dependency>
+		<dependency>
+			<groupId>com.atlassian.activeobjects</groupId>
+			<artifactId>activeobjects-test</artifactId>
+			<version>${ao.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>2.3.3</version>
+		</dependency>
 		<dependency>
 			<groupId>com.jcraft</groupId>
 			<artifactId>jsch</artifactId>
@@ -195,14 +195,14 @@
 							<dataVersion>${stash.data.version}</dataVersion>
 						</product>
 					</products>
-<!-- 					<log4jProperties>src/main/resources/log4j.properties</log4jProperties> -->
+					<!-- <log4jProperties>src/main/resources/log4j.properties</log4jProperties> -->
 				</configuration>
 			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -234,13 +234,6 @@
 			<id>db</id>
 			<build>
 				<plugins>
-					<plugin>
-						<artifactId>maven-compiler-plugin</artifactId>
-						<configuration>
-							<source>1.8</source>
-							<target>1.8</target>
-						</configuration>
-					</plugin>
 					<plugin>
 						<!-- provide runtime arguments for tests. NOt all engines need all 
 							arguments -->

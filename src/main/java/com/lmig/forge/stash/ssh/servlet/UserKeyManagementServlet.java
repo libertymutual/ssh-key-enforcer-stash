@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,10 +34,12 @@ import com.google.common.collect.ImmutableMap;
 
 public class UserKeyManagementServlet extends HttpServlet{
     private static final Logger log = LoggerFactory.getLogger(UserKeyManagementServlet.class);
-    private SoyTemplateRenderer soyTemplateRenderer;
+    private final SoyTemplateRenderer soyTemplateRenderer;
+    private final PluginSettingsService pluginSettingsService;
 
-    public UserKeyManagementServlet(SoyTemplateRenderer soyTemplateRenderer) {
+    public UserKeyManagementServlet(SoyTemplateRenderer soyTemplateRenderer,PluginSettingsService pluginSettingsService) {
         this.soyTemplateRenderer = soyTemplateRenderer;
+        this.pluginSettingsService = pluginSettingsService;
     }
     
     @Override
@@ -45,7 +48,7 @@ public class UserKeyManagementServlet extends HttpServlet{
         String pathInfo = req.getPathInfo();
 
         
-        render(resp, "plugin.account.sshTab", ImmutableMap.<String, Object>of("key", "value"));
+        render(resp, "plugin.account.sshTab", ImmutableMap.<String, Object>of("policyLink", pluginSettingsService.getInternalKeyPolicyLink("")));
     }
 
     

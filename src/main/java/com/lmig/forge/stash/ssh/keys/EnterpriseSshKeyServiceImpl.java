@@ -16,6 +16,8 @@
 
 package com.lmig.forge.stash.ssh.keys;
 
+
+import java.util.Date;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -104,7 +106,9 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
     @Override
     public void replaceExpiredKeysAndNotifyUsers() {
         DateTime dateTime = new DateTime();
-        List<SshKeyEntity> expiredStashKeys = enterpriseKeyRepository.listOfExpiredKeys( dateTime.minusDays(pluginSettingsService.getDaysAllowedForUserKeys()).toDate(), KeyType.USER);
+        Date oldestAllowed = dateTime.minusDays(pluginSettingsService.getDaysAllowedForUserKeys()).toDate();
+        //Date oldestAllowed = dateTime.minusMinutes(1).toDate(); //for live demos
+        List<SshKeyEntity> expiredStashKeys = enterpriseKeyRepository.listOfExpiredKeys( oldestAllowed, KeyType.USER);
    
         
         for (SshKeyEntity keyRecord : expiredStashKeys) {
