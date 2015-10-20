@@ -22,17 +22,4 @@ public class AdminConfigResourceFuncTest {
 
     }
 
-    @Test
-    public void messageIsValid() {
-
-        String baseUrl = System.getProperty("baseurl");
-        String resourceUrl = baseUrl + "/rest/adminconfig/1.0/message";
-
-        RestClient client = new RestClient();
-        Resource resource = client.resource(resourceUrl);
-
-        AdminConfigResourceModel message = resource.get(AdminConfigResourceModel.class);
-
-        assertEquals("wrong message","Hello World",message.getMessage());
-    }
 }
