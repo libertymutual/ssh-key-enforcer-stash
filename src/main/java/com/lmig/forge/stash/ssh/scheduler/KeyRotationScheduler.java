@@ -55,13 +55,15 @@ public class KeyRotationScheduler implements DisposableBean, InitializingBean {
      /**
       * this occurs on start and when the settings/config of server are updated. Includes any changes made via {@link PluginSettingsService}
       */
-     public void afterPropertiesSet() throws SchedulerServiceException {     
-         if(pluginSettingsService.getMillisBetweenRuns() > 0){
+     public void afterPropertiesSet() throws SchedulerServiceException {   
+         long runInterval = pluginSettingsService.getMillisBetweenRuns();
+       //  long runInterval = 60000; //for live demos
+         if(runInterval > 0){
              schedulerService.registerJobRunner(JobRunnerKey.of(JOB_RUNNER_KEY), keyRotationJobRunner); 
              schedulerService.scheduleJob(JOB_ID, JobConfig.forJobRunnerKey(JobRunnerKey.of(JOB_RUNNER_KEY)) 
                      .withRunMode(RunMode.RUN_ONCE_PER_CLUSTER) 
-                     .withSchedule(Schedule.forInterval(pluginSettingsService.getMillisBetweenRuns(), new Date(System.currentTimeMillis() + pluginSettingsService.getMillisBetweenRuns())))); 
-             log.debug("KEY Expiring Job Scheduled");
+                     .withSchedule(Schedule.forInterval(runInterval, new Date(System.currentTimeMillis() + runInterval)))); 
+             log.warn("KEY Expiring Job Scheduled");
          }else{
             List<JobDetails> existingSchedules =  schedulerService.getJobsByJobRunnerKey(JobRunnerKey.of(JOB_RUNNER_KEY));
             if( existingSchedules.size() > 0 ){
