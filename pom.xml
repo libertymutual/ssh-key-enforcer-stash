@@ -3,15 +3,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.edwardawebb</groupId>
+	<groupId>com.lmig.forge.stash.ssh</groupId>
 	<artifactId>stash-ssh-key-enforcer</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<organization>
-		<name>Example Company</name>
-		<url>http://www.example.com/</url>
+		<name>Liberty Mutual Insurance</name>
+		<url>https://libertymutual.com/</url>
 	</organization>
 	<name>stash-ssh-key-enforcer</name>
-	<description>This is the com.edwardawebb:stash-ssh-key-enforcer plugin for Atlassian Stash.</description>
 	<packaging>atlassian-plugin</packaging>
 	<scm>
 		<connection>scm:git:git@github.com:Libertymutual/ssh-key-enforcer-stash.git</connection>
@@ -36,6 +35,18 @@
 		<dependency>
 			<groupId>com.atlassian.stash</groupId>
 			<artifactId>stash-api</artifactId>
+			<version>${stash.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atlassian.stash</groupId>
+			<artifactId>stash-ssh</artifactId>
+			<version>${stash.ssh.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atlassian.scheduler</groupId>
+			<artifactId>atlassian-scheduler-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -60,6 +71,34 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.atlassian.activeobjects</groupId>
+			<artifactId>activeobjects-plugin</artifactId>
+			<version>${ao.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.java.dev.activeobjects</groupId>
+			<artifactId>activeobjects-test</artifactId>
+			<version>${ao.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atlassian.activeobjects</groupId>
+			<artifactId>activeobjects-test</artifactId>
+			<version>${ao.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>2.3.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch</artifactId>
+			<version>0.1.53</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.10</version>
@@ -70,13 +109,6 @@
 			<artifactId>commons-lang</artifactId>
 			<version>2.6</version>
 			<scope>provided</scope>
-		</dependency>
-		<!-- WIRED TEST RUNNER DEPENDENCIES -->
-		<dependency>
-			<groupId>com.atlassian.plugins</groupId>
-			<artifactId>atlassian-plugins-osgi-testrunner</artifactId>
-			<version>${plugin.testrunner.version}</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
@@ -89,11 +121,30 @@
 			<artifactId>gson</artifactId>
 			<version>2.2.2-atlassian-1</version>
 		</dependency>
+
+		<dependency>
+			<groupId>com.atlassian.sal</groupId>
+			<artifactId>sal-api</artifactId>
+			<version>2.4.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.collections</groupId>
+			<artifactId>google-collections</artifactId>
+			<version>1.0</version>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.6.6</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atlassian.plugins</groupId>
+			<artifactId>atlassian-plugins-osgi-testrunner</artifactId>
+			<version>${plugin.testrunner.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
@@ -143,21 +194,124 @@
 							<allowGoogleTracking>false</allowGoogleTracking
 						</product>
 					</products>
+					<!-- <log4jProperties>src/main/resources/log4j.properties</log4jProperties> -->
 				</configuration>
 			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.4.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<createDependencyReducedPom>false</createDependencyReducedPom>
+							<relocations>
+								<relocation>
+									<pattern>com.jcraft.jsch</pattern>
+									<shadedPattern>com.shaded.jcraft.jsch</shadedPattern>
+								</relocation>
+							</relocations>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>db</id>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- provide runtime arguments for tests. NOt all engines need all 
+							arguments -->
+						<!-- http://grepcode.com/file/repo1.maven.org/maven2/net.java.dev.activeobjects/activeobjects-test/0.23.0/net/java/ao/test/jdbc/DynamicJdbcConfiguration.java#DynamicJdbcConfiguration.0jdbcSupplier -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.18.1</version>
+						<configuration>
+							<excludes>
+								<exclude>**/*Test.java</exclude>
+							</excludes>
+							<includes>
+								<include>**/*AOTezt.java</include>
+							</includes>
+							<systemPropertyVariables>
+								<!-- postgres,hsql,hsql-file,mysql, oracle, sqlserver,derby-embedded -->
+								<ao.test.database>${db.engine}</ao.test.database>
+								<db.url>${db.url}</db.url>
+								<db.schema>${db.schema}</db.schema>
+								<db.username>${db.username}</db.username>
+								<db.password>${db.password}</db.password>
+							</systemPropertyVariables>
+						</configuration>
+					</plugin>
+					<plugin>
+						<!-- allows us to use AWS CLI to spin up RDS and save URL to a file 
+							read by maven -->
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<version>1.0-alpha-2</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>${basedir}/db.properties</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>db-postgres</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.postgresql</groupId>
+					<artifactId>postgresql</artifactId>
+					<version>9.3-1100-jdbc41</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>db-mysql</id>
+			<dependencies>
+				<dependency>
+					<groupId>mysql</groupId>
+					<artifactId>mysql-connector-java</artifactId>
+					<version>5.1.36</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>db-mssql</id>
+		</profile>
+	</profiles>
 	<properties>
 		<stash.version>3.11.2</stash.version>
+		<stash.ssh.version>3.10.0</stash.ssh.version>
 		<stash.data.version>3.11.2</stash.data.version>
 		<amps.version>5.0.13</amps.version>
 		<plugin.testrunner.version>1.2.3</plugin.testrunner.version>
+		<ao.version>0.28.0</ao.version>
 	</properties>
+	<url>https://forge.lmig.com</url>
+	<description>This plugin enables enterprise level SSH Key management over the default access provided in Bitbucket.</description>
 </project>

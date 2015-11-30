@@ -1,19 +1,94 @@
 {namespace plugin.account}
 
 /**
- * @param user StashUser object which is in the context provided by AccountServlet
+ * @param policyLink
  */
 {template .sshTab}
 <html>
 <head>
     <meta name="decorator" content="stash.users.account">
-    <meta name="userSlug" content="{$user.slug}">
     <meta name="activeTab" content="account-plugin-tab">
-    <title>{$user.displayName} / Account Tab</title>
+    <title>Enterprise Key Management</title>
+    {webResourceManager_requireResource('com.lmig.forge.stash.ssh.stash-ssh-key-enforcer:stash-ssh-key-generator-resources')}
+    
 </head>
 <body>
-    <h3>Hello, {$user.displayName}</h3>
-    <p>Welcome to my plugin tab in the account page.</p>
+<div class="aui-group">
+    <h3>Enterprise Key Generation</h3>
+    <p>You may create a new SSH Key Pair if your previous was lost or compromised.</p>
+    <p>Once created you will have the chance to download the public/private key as a file. Make sure to save them in a safe place. {if $policyLink}See <a id="dialog-show-link" href="{$policyLink}" target="_blank">company policy</a>.{/if}</p>
+</div>
+    
+<div class="aui-group">
+    <div class="aui-item">
+       <button id="ssh-key-gen-button" class="aui-button aui-button-primary">Create New Key Pair</button>
+    </div>
+</div>
+<div id="keybox" style="display:none;">
+	<div class="aui-group">
+	    <div class="aui-item">
+	    	<div class="hidden-info"><h4>Private Key</h4><p>Save this locally as ~/.ssh/id_rsa</p></div>
+	    </div>
+	    <div class="aui-item">
+	        <textarea id="ssh-key-rez-private" readonly></textarea>
+	    </div>
+	</div>
+	<div class="aui-group">
+	    <div class="aui-item">
+	    	<div class="hidden-info" ><h4>Public Key</h4><p>Save this locally as ~/.ssh/id_rsa.pub</p></div>
+	     </div>
+	    <div class="aui-item">
+	        <textarea id="ssh-key-rez-public" readonly></textarea>
+	    </div>
+	</div>
+	    	
+	<div class="aui-group">
+	    <div class="aui-item">
+	    	<div class="hidden-info" ><h4>Key Fingerprint</h4><p>Informational only. Not required for future use.</p></div>
+	      </div>
+	    <div class="aui-item">
+	        <input id="ssh-key-rez-fingerprint" readonly></input> 
+	    </div>
+	</div>
+</div>
+
+   
 </body>
 </html>
+{/template}
+
+
+/**
+ * @param policyLink
+ */
+{template .policyDialog}
+See <a id="dialog-show-link" href="#">company policy</a>.
+<section role="dialog" id="policy-dialog" class="aui-layer aui-dialog2 aui-dialog2-medium" aria-hidden="true">
+    <!-- Dialog header -->
+    <header class="aui-dialog2-header">
+        <!-- The dialog's title -->
+        <h2 class="aui-dialog2-header-main">Company Policy</h2>
+        <!-- Actions to render on the right of the header -->
+        <div class="aui-dialog2-header-secondary">
+            <a href="{$policyLink}" target="_blank">Open in New Window</a>
+        </div>
+        <!-- Close icon -->
+        <a class="aui-dialog2-header-close">
+            <span class="aui-icon aui-icon-small aui-iconfont-close-dialog">Close</span>
+        </a>
+    </header>
+    <!-- Main dialog content -->
+    <div class="aui-dialog2-content">
+        <iframe src="{$policyLink}" />
+    </div>
+    <!-- Dialog footer -->
+    <footer class="aui-dialog2-footer">
+        <!-- Actions to render on the right of the footer -->
+        <div class="aui-dialog2-footer-actions">
+            <button id="dialog-close-button" class="aui-button aui-button-link">Close</button>
+        </div>
+        <!-- Hint text is rendered on the left of the footer -->
+        <!--div class="aui-dialog2-footer-hint">this is a hint</div-->
+    </footer>
+</section>
 {/template}
