@@ -191,7 +191,6 @@
 							<instanceId>stash</instanceId>
 							<version>${stash.version}</version>
 							<dataVersion>${stash.data.version}</dataVersion>
-							<allowGoogleTracking>false</allowGoogleTracking
 						</product>
 					</products>
 					<!-- <log4jProperties>src/main/resources/log4j.properties</log4jProperties> -->
