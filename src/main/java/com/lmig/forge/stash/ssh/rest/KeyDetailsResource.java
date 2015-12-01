@@ -49,11 +49,6 @@ public class KeyDetailsResource {
         this.stashAuthenticationContext = stashAuthenticationContext;
     }
 
-    @GET
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    public Response getMessage() {
-        return Response.ok(new KeyDetailsResourceModel("Hello World")).build();
-    }
 
     @POST
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
