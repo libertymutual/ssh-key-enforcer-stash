@@ -20,11 +20,16 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import com.lmig.forge.stash.ssh.crypto.JschSshKeyPairGenerator;
+import com.lmig.forge.stash.ssh.crypto.SshKeyPairGenerator;
+import com.lmig.forge.stash.ssh.rest.KeyPairResourceModel;
 import net.java.ao.DBParam;
 import net.java.ao.EntityManager;
 import net.java.ao.test.jdbc.Data;
@@ -54,6 +59,7 @@ import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
 import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyServiceImpl;
 import com.lmig.forge.stash.ssh.notifications.NotificationService;
 import com.lmig.forge.stash.ssh.scheduler.KeyRotationJobRunner;
+import org.mockito.ArgumentCaptor;
 
 /**
  * Must run all methods that interact with service as @NonTransactional or
@@ -68,7 +74,7 @@ import com.lmig.forge.stash.ssh.scheduler.KeyRotationJobRunner;
  * 
  */
 @RunWith(ActiveObjectsJUnitRunner.class)
-@Data(EnterpriseSshKeyManagerImplTest.EnterpriseSshKeyRepositoryTestData.class)
+@Data(value = EnterpriseSshKeyManagerImplTest.EnterpriseSshKeyRepositoryTestData.class)
 @Jdbc(net.java.ao.test.jdbc.DynamicJdbcConfiguration.class)
 public class EnterpriseSshKeyManagerImplTest {
     private static final String APPROVED_PUBLIC_KEY_ONE = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC0O2PpfWd0RuoveFkSLP8DaL2ZekQZJM7gzQFi/cavziK8jnAY+xtNIAF1K7EN64JSM2DTMU7BZUFkJvqqbugzc29A/LOfZ6GzvMhSiR7YR2J/eOkVZbmPPyC1qWDCc5Ne71pEJhU5OdlFd4Hj5XgDzNyMANoYlO+xm1IDzHBxDSrvY++VGrnZG1rJ6aSdxyRCoE7MVtQkLuIMDSVPTVfdqDV4oKlH2bzd4LyA1Jm01+MBmWq2qVcKcF6UYKaUILVreZZZSm2/PBbgQ+H5yzjNeEbvdnAr7bcn+xRdhEM0ZGm/RRDRIvwkTlWJ2y9M3KvnJEKbv/c9ZAlOmbs5K1OhfGL/jCU8h1EslwQ9euFp0wjKUMj5u9ll8QqpNcXxsfUnaN9qc2rrm5FS5t5TFAkbIX5fOTJCPb+seE146ax/cNovzOoJUPvF+qBfvJLQGX2L/4JdPqDQ6FkLbvJy194/K5oWag8w4F9ftYIfd/SOgatPMiKuhOls2zYufm34UBbksc7qxDD12JUiI/q7JNted53tnPVBSDLM5RYtohDq/w4MfyFmA51UeETSLumlwg9kOuqaWBYjr2Esn09EtkQNIhQxxt3w47O0RFghZgJdnP3VORju3v2l0Qfo7A/EbeDGKXQhCl6yeMv82lmUtzOhVN6IAApOwMH7Hmh/z209jw==";
@@ -77,6 +83,7 @@ public class EnterpriseSshKeyManagerImplTest {
     private static final int VALID_USER_ID = 2;
     private static final int EXPIRED_STASH_KEY_ID = 100;
     private static final int VALID_STASH_KEY_ID = 200;
+    private static final int VALID_BYPASS_KEY_ID = 300;
     private static final int DAYS_ALLOWED = 90;
     private static final String AUTHED_GROUP = "the-monkeys";
 
@@ -88,6 +95,7 @@ public class EnterpriseSshKeyManagerImplTest {
     private EnterpriseSshKeyService ourKeyService;
     private NotificationService notificationService;
     private SshKeyService stashKeyService;
+    private SshKeyPairGenerator keyPairGenerator;
     private UserService userService;
     private PluginSettingsService pluginSettingsService;
     private StashUser unblessedUser ;
@@ -98,8 +106,10 @@ public class EnterpriseSshKeyManagerImplTest {
         ao = new TestActiveObjects(entityManager);
         keyRepo = new EnterpriseKeyRepositoryImpl(ao);
         stashKeyService = mock(SshKeyService.class);
+        when(stashKeyService.addForUser(any(StashUser.class),anyString())).thenReturn(new SimpleSshKey(999,"Label","KEYVALUE",blessedUser));
         notificationService = mock(NotificationService.class);
         userService = mock(UserService.class);
+        keyPairGenerator = new JschSshKeyPairGenerator();
         when(userService.existsGroup(anyString())).thenReturn(true);
         pluginSettingsService = mock(PluginSettingsService.class);
         when(pluginSettingsService.getMillisBetweenRuns()).thenReturn(60000L);
@@ -107,7 +117,7 @@ public class EnterpriseSshKeyManagerImplTest {
         when(pluginSettingsService.getDaysAllowedForBambooKeys()).thenReturn(DAYS_ALLOWED);
         when(pluginSettingsService.getAuthorizedGroup()).thenReturn(AUTHED_GROUP);
         when(userService.getUserByName(KeyRotationJobRunner.ADMIN_ACCOUNT_NAME)).thenReturn(mock(StashUser.class));//defeat NPE check
-        ourKeyService = new EnterpriseSshKeyServiceImpl(stashKeyService, keyRepo, null, notificationService,userService, pluginSettingsService);
+        ourKeyService = new EnterpriseSshKeyServiceImpl(stashKeyService, keyRepo, keyPairGenerator, notificationService,userService, pluginSettingsService);
    
          unblessedUser = mock(StashUser.class);
         when(unblessedUser.getId()).thenReturn(VALID_USER_ID);
@@ -182,8 +192,26 @@ public class EnterpriseSshKeyManagerImplTest {
         //when(keyRepo.isValidKeyForUser(unblessedUser, PUBLIC_KEY_ONE)).thenReturn(true);
         SshKey newKey = new SimpleSshKey(1, "a comment", APPROVED_PUBLIC_KEY_ONE,unblessedUser );
         boolean isAllowed = ourKeyService.isKeyValidForUser(newKey, unblessedUser);
-        
-        assertThat(isAllowed,is(true));        
+
+        assertThat(isAllowed,is(true));
+    }
+
+    @Test
+    @NonTransactional
+    public void generatingNewUserKeysIgnoresOtherTypes(){
+        //given a user with existing USER and BYPASS keys
+        // see EnterpriseSshKeyRepositoryTestData below and bypassKey
+
+
+        //when new USER key is created
+        ourKeyService.generateNewKeyPairFor(blessedUser);
+
+        //then previous BYPASS key remains
+        verify(stashKeyService,times(0)).removeAllForUser(blessedUser);
+        verify(stashKeyService, times(0)).remove(VALID_BYPASS_KEY_ID);
+
+        //but preivous USER key does not
+        verify(stashKeyService).remove(VALID_STASH_KEY_ID);
     }
     
  
@@ -202,7 +230,12 @@ public class EnterpriseSshKeyManagerImplTest {
                     new DBParam("CREATED", now.minusDays(DAYS_ALLOWED+1).toDate()));
 
             validKey = em.create(SshKeyEntity.class, new DBParam("USERID", VALID_USER_ID), new DBParam("KEYID",
-                    VALID_STASH_KEY_ID), new DBParam("TEXT", APPROVED_PUBLIC_KEY_ONE), new DBParam("LABEL", "VALID"), new DBParam("TYPE", KeyType.USER),
+                            VALID_STASH_KEY_ID), new DBParam("TEXT", APPROVED_PUBLIC_KEY_ONE), new DBParam("LABEL", "VALID"), new DBParam("TYPE", KeyType.USER),
+                    new DBParam("CREATED",  now.minusDays(DAYS_ALLOWED-1).toDate()));
+
+
+            SshKeyEntity bypassKey = em.create(SshKeyEntity.class, new DBParam("USERID", VALID_USER_ID), new DBParam("KEYID",
+                            VALID_BYPASS_KEY_ID), new DBParam("TEXT", APPROVED_PUBLIC_KEY_ONE), new DBParam("LABEL", "BYPASS"), new DBParam("TYPE", KeyType.BYPASS),
                     new DBParam("CREATED",  now.minusDays(DAYS_ALLOWED-1).toDate()));
 
         }
