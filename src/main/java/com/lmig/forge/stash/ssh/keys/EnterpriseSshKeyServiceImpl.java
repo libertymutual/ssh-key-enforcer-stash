@@ -90,18 +90,29 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
 
     @Override
     public KeyPairResourceModel generateNewKeyPairFor(StashUser user) {
+        //purge old key for this user
+        removeExistingUserKeysFor(user);
+        //create new one
         String keyComment = "SYSTEM GENERATED";
         KeyPairResourceModel result = sshKeyPairGenerator.generateKeyPair(keyComment);
         // must add to our repo before calling stash SSH service since audit
         // listener will otherwise revoke it.
         SshKeyEntity newRecord = enterpriseKeyRepository.createOrUpdateUserKey(user, result.getPublicKey(), keyComment);
-        sshKeyService.removeAllForUser(user);
         SshKey newKey = sshKeyService.addForUser(user, result.getPublicKey());
         enterpriseKeyRepository.updateRecordWithKeyId(newRecord, newKey);
         return result;
     }
-    
-    
+
+    private void removeExistingUserKeysFor(StashUser user) {
+        List<SshKeyEntity> allKeys = enterpriseKeyRepository.keysForUser(user);
+        for(SshKeyEntity key: allKeys){
+            if(key.getKeyType() == KeyType.USER){
+                //this call fires an event that #forgetDeletedKey() will handle
+                sshKeyService.remove(key.getKeyId());
+            }
+        }
+    }
+
 
     @Override
     public void replaceExpiredKeysAndNotifyUsers() {
