@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.lmig.forge.stash.ssh</groupId>
 	<artifactId>stash-ssh-key-enforcer</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<organization>
 		<name>Liberty Mutual Insurance</name>
 		<url>https://libertymutual.com/</url>
@@ -227,82 +227,6 @@
 			</plugin>
 		</plugins>
 	</build>
-	<profiles>
-		<profile>
-			<id>db</id>
-			<build>
-				<plugins>
-					<plugin>
-						<!-- provide runtime arguments for tests. NOt all engines need all 
-							arguments -->
-						<!-- http://grepcode.com/file/repo1.maven.org/maven2/net.java.dev.activeobjects/activeobjects-test/0.23.0/net/java/ao/test/jdbc/DynamicJdbcConfiguration.java#DynamicJdbcConfiguration.0jdbcSupplier -->
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<version>2.18.1</version>
-						<configuration>
-							<excludes>
-								<exclude>**/*Test.java</exclude>
-							</excludes>
-							<includes>
-								<include>**/*AOTezt.java</include>
-							</includes>
-							<systemPropertyVariables>
-								<!-- postgres,hsql,hsql-file,mysql, oracle, sqlserver,derby-embedded -->
-								<ao.test.database>${db.engine}</ao.test.database>
-								<db.url>${db.url}</db.url>
-								<db.schema>${db.schema}</db.schema>
-								<db.username>${db.username}</db.username>
-								<db.password>${db.password}</db.password>
-							</systemPropertyVariables>
-						</configuration>
-					</plugin>
-					<plugin>
-						<!-- allows us to use AWS CLI to spin up RDS and save URL to a file 
-							read by maven -->
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>properties-maven-plugin</artifactId>
-						<version>1.0-alpha-2</version>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>read-project-properties</goal>
-								</goals>
-								<configuration>
-									<files>
-										<file>${basedir}/db.properties</file>
-									</files>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>db-postgres</id>
-			<dependencies>
-				<dependency>
-					<groupId>org.postgresql</groupId>
-					<artifactId>postgresql</artifactId>
-					<version>9.3-1100-jdbc41</version>
-				</dependency>
-			</dependencies>
-		</profile>
-		<profile>
-			<id>db-mysql</id>
-			<dependencies>
-				<dependency>
-					<groupId>mysql</groupId>
-					<artifactId>mysql-connector-java</artifactId>
-					<version>5.1.36</version>
-				</dependency>
-			</dependencies>
-		</profile>
-		<profile>
-			<id>db-mssql</id>
-		</profile>
-	</profiles>
 	<properties>
 		<stash.version>3.11.2</stash.version>
 		<stash.ssh.version>3.10.0</stash.ssh.version>

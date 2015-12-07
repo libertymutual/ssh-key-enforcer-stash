@@ -44,17 +44,23 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
     }
 
     @Override
-    public SshKeyEntity createOrUpdateUserKey(StashUser user, String text, String label) {        
-        SshKeyEntity key = findSingleUserKey(user);
-        if(null != key){
-            key.setText(text);
-            key.setLabel(label);
-            key.setCreatedDate(new Date());
-            key.save();
-        }else{
-            key = ao.create(SshKeyEntity.class, new DBParam("TYPE", SshKeyEntity.KeyType.USER), new DBParam("USERID", user.getId()), new DBParam("TEXT", text),new DBParam("LABEL",label),new DBParam("CREATED", new Date()));
-        }
-        return key;        
+    public SshKeyEntity createOrUpdateUserKey(StashUser user, String text, String label) {
+        return ao.executeInTransaction(new TransactionCallback<SshKeyEntity>() {
+
+            @Override
+            public SshKeyEntity doInTransaction() {
+                SshKeyEntity key = findSingleUserKey(user);
+                if (null != key) {
+                    key.setText(text);
+                    key.setLabel(label);
+                    key.setCreatedDate(new Date());
+                    key.save();
+                } else {
+                    key = ao.create(SshKeyEntity.class, new DBParam("TYPE", SshKeyEntity.KeyType.USER), new DBParam("USERID", user.getId()), new DBParam("TEXT", text), new DBParam("LABEL", label), new DBParam("CREATED", new Date()));
+                }
+                return key;
+            }
+        });
     }
     
 
