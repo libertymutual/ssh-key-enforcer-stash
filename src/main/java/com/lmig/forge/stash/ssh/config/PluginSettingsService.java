@@ -60,7 +60,7 @@ public class PluginSettingsService {
         String internalKeyPolicyLink = (String) settings.get(SETTINGS_KEY_POLICY_LINK);
         if (internalKeyPolicyLink != null)
         {
-          config.setBambooUser(internalKeyPolicyLink);
+          config.setInternalKeyPolicyLink(internalKeyPolicyLink);
         } 
         return config;
     }

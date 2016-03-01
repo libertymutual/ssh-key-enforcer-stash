@@ -49,7 +49,7 @@ public class PluginSettingsServiceTest {
     }
 
     @Test
-    public void configCanBeRetrieved() {
+    public void defaultConfigCanBeRetrieved() {
         AdminConfigResourceModel config = pluginSettingsService.getAdminConfigResourcesModel();
 
         assertThat(config.getAuthorizedGroup(),is(SshEnforcerTestHelper.PLUGIN_SERVICE_TEST_CONFIG_GROUP));
@@ -64,13 +64,26 @@ public class PluginSettingsServiceTest {
         int userDays = 7;
         int bambooDays = 30;
         long millis = 300000; //5 minutes
+        String policyLink = "http://example.com/info";
         
-        pluginSettingsService.updateAdminConfigResourcesModel(new AdminConfigResourceModel(null, group, userDays, bambooDays, millis, user));
-        
-        verify(pluginSettings).put(PluginSettingsService.SETTINGS_KEY_AUTHORIZED_GROUP, group); 
+        pluginSettingsService.updateAdminConfigResourcesModel(
+                new AdminConfigResourceModel.Builder()
+                        .withAuthorizedGroup(group)
+                        .withBambooUser(user)
+                        .withDaysToKeepBambooKeys(bambooDays)
+                        .withDaysToKeepUserKeys(userDays)
+                        .withInternalKeyPolicyLink(policyLink)
+                        .withMillisBetweenRuns(millis)
+                        .build()
+        );
+
+        verify(pluginSettings).put(PluginSettingsService.SETTINGS_KEY_BAMBOO_USER, user);
+        verify(pluginSettings).put(PluginSettingsService.SETTINGS_KEY_AUTHORIZED_GROUP, group);
         verify(pluginSettings).put(PluginSettingsService.SETTINGS_KEY_DAYS_KEEP_USERS, String.valueOf(userDays)); 
-        verify(pluginSettings).put(PluginSettingsService.SETTINGS_KEY_DAYS_KEEP_BAMBOO, String.valueOf(bambooDays)); 
-        verify(pluginSettings).put(PluginSettingsService.SETTINGS_KEY_MILLIS_INTERVAL, String.valueOf(millis)); 
+        verify(pluginSettings).put(PluginSettingsService.SETTINGS_KEY_DAYS_KEEP_BAMBOO, String.valueOf(bambooDays));
+        verify(pluginSettings).put(PluginSettingsService.SETTINGS_KEY_MILLIS_INTERVAL, String.valueOf(millis));
+        verify(pluginSettings).put(PluginSettingsService.SETTINGS_KEY_POLICY_LINK,policyLink);
+
     }
     @Test
     public void scheduledIntervalMustBeFiveMinutesOrMore() {
@@ -79,10 +92,20 @@ public class PluginSettingsServiceTest {
         int userDays = 7;
         int bambooDays = 30;
         long millis = 60000; // 1 minute
+        String policyLink = "http://example.com/info";
         
         //bad attempt throws exception
         expectedException.expect(IllegalArgumentException.class);
-        pluginSettingsService.updateAdminConfigResourcesModel(new AdminConfigResourceModel(null, group, userDays, bambooDays, millis, user));
+        pluginSettingsService.updateAdminConfigResourcesModel(
+                new AdminConfigResourceModel.Builder()
+                        .withAuthorizedGroup(group)
+                        .withBambooUser(user)
+                        .withDaysToKeepBambooKeys(bambooDays)
+                        .withDaysToKeepUserKeys(userDays)
+                        .withInternalKeyPolicyLink(policyLink)
+                        .withMillisBetweenRuns(millis)
+                        .build()
+                );
 
     }
     @Test
@@ -91,15 +114,34 @@ public class PluginSettingsServiceTest {
         String user="baz";
         int userDays = 1;
         int bambooDays = -1;
-        long millis = 60000; // 1 minute    
+        long millis = 60000; // 1 minute
+        String policyLink = "http://example.com/info";
         //bad attempt throws exception
         expectedException.expect(IllegalArgumentException.class);
-        pluginSettingsService.updateAdminConfigResourcesModel(new AdminConfigResourceModel(null, group, userDays, bambooDays, millis, user));
+        pluginSettingsService.updateAdminConfigResourcesModel(
+                new AdminConfigResourceModel.Builder()
+                        .withAuthorizedGroup(group)
+                        .withBambooUser(user)
+                        .withDaysToKeepBambooKeys(bambooDays)
+                        .withDaysToKeepUserKeys(userDays)
+                        .withInternalKeyPolicyLink(policyLink)
+                        .withMillisBetweenRuns(millis)
+                        .build()
+        );
         userDays = -1; //swap the negatives
         bambooDays = 1;
        //bad attempt throws exception
         expectedException.expect(IllegalArgumentException.class);
-        pluginSettingsService.updateAdminConfigResourcesModel(new AdminConfigResourceModel(null, group, userDays, bambooDays, millis, user));
+        pluginSettingsService.updateAdminConfigResourcesModel(
+                new AdminConfigResourceModel.Builder()
+                        .withAuthorizedGroup(group)
+                        .withBambooUser(user)
+                        .withDaysToKeepBambooKeys(bambooDays)
+                        .withDaysToKeepUserKeys(userDays)
+                        .withInternalKeyPolicyLink(policyLink)
+                        .withMillisBetweenRuns(millis)
+                        .build()
+        );
 
     }
     @Test
@@ -109,8 +151,18 @@ public class PluginSettingsServiceTest {
         int userDays = 7;
         int bambooDays = 30;
         long millis = 0; // disable
+        String policyLink = "http://example.com/info";
         
-        pluginSettingsService.updateAdminConfigResourcesModel(new AdminConfigResourceModel(null, group, userDays, bambooDays, millis, user));
+        pluginSettingsService.updateAdminConfigResourcesModel(
+                new AdminConfigResourceModel.Builder()
+                        .withAuthorizedGroup(group)
+                        .withBambooUser(user)
+                        .withDaysToKeepBambooKeys(bambooDays)
+                        .withDaysToKeepUserKeys(userDays)
+                        .withInternalKeyPolicyLink(policyLink)
+                        .withMillisBetweenRuns(millis)
+                        .build()
+        );
 
         verify(pluginSettings).put(PluginSettingsService.SETTINGS_KEY_MILLIS_INTERVAL, String.valueOf(millis)); 
     }

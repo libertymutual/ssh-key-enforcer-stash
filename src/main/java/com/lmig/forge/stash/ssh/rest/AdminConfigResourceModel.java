@@ -30,16 +30,16 @@ public class AdminConfigResourceModel {
     public AdminConfigResourceModel() {
     }
 
-
-
-    public AdminConfigResourceModel(String message, String authorizedGroup, int daysToKeepUserKeys,
-            int daysToKeepBambooKeys, long millisBetweenRuns, String bambooUser) {
+    //for builder
+    private AdminConfigResourceModel(String message, String authorizedGroup, int daysToKeepUserKeys,
+            int daysToKeepBambooKeys, long millisBetweenRuns, String bambooUser,String internalKeyPolicyLink) {
         this.message = message;
         this.authorizedGroup = authorizedGroup;
         this.daysToKeepUserKeys = daysToKeepUserKeys;
         this.daysToKeepBambooKeys = daysToKeepBambooKeys;
         this.millisBetweenRuns = millisBetweenRuns;
         this.bambooUser = bambooUser;
+        this.internalKeyPolicyLink = internalKeyPolicyLink;
     }
 
 
@@ -102,6 +102,58 @@ public class AdminConfigResourceModel {
     public void setInternalKeyPolicyLink(String internalKeyPolicyLink) {
         this.internalKeyPolicyLink = internalKeyPolicyLink;
     }
-    
+
+    public static class Builder{
+        private String authorizedGroup;
+        private String bambooUser;
+        private int daysToKeepUserKeys = DEFAULT_DAYS_USER;
+        private int daysToKeepBambooKeys = DEFAULT_DAYS_BAMBOO;
+        private long millisBetweenRuns = DEFAULT_MILLIS_BETWEEN_RUNS;
+        private String internalKeyPolicyLink ;
+
+        public Builder() {
+        }
+
+        public AdminConfigResourceModel build(){
+            AdminConfigResourceModel config = new AdminConfigResourceModel();
+            config.internalKeyPolicyLink=internalKeyPolicyLink;
+            config.millisBetweenRuns = millisBetweenRuns;
+            config.daysToKeepBambooKeys = daysToKeepBambooKeys;
+            config.daysToKeepUserKeys = daysToKeepUserKeys;
+            config.bambooUser = bambooUser;
+            config.authorizedGroup = authorizedGroup;
+            return config;
+        }
+
+        public Builder withAuthorizedGroup(String authorizedGroup) {
+            this.authorizedGroup = authorizedGroup;
+            return this;
+        }
+
+        public Builder withBambooUser(String bambooUser) {
+            this.bambooUser = bambooUser;
+            return this;
+        }
+
+        public Builder withDaysToKeepUserKeys(int daysToKeepUserKeys) {
+            this.daysToKeepUserKeys = daysToKeepUserKeys;
+            return this;
+        }
+
+        public Builder withDaysToKeepBambooKeys(int daysToKeepBambooKeys) {
+            this.daysToKeepBambooKeys = daysToKeepBambooKeys;
+            return this;
+        }
+
+        public Builder withMillisBetweenRuns(long millisBetweenRuns) {
+            this.millisBetweenRuns = millisBetweenRuns;
+            return this;
+        }
+
+        public Builder withInternalKeyPolicyLink(String internalKeyPolicyLink) {
+            this.internalKeyPolicyLink = internalKeyPolicyLink;
+            return this;
+        }
+    }
 
 }

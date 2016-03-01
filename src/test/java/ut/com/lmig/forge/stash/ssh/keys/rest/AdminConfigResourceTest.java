@@ -22,7 +22,7 @@ import com.lmig.forge.stash.ssh.rest.AdminConfigResourceModel;
 public class AdminConfigResourceTest { 
     private static final String TEST_CONFIG_GROUP ="ssh-gods";
     private static final String TEST_CONFIG_USER ="bamboolinker";
-    private final AdminConfigResourceModel sampleConfig = new AdminConfigResourceModel(null,TEST_CONFIG_GROUP, AdminConfigResourceModel.DEFAULT_DAYS_USER, AdminConfigResourceModel.DEFAULT_DAYS_BAMBOO, AdminConfigResourceModel.DEFAULT_MILLIS_BETWEEN_RUNS,TEST_CONFIG_USER);
+    private final AdminConfigResourceModel sampleConfig = new AdminConfigResourceModel.Builder().withAuthorizedGroup(TEST_CONFIG_GROUP).withBambooUser(TEST_CONFIG_USER).build();
     private UserManager userManager = mock(UserManager.class);
     private StashAuthenticationContext stashAuthenticationContext = mock(StashAuthenticationContext.class);
     private PluginSettingsService pluginSettingsService = mock(PluginSettingsService.class);
