@@ -18,11 +18,12 @@ import com.atlassian.stash.user.StashUser;
 import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 import com.lmig.forge.stash.ssh.rest.AdminConfigResource;
 import com.lmig.forge.stash.ssh.rest.AdminConfigResourceModel;
+import ut.com.lmig.forge.stash.ssh.config.PluginSettingsServiceTest;
 
 public class AdminConfigResourceTest { 
     private static final String TEST_CONFIG_GROUP ="ssh-gods";
     private static final String TEST_CONFIG_USER ="bamboolinker";
-    private final AdminConfigResourceModel sampleConfig = new AdminConfigResourceModel.Builder().withAuthorizedGroup(TEST_CONFIG_GROUP).withBambooUser(TEST_CONFIG_USER).build();
+    private final AdminConfigResourceModel sampleConfig = new PluginSettingsServiceTest.TestBuilder().withAuthorizedGroup(TEST_CONFIG_GROUP).withBambooUser(TEST_CONFIG_USER).build();
     private UserManager userManager = mock(UserManager.class);
     private StashAuthenticationContext stashAuthenticationContext = mock(StashAuthenticationContext.class);
     private PluginSettingsService pluginSettingsService = mock(PluginSettingsService.class);

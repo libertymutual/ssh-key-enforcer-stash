@@ -67,7 +67,7 @@ public class PluginSettingsServiceTest {
         String policyLink = "http://example.com/info";
         
         pluginSettingsService.updateAdminConfigResourcesModel(
-                new AdminConfigResourceModel.Builder()
+                new TestBuilder()
                         .withAuthorizedGroup(group)
                         .withBambooUser(user)
                         .withDaysToKeepBambooKeys(bambooDays)
@@ -97,7 +97,7 @@ public class PluginSettingsServiceTest {
         //bad attempt throws exception
         expectedException.expect(IllegalArgumentException.class);
         pluginSettingsService.updateAdminConfigResourcesModel(
-                new AdminConfigResourceModel.Builder()
+                new TestBuilder()
                         .withAuthorizedGroup(group)
                         .withBambooUser(user)
                         .withDaysToKeepBambooKeys(bambooDays)
@@ -119,7 +119,7 @@ public class PluginSettingsServiceTest {
         //bad attempt throws exception
         expectedException.expect(IllegalArgumentException.class);
         pluginSettingsService.updateAdminConfigResourcesModel(
-                new AdminConfigResourceModel.Builder()
+                new TestBuilder()
                         .withAuthorizedGroup(group)
                         .withBambooUser(user)
                         .withDaysToKeepBambooKeys(bambooDays)
@@ -133,7 +133,7 @@ public class PluginSettingsServiceTest {
        //bad attempt throws exception
         expectedException.expect(IllegalArgumentException.class);
         pluginSettingsService.updateAdminConfigResourcesModel(
-                new AdminConfigResourceModel.Builder()
+                new TestBuilder()
                         .withAuthorizedGroup(group)
                         .withBambooUser(user)
                         .withDaysToKeepBambooKeys(bambooDays)
@@ -154,7 +154,7 @@ public class PluginSettingsServiceTest {
         String policyLink = "http://example.com/info";
         
         pluginSettingsService.updateAdminConfigResourcesModel(
-                new AdminConfigResourceModel.Builder()
+                new TestBuilder()
                         .withAuthorizedGroup(group)
                         .withBambooUser(user)
                         .withDaysToKeepBambooKeys(bambooDays)
@@ -166,4 +166,58 @@ public class PluginSettingsServiceTest {
 
         verify(pluginSettings).put(PluginSettingsService.SETTINGS_KEY_MILLIS_INTERVAL, String.valueOf(millis)); 
     }
+
+    public static class TestBuilder{
+        private String authorizedGroup;
+        private String bambooUser;
+        private int daysToKeepUserKeys = AdminConfigResourceModel.DEFAULT_DAYS_USER;
+        private int daysToKeepBambooKeys = AdminConfigResourceModel.DEFAULT_DAYS_BAMBOO;
+        private long millisBetweenRuns = AdminConfigResourceModel.DEFAULT_MILLIS_BETWEEN_RUNS;
+        private String internalKeyPolicyLink ;
+
+        public TestBuilder() {
+        }
+
+        public AdminConfigResourceModel build(){
+            AdminConfigResourceModel config = new AdminConfigResourceModel();
+            config.setInternalKeyPolicyLink(internalKeyPolicyLink);
+            config.setMillisBetweenRuns(millisBetweenRuns);
+            config.setDaysToKeepBambooKeys(daysToKeepBambooKeys);
+            config.setDaysToKeepUserKeys( daysToKeepUserKeys);
+            config.setBambooUser( bambooUser);
+            config.setAuthorizedGroup(authorizedGroup);
+            return config;
+        }
+
+        public TestBuilder withAuthorizedGroup(String authorizedGroup) {
+            this.authorizedGroup = authorizedGroup;
+            return this;
+        }
+
+        public TestBuilder withBambooUser(String bambooUser) {
+            this.bambooUser = bambooUser;
+            return this;
+        }
+
+        public TestBuilder withDaysToKeepUserKeys(int daysToKeepUserKeys) {
+            this.daysToKeepUserKeys = daysToKeepUserKeys;
+            return this;
+        }
+
+        public TestBuilder withDaysToKeepBambooKeys(int daysToKeepBambooKeys) {
+            this.daysToKeepBambooKeys = daysToKeepBambooKeys;
+            return this;
+        }
+
+        public TestBuilder withMillisBetweenRuns(long millisBetweenRuns) {
+            this.millisBetweenRuns = millisBetweenRuns;
+            return this;
+        }
+
+        public TestBuilder withInternalKeyPolicyLink(String internalKeyPolicyLink) {
+            this.internalKeyPolicyLink = internalKeyPolicyLink;
+            return this;
+        }
+    }
+
 }
