@@ -48,15 +48,16 @@ public class KeyRotationJobRunner implements JobRunner{
     @Override
     public JobRunnerResponse runJob(JobRunnerRequest request) {
         if( pluginSettingService.getDaysAllowedForUserKeys() > 0 ){
-            log.debug("Key Expire Job Starting");    
+            log.debug("Key Expire Job Starting");
             EscalatedSecurityContext elevatedContext = securityService.withPermission(Permission.SYS_ADMIN,PERMISSION_REASON);
             try {
                 elevatedContext.call(keyRotationOperation);
             } catch (Throwable e) {
+                log.error("Key expiry failed!",e);
                 return JobRunnerResponse.failed(e);
             }
             log.debug("Key Expire Job Complete");
-        }else{
+        } else {
             log.debug("Key Expire Job Skipping since  '" + PluginSettingsService.SETTINGS_KEY_DAYS_KEEP_USERS + "' is 0/not set.");
         }
         return JobRunnerResponse.success();
