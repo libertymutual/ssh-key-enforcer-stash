@@ -55,20 +55,20 @@ public class KeyRotationScheduler implements DisposableBean, InitializingBean {
      /**
       * this occurs on start and when the settings/config of server are updated. Includes any changes made via {@link PluginSettingsService}
       */
-     public void afterPropertiesSet() throws SchedulerServiceException {   
+     public void afterPropertiesSet() throws SchedulerServiceException {
+         List<JobDetails> existingSchedules =  schedulerService.getJobsByJobRunnerKey(JobRunnerKey.of(JOB_RUNNER_KEY));
+         if( existingSchedules.size() > 0 ){
+             schedulerService.unregisterJobRunner(JobRunnerKey.of(JOB_RUNNER_KEY));
+             log.warn("Unregistered previously scheduled job");
+         }
          long runInterval = pluginSettingsService.getMillisBetweenRuns();
-       //  long runInterval = 60000; //for live demos
+         //  long runInterval = 60000; //for live demos
          if(runInterval > 0){
              schedulerService.registerJobRunner(JobRunnerKey.of(JOB_RUNNER_KEY), keyRotationJobRunner); 
              schedulerService.scheduleJob(JOB_ID, JobConfig.forJobRunnerKey(JobRunnerKey.of(JOB_RUNNER_KEY)) 
                      .withRunMode(RunMode.RUN_ONCE_PER_CLUSTER) 
-                     .withSchedule(Schedule.forInterval(runInterval, new Date(System.currentTimeMillis() + runInterval)))); 
-             log.warn("KEY Expiring Job Scheduled");
-         }else{
-            List<JobDetails> existingSchedules =  schedulerService.getJobsByJobRunnerKey(JobRunnerKey.of(JOB_RUNNER_KEY));
-            if( existingSchedules.size() > 0 ){
-                schedulerService.unregisterJobRunner(JobRunnerKey.of(JOB_RUNNER_KEY));
-            }
+                     .withSchedule(Schedule.forInterval(runInterval, new Date(System.currentTimeMillis() + 5000))));
+             log.warn("KEY Expiring Job Scheduled to run every " + runInterval + " ms. First run will trigger in ~5 seconds");
          }
      } 
 

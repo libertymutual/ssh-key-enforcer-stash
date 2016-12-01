@@ -41,9 +41,6 @@ public class GeneralEventListener {
         this.i18nService = i18nService;
     }
 
-    
-    
-
     @EventListener
     public void mylistener(StashEvent stashEvent) {       
         if (SSH_KEY_CREATED_EVENT_CLASS.equals(stashEvent.getClass().getCanonicalName())) {

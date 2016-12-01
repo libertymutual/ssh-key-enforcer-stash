@@ -16,6 +16,7 @@
 
 package com.lmig.forge.stash.ssh.notifications;
 
+import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,22 +35,29 @@ public class NotificationService {
     private final ApplicationPropertiesService applicationPropertiesService;
     private final I18nService i18nService;
     private final String KEY_GEN_CONTEXT = "/plugins/servlet/account/enterprisekey";
+    private final PluginSettingsService pluginSettingsService;
     private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
     
 
     public NotificationService(MailService mailService, UserService userService,
-            ApplicationPropertiesService applicationPropertiesService,I18nService i18nService) {
+                               ApplicationPropertiesService applicationPropertiesService, I18nService i18nService, PluginSettingsService pluginSettingsService) {
         this.mailService = mailService;
         this.userService = userService;
         this.applicationPropertiesService = applicationPropertiesService;
         this.i18nService = i18nService;
+        this.pluginSettingsService = pluginSettingsService;
     }
 
     public void notifyUserOfExpiredKey(int userId) {
         StashUser user = userService.getUserById(userId);
         String pageUrl = applicationPropertiesService.getBaseUrl() + KEY_GEN_CONTEXT;
         String subject = i18nService.getMessage("stash.ssh.reset.email.subject");
-        String body = i18nService.getMessage("stash.ssh.reset.email.body",pageUrl);
+        int maxDays = pluginSettingsService.getDaysAllowedForUserKeys();
+        String body = i18nService.getMessage("stash.ssh.reset.email.body",pageUrl,maxDays);
+        String policyUrl = pluginSettingsService.getInternalKeyPolicyLink();
+        if( null != policyUrl){
+            body = body + "\n " + i18nService.getMessage("stash.ssh.reset.email.policy",policyUrl);
+        }
         if (null != user) {
             if(log.isDebugEnabled()){
                 log.debug("Sending email to: " + user.getEmailAddress());

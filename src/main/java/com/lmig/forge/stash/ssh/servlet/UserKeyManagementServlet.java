@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.lmig.forge.stash.ssh.config.PluginSettingsService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,7 @@ public class UserKeyManagementServlet extends HttpServlet{
         String pathInfo = req.getPathInfo();
 
         
-        render(resp, "plugin.account.sshTab", ImmutableMap.<String, Object>of("policyLink", pluginSettingsService.getInternalKeyPolicyLink("")));
+        render(resp, "plugin.account.sshTab", ImmutableMap.<String, Object>of("policyLink", StringUtils.defaultString(pluginSettingsService.getInternalKeyPolicyLink()))); //atlassian soy will not accept null paramteres.
     }
 
     

@@ -79,7 +79,7 @@ public class PluginSettingsService {
          settings.put(SETTINGS_KEY_DAYS_KEEP_USERS, String.valueOf(updatedConfig.getDaysToKeepUserKeys()));
         settings.put(SETTINGS_KEY_DAYS_KEEP_BAMBOO,  String.valueOf(updatedConfig.getDaysToKeepBambooKeys()));
         settings.put(SETTINGS_KEY_MILLIS_INTERVAL,  String.valueOf(updatedConfig.getMillisBetweenRuns()));
-        
+
         //refresh cache, including logic on default values in case some were not provided.
         cachedModel = updatedConfig;
         return cachedModel;
@@ -104,8 +104,8 @@ public class PluginSettingsService {
         return getAdminConfigResourcesModel().getBambooUser();
     }
     
-    public String getInternalKeyPolicyLink(String defaultValue){
-        return null == getAdminConfigResourcesModel().getInternalKeyPolicyLink()?defaultValue:getAdminConfigResourcesModel().getInternalKeyPolicyLink();
+    public String getInternalKeyPolicyLink(){
+        return getAdminConfigResourcesModel().getInternalKeyPolicyLink() ;
     }
 
 }

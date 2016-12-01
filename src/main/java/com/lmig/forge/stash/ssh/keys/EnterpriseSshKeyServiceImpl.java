@@ -118,7 +118,7 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
     public void replaceExpiredKeysAndNotifyUsers() {
         DateTime dateTime = new DateTime();
         Date oldestAllowed = dateTime.minusDays(pluginSettingsService.getDaysAllowedForUserKeys()).toDate();
-        //Date oldestAllowed = dateTime.minusMinutes(1).toDate(); //for live demos
+        //Date oldestAllowed = dateTime.minusMillis(100).toDate(); //for live demos
         List<SshKeyEntity> expiredStashKeys = enterpriseKeyRepository.listOfExpiredKeys( oldestAllowed, KeyType.USER);
    
         
