@@ -27,8 +27,8 @@ import org.slf4j.LoggerFactory;
 
 import com.atlassian.activeobjects.external.ActiveObjects;
 import com.atlassian.sal.api.transaction.TransactionCallback;
-import com.atlassian.stash.ssh.api.SshKey;
-import com.atlassian.stash.user.StashUser;
+import com.atlassian.bitbucket.ssh.SshKey;
+import com.atlassian.bitbucket.user.ApplicationUser;
 import com.google.common.collect.Lists;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity.KeyType;
 
@@ -44,7 +44,7 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
     }
 
     @Override
-    public SshKeyEntity createOrUpdateUserKey(StashUser user, String text, String label) {
+    public SshKeyEntity createOrUpdateUserKey(ApplicationUser user, String text, String label) {
         return ao.executeInTransaction(new TransactionCallback<SshKeyEntity>() {
 
             @Override
@@ -65,12 +65,12 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
     
 
     @Override
-    public SshKeyEntity saveExternallyGeneratedKeyDetails(SshKey key, StashUser user, KeyType keyType) {
+    public SshKeyEntity saveExternallyGeneratedKeyDetails(SshKey key, ApplicationUser user, KeyType keyType) {
         SshKeyEntity entity =ao.create(SshKeyEntity.class, new DBParam("TYPE",keyType), new DBParam("USERID", user.getId()),  new DBParam("KEYID",key.getId()), new DBParam("TEXT", key.getText()),new DBParam("LABEL",key.getLabel()),new DBParam("CREATED", new Date()));
         return entity;
     }
 
-    private SshKeyEntity findSingleUserKey(StashUser user) {
+    private SshKeyEntity findSingleUserKey(ApplicationUser user) {
         SshKeyEntity[] keys = ao.find(SshKeyEntity.class, Query.select().where("USERID = ? AND TYPE = ?", user.getId(), KeyType.USER));
         if( null != keys && keys.length == 1 ){
             SshKeyEntity key = keys[0];
@@ -81,7 +81,7 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
     }
 
     @Override
-    public boolean isValidKeyForUser(StashUser user, String text) {
+    public boolean isValidKeyForUser(ApplicationUser user, String text) {
         SshKeyEntity key = findSingleUserKey(user);
         if(null != key){
             return key.getText().equals(text);
@@ -124,7 +124,7 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
     }
 
     @Override
-    public List<SshKeyEntity> keysForUser(StashUser user) {
+    public List<SshKeyEntity> keysForUser(ApplicationUser user) {
         SshKeyEntity[] results = ao.find(SshKeyEntity.class,Query.select().where("USERID = ?", user.getId()));
         return Lists.newArrayList(results);
     }

@@ -15,7 +15,7 @@
  */
 package com.lmig.forge.stash.ssh.scheduler;
 
-import com.atlassian.stash.util.UncheckedOperation;
+import com.atlassian.bitbucket.util.UncheckedOperation;
 import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
 
 public class KeyRotationOperation implements UncheckedOperation {

@@ -32,7 +32,7 @@ public interface SshKeyEntity extends Entity{
     Integer getKeyId();
     @NotNull
     @Mutator("TEXT")
-    @StringLength(value=767)
+    @StringLength(value=StringLength.UNLIMITED)
     String getText();
     @NotNull
     @Mutator("LABEL")

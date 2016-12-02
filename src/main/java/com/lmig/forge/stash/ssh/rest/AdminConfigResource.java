@@ -8,9 +8,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.atlassian.bitbucket.auth.AuthenticationContext;
 import com.atlassian.sal.api.user.UserManager;
-import com.atlassian.stash.user.StashAuthenticationContext;
-import com.atlassian.stash.user.StashUser;
+import com.atlassian.bitbucket.user.ApplicationUser;
 import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 
 /**
@@ -20,11 +20,11 @@ import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 public class AdminConfigResource {
 
     private final UserManager userManager;
-    private final StashAuthenticationContext stashAuthenticationContext;
+    private final AuthenticationContext stashAuthenticationContext;
     private final PluginSettingsService pluginSettingsService;
     
     
-    public AdminConfigResource(UserManager userManager, StashAuthenticationContext stashAuthenticationContext,
+    public AdminConfigResource(UserManager userManager, AuthenticationContext stashAuthenticationContext,
             PluginSettingsService pluginSettingsService) {
         super();
         this.userManager = userManager;
@@ -36,7 +36,7 @@ public class AdminConfigResource {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getConfig()
     {
-        StashUser user = stashAuthenticationContext.getCurrentUser();
+        ApplicationUser user = stashAuthenticationContext.getCurrentUser();
         if (user == null || !userManager.isSystemAdmin(user.getName())){
           return Response.status(Response.Status.FORBIDDEN).build();
         }
@@ -48,7 +48,7 @@ public class AdminConfigResource {
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response updateConfig(AdminConfigResourceModel updatedModel)
     {
-        StashUser user = stashAuthenticationContext.getCurrentUser();
+        ApplicationUser user = stashAuthenticationContext.getCurrentUser();
         if (user == null || !userManager.isSystemAdmin(user.getName())){
           return Response.status(Response.Status.FORBIDDEN).build();
         }

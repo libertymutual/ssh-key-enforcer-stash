@@ -27,6 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.atlassian.bitbucket.ssh.SshKey;
 import com.lmig.forge.stash.ssh.crypto.JschSshKeyPairGenerator;
 import com.lmig.forge.stash.ssh.crypto.SshKeyPairGenerator;
 import com.lmig.forge.stash.ssh.rest.KeyPairResourceModel;
@@ -45,11 +46,9 @@ import org.junit.runner.RunWith;
 
 import com.atlassian.activeobjects.external.ActiveObjects;
 import com.atlassian.activeobjects.test.TestActiveObjects;
-import com.atlassian.stash.internal.key.ssh.SimpleSshKey;
-import com.atlassian.stash.ssh.api.SshKey;
-import com.atlassian.stash.ssh.api.SshKeyService;
-import com.atlassian.stash.user.StashUser;
-import com.atlassian.stash.user.UserService;
+import com.atlassian.bitbucket.ssh.SshKeyService;
+import com.atlassian.bitbucket.user.ApplicationUser;
+import com.atlassian.bitbucket.user.UserService;
 import com.lmig.forge.stash.ssh.ao.EnterpriseKeyRepository;
 import com.lmig.forge.stash.ssh.ao.EnterpriseKeyRepositoryImpl;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
@@ -98,17 +97,38 @@ public class EnterpriseSshKeyManagerImplTest {
     private SshKeyPairGenerator keyPairGenerator;
     private UserService userService;
     private PluginSettingsService pluginSettingsService;
-    private StashUser unblessedUser ;
-    private StashUser blessedUser;
+    private ApplicationUser unblessedUser ;
+    private ApplicationUser blessedUser;
+    private SshKey approvedUserKey = mock(SshKey.class);
+    private SshKey unapprovedUserKey = mock(SshKey.class);
+    private SshKey existingKeyForUnapprovedUser = mock(SshKey.class);
 
     @Before
     public void setup() {
+        //mock app users
+        userService = mock(UserService.class);
+        unblessedUser = mock(ApplicationUser.class);
+        when(unblessedUser.getId()).thenReturn(VALID_USER_ID);
+        when(userService.isUserInGroup(unblessedUser, AUTHED_GROUP)).thenReturn(false);
+        blessedUser = mock(ApplicationUser.class);
+        when(blessedUser.getId()).thenReturn(VALID_USER_ID);
+        when(userService.isUserInGroup(blessedUser, AUTHED_GROUP)).thenReturn(true);
+
+        // mock their keys and potential keys
+        when(approvedUserKey.getText()).thenReturn(APPROVED_PUBLIC_KEY_ONE);
+        when(approvedUserKey.getUser()).thenReturn(blessedUser);
+
+        when(unapprovedUserKey.getText()).thenReturn(UNAPPROVED_PUBLIC_KEY_ONE);
+        when(unapprovedUserKey.getUser()).thenReturn(unblessedUser);
+
+        when(existingKeyForUnapprovedUser.getText()).thenReturn(APPROVED_PUBLIC_KEY_ONE);
+        when(existingKeyForUnapprovedUser.getUser()).thenReturn(unblessedUser);
+
         ao = new TestActiveObjects(entityManager);
         keyRepo = new EnterpriseKeyRepositoryImpl(ao);
         stashKeyService = mock(SshKeyService.class);
-        when(stashKeyService.addForUser(any(StashUser.class),anyString())).thenReturn(new SimpleSshKey(999,"Label","KEYVALUE",blessedUser));
+        when(stashKeyService.addForUser(any(ApplicationUser.class),anyString())).thenReturn(approvedUserKey);
         notificationService = mock(NotificationService.class);
-        userService = mock(UserService.class);
         keyPairGenerator = new JschSshKeyPairGenerator();
         when(userService.existsGroup(anyString())).thenReturn(true);
         pluginSettingsService = mock(PluginSettingsService.class);
@@ -116,15 +136,9 @@ public class EnterpriseSshKeyManagerImplTest {
         when(pluginSettingsService.getDaysAllowedForUserKeys()).thenReturn(DAYS_ALLOWED);
         when(pluginSettingsService.getDaysAllowedForBambooKeys()).thenReturn(DAYS_ALLOWED);
         when(pluginSettingsService.getAuthorizedGroup()).thenReturn(AUTHED_GROUP);
-        when(userService.getUserByName(KeyRotationJobRunner.ADMIN_ACCOUNT_NAME)).thenReturn(mock(StashUser.class));//defeat NPE check
+        when(userService.getUserByName(KeyRotationJobRunner.ADMIN_ACCOUNT_NAME)).thenReturn(mock(ApplicationUser.class));//defeat NPE check
         ourKeyService = new EnterpriseSshKeyServiceImpl(stashKeyService, keyRepo, keyPairGenerator, notificationService,userService, pluginSettingsService);
-   
-         unblessedUser = mock(StashUser.class);
-        when(unblessedUser.getId()).thenReturn(VALID_USER_ID);
-        when(userService.isUserInGroup(unblessedUser, AUTHED_GROUP)).thenReturn(false);        
-         blessedUser = mock(StashUser.class);
-        when(blessedUser.getId()).thenReturn(VALID_USER_ID);
-        when(userService.isUserInGroup(blessedUser, AUTHED_GROUP)).thenReturn(true);
+
     }
 
     @Test
@@ -171,8 +185,7 @@ public class EnterpriseSshKeyManagerImplTest {
     
     @Test
     public void userInBlessedGroupMayByPassDirectService(){
-        SshKey newKey = new SimpleSshKey(1, "a comment", UNAPPROVED_PUBLIC_KEY_ONE,blessedUser );
-        boolean isAllowed = ourKeyService.isKeyValidForUser(newKey, blessedUser);
+        boolean isAllowed = ourKeyService.isKeyValidForUser(approvedUserKey, blessedUser);
         
         assertThat(isAllowed,is(true));
     }
@@ -180,18 +193,17 @@ public class EnterpriseSshKeyManagerImplTest {
     
     @Test
     public void userNotInBlessedGroupAreNotAllowedDirect(){
-        
-        SshKey newKey = new SimpleSshKey(1, "a comment", UNAPPROVED_PUBLIC_KEY_ONE ,unblessedUser );
-        boolean isAllowed = ourKeyService.isKeyValidForUser(newKey, unblessedUser);
+        boolean isAllowed = ourKeyService.isKeyValidForUser(unapprovedUserKey, unblessedUser);
         
         assertThat(isAllowed,is(false));        
     }
 
     @Test
+    // This test seems to rely on fact that the APPROVED_PUBLIC_KEY_ONE exists in DB wit TYPE BYPASS
+    // not sure what the use case is/was....
+    // I think it allows admins to create permanent keys on behalf od users.  If key text exists in DB associated with that user its not purged...
     public void userNotInBlessedGroupButUsedWrapperServiceAreAllowed(){
-        //when(keyRepo.isValidKeyForUser(unblessedUser, PUBLIC_KEY_ONE)).thenReturn(true);
-        SshKey newKey = new SimpleSshKey(1, "a comment", APPROVED_PUBLIC_KEY_ONE,unblessedUser );
-        boolean isAllowed = ourKeyService.isKeyValidForUser(newKey, unblessedUser);
+        boolean isAllowed = ourKeyService.isKeyValidForUser(existingKeyForUnapprovedUser, unblessedUser);
 
         assertThat(isAllowed,is(true));
     }

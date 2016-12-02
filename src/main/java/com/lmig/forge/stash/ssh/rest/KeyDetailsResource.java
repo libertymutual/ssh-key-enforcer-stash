@@ -28,8 +28,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.atlassian.annotations.PublicApi;
-import com.atlassian.stash.user.StashAuthenticationContext;
-import com.atlassian.stash.user.StashUser;
+import com.atlassian.bitbucket.auth.AuthenticationContext;
+import com.atlassian.bitbucket.user.ApplicationUser;
 import com.lmig.forge.stash.ssh.EnterpriseKeyGenerationException;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
 import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
@@ -41,10 +41,10 @@ import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
 @PublicApi
 public class KeyDetailsResource {
     private final EnterpriseSshKeyService enterpriseKeyService;
-    private final StashAuthenticationContext stashAuthenticationContext;
+    private final AuthenticationContext stashAuthenticationContext;
 
     public KeyDetailsResource(EnterpriseSshKeyService enterpriseKeyService,
-            StashAuthenticationContext stashAuthenticationContext) {
+                              AuthenticationContext stashAuthenticationContext) {
         this.enterpriseKeyService = enterpriseKeyService;
         this.stashAuthenticationContext = stashAuthenticationContext;
     }
@@ -54,7 +54,7 @@ public class KeyDetailsResource {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public Response generateNewPair() {
 
-        StashUser user = stashAuthenticationContext.getCurrentUser();
+        ApplicationUser user = stashAuthenticationContext.getCurrentUser();
         KeyPairResourceModel keyPair;
         try {
             keyPair = enterpriseKeyService.generateNewKeyPairFor(user);
