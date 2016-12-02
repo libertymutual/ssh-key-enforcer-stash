@@ -14,30 +14,17 @@
   <!-- add our web resources -->
   <web-resource key="stash-ssh-key-enforcer-resources" name="stash-ssh-key-enforcer Web Resources">
     <dependency>com.atlassian.auiplugin:ajs</dependency>
-    <dependency>com.atlassian.soy.soy-template-plugin:soy-deps</dependency>
     <!-- transform calls to AJS.getText() inside JS files -->
     <transformation extension="js">
       <transformer key="jsI18n"/>
-    </transformation>
-    <!-- resource type="soy" name="supportTeamTab" location="/override-add-keys.soy"/> -->
-    <!-- transform Soy templates into JS -->
-    <transformation extension="soy">
-      <transformer key="soyTransformer"/>
     </transformation>
     <resource type="download" name="key-enforcer.js" location="/js/stash-ssh-key-enforcer.js"/>
     <context>atl.general</context>
   </web-resource>
   <web-resource key="stash-ssh-key-generator-resources" name="stash-ssh-key-enforcer Web Resources">
     <dependency>com.atlassian.auiplugin:ajs</dependency>
-    <dependency>com.atlassian.soy.soy-template-plugin:soy-deps</dependency>
-    <!-- transform calls to AJS.getText() inside JS files -->
     <transformation extension="js">
       <transformer key="jsI18n"/>
-    </transformation>
-    <!-- resource type="soy" name="supportTeamTab" location="/override-add-keys.soy"/> -->
-    <!-- transform Soy templates into JS -->
-    <transformation extension="soy">
-      <transformer key="soyTransformer"/>
     </transformation>
     <resource type="download" name="key-enforcer.js" location="/js/stash-ssh-key-generating.js"/>
   </web-resource>

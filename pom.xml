@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.lmig.forge.stash.ssh</groupId>
 	<artifactId>stash-ssh-key-enforcer</artifactId>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.2-SNAPSHOT</version>
 	<organization>
 		<name>Liberty Mutual Insurance</name>
 		<url>https://libertymutual.com/</url>
@@ -263,8 +263,8 @@
 						<testGroup>
 							<id>clusterTestGroup</id>
 							<productIds>
-								<productId>stash-node-2</productId>
 								<productId>stash-node-1</productId>
+								<productId>stash-node-2</productId>
 							</productIds>
 						</testGroup>
 					</testGroups>
