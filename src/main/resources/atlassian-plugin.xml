@@ -28,9 +28,9 @@
     </transformation>
     <resource type="download" name="key-enforcer.js" location="/js/stash-ssh-key-generating.js"/>
   </web-resource>
-  <bitbucket-resource key="account-ssh-soy" name="Account Tab Soy Templates">
+  <client-resource key="account-ssh-soy" name="Account Tab Soy Templates">
     <directory location="/templates/"/>
-  </bitbucket-resource>
+  </client-resource>
   <servlet name="User Key Management Servlet" i18n-name-key="user-key-management-servlet.name" key="user-key-management-servlet" class="com.lmig.forge.stash.ssh.servlet.UserKeyManagementServlet">
     <description key="user-key-management-servlet.description">The User Key Management Servlet Plugin</description>
     <url-pattern>/account/enterprisekey</url-pattern>

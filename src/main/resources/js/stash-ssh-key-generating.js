@@ -8,6 +8,10 @@ AJS.$( document ).ready(function() {
 	 jQuery.ajax({
 	     url: configEndpoint,
 	     type: 'POST',
+		beforeSend: function (request)
+		{
+		  request.setRequestHeader("X-Atlassian-Token", "no-check");
+		},
 	     dataType: 'json',
 	     async: false,
 	     success: function(data) {
