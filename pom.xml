@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.lmig.forge.stash.ssh</groupId>
 	<artifactId>stash-ssh-key-enforcer</artifactId>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.2-SNAPSHOT</version>
 	<organization>
 		<name>Liberty Mutual Insurance</name>
 		<url>https://libertymutual.com/</url>
@@ -185,16 +185,89 @@
 				<version>${amps.version}</version>
 				<extensions>true</extensions>
 				<configuration>
+                    <allowGoogleTracking>false</allowGoogleTracking>
 					<server>localhost</server>
+					<!-- run DC cluster using 'atlas-run \-\-testGroup clusterTestGroup' -->
+                    <!-- you will also need to download mysql driver and place in /home/lib for *all* nodes in cluster. See stash.shared.home values for each node below -->
+					<!-- see https://developer.atlassian.com/stash/docs/latest/how-tos/cluster-safe-plugins.html -->
+                    <!-- the file runClustered.sh aggregates some manipulations needed to make it easier, but starting a clister is sloooow -->
 					<products>
+						<!-- node 1 for clustered -->
 						<product>
 							<id>stash</id>
-							<instanceId>stash</instanceId>
+							<instanceId>stash-node-1</instanceId>
 							<version>${stash.version}</version>
 							<dataVersion>${stash.data.version}</dataVersion>
+							<systemPropertyVariables>
+								<stash.shared.home>${project.basedir}/target/stash-node-1/home/shared</stash.shared.home>
+                                <!-- override the SSH port used for this node -->
+                                <stash.plugin.ssh.port>7997</stash.plugin.ssh.port>
+								<!-- override database settings so both nodes use a single database -->
+								<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
+								<jdbc.url>jdbc:mysql://10.187.116.253:3306/cf_355c208f_d6d1_4f9b_b8c9_538453c89ec7?characterEncoding=utf8&amp;useUnicode=true&amp;sessionVariables=storage_engine%3DInnoDB</jdbc.url>
+								<jdbc.user>TcVfaZp8iohxwHMg</jdbc.user>
+								<jdbc.password>1vpJLjjMaoLVvozA</jdbc.password>
+								<!-- allow cluster nodes to find each other over TCP/IP thus enabling clustering for this node -->
+								<hazelcast.network.tcpip>true</hazelcast.network.tcpip>
+								<!-- set to true if your load balancer supports stick sessions -->
+								<hazelcast.http.stickysessions>false</hazelcast.http.stickysessions>
+								<!-- forces Stash to fully finish starting up before yielding to the func test runner or atlas-run -->
+								<johnson.spring.lifecycle.synchronousStartup>true</johnson.spring.lifecycle.synchronousStartup>
+							</systemPropertyVariables>
+                            <libArtifacts>
+                                <!-- ensure MySQL drivers are available to Stash -->
+                                <libArtifact>
+                                    <groupId>mysql</groupId>
+                                    <artifactId>mysql-connector-java</artifactId>
+                                    <version>5.1.32</version>
+                                </libArtifact>
+                            </libArtifacts>
+						</product>
+						<!-- Node 2 -->
+						<product>
+							<id>stash</id>
+							<instanceId>stash-node-2</instanceId>
+							<version>${stash.version}</version>
+							<dataVersion>${stash.data.version}</dataVersion>
+							<!-- override the HTTP port used for this node -->
+							<httpPort>7992</httpPort>
+							<systemPropertyVariables>
+								<stash.shared.home>${project.basedir}/target/stash-node-1/home/shared</stash.shared.home>
+								<!-- override the SSH port used for this node -->
+								<stash.plugin.ssh.port>7998</stash.plugin.ssh.port>
+								<!-- override database settings so both nodes use a single database -->
+								<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
+								<jdbc.url>jdbc:mysql://10.187.116.253:3306/cf_355c208f_d6d1_4f9b_b8c9_538453c89ec7?characterEncoding=utf8&amp;useUnicode=true&amp;sessionVariables=storage_engine%3DInnoDB</jdbc.url>
+								<jdbc.user>TcVfaZp8iohxwHMg</jdbc.user>
+								<jdbc.password>1vpJLjjMaoLVvozA</jdbc.password>
+								<!-- allow cluster nodes to find each other over TCP/IP thus enabling clustering for this node -->
+								<hazelcast.network.tcpip>true</hazelcast.network.tcpip>
+								<!-- set to true if your load balancer supports stick sessions -->
+								<hazelcast.http.stickysessions>false</hazelcast.http.stickysessions>
+								<!-- forces Stash to fully finish starting up before yielding to the func test runner or atlas-run -->
+								<johnson.spring.lifecycle.synchronousStartup>true</johnson.spring.lifecycle.synchronousStartup>
+							</systemPropertyVariables>
+							<libArtifacts>
+								<!-- ensure MySQL drivers are available to Stash -->
+								<libArtifact>
+									<groupId>mysql</groupId>
+									<artifactId>mysql-connector-java</artifactId>
+									<version>5.1.32</version>
+								</libArtifact>
+							</libArtifacts>
 						</product>
 					</products>
 					<!-- <log4jProperties>src/main/resources/log4j.properties</log4jProperties> -->
+					<testGroups>
+						<!-- tell AMPS / Maven which products ie nodes to run for the named testGroup 'clusterTestGroup' -->
+						<testGroup>
+							<id>clusterTestGroup</id>
+							<productIds>
+								<productId>stash-node-1</productId>
+								<productId>stash-node-2</productId>
+							</productIds>
+						</testGroup>
+					</testGroups>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -232,7 +305,7 @@
 		<stash.version>3.11.2</stash.version>
 		<stash.ssh.version>3.10.0</stash.ssh.version>
 		<stash.data.version>3.11.2</stash.data.version>
-		<amps.version>5.0.13</amps.version>
+		<amps.version>6.1.0</amps.version>
 		<plugin.testrunner.version>1.2.3</plugin.testrunner.version>
 		<ao.version>0.28.0</ao.version>
 	</properties>

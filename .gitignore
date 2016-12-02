@@ -4,3 +4,5 @@ target
 .project
 .idea
 *.iml
+src/test/resources/mysql-connector-java-5.1.40-bin.jar
+.DS_Store

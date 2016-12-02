@@ -7,36 +7,24 @@
     <vendor name="${project.organization.name}" url="${project.organization.url}"/>
     <param name="plugin-icon">images/pluginIcon.png</param>
     <param name="plugin-logo">images/pluginLogo.png</param>
+    <param name="atlassian-data-center-compatible">true</param>
   </plugin-info>
   <!-- add our i18n resource -->
   <resource type="i18n" name="i18n" location="stash-ssh-key-enforcer"/>
   <!-- add our web resources -->
   <web-resource key="stash-ssh-key-enforcer-resources" name="stash-ssh-key-enforcer Web Resources">
     <dependency>com.atlassian.auiplugin:ajs</dependency>
-    <dependency>com.atlassian.soy.soy-template-plugin:soy-deps</dependency>
     <!-- transform calls to AJS.getText() inside JS files -->
     <transformation extension="js">
       <transformer key="jsI18n"/>
-    </transformation>
-    <!-- resource type="soy" name="supportTeamTab" location="/override-add-keys.soy"/> -->
-    <!-- transform Soy templates into JS -->
-    <transformation extension="soy">
-      <transformer key="soyTransformer"/>
     </transformation>
     <resource type="download" name="key-enforcer.js" location="/js/stash-ssh-key-enforcer.js"/>
     <context>atl.general</context>
   </web-resource>
   <web-resource key="stash-ssh-key-generator-resources" name="stash-ssh-key-enforcer Web Resources">
     <dependency>com.atlassian.auiplugin:ajs</dependency>
-    <dependency>com.atlassian.soy.soy-template-plugin:soy-deps</dependency>
-    <!-- transform calls to AJS.getText() inside JS files -->
     <transformation extension="js">
       <transformer key="jsI18n"/>
-    </transformation>
-    <!-- resource type="soy" name="supportTeamTab" location="/override-add-keys.soy"/> -->
-    <!-- transform Soy templates into JS -->
-    <transformation extension="soy">
-      <transformer key="soyTransformer"/>
     </transformation>
     <resource type="download" name="key-enforcer.js" location="/js/stash-ssh-key-generating.js"/>
   </web-resource>
