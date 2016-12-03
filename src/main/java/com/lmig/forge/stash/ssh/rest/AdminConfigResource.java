@@ -8,8 +8,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.atlassian.bitbucket.auth.AuthenticationContext;
 import com.atlassian.sal.api.user.UserManager;
+import com.atlassian.bitbucket.auth.AuthenticationContext;
 import com.atlassian.bitbucket.user.ApplicationUser;
 import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 

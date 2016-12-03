@@ -27,7 +27,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.atlassian.bitbucket.ssh.SshKey;
 import com.lmig.forge.stash.ssh.crypto.JschSshKeyPairGenerator;
 import com.lmig.forge.stash.ssh.crypto.SshKeyPairGenerator;
 import com.lmig.forge.stash.ssh.rest.KeyPairResourceModel;
@@ -46,6 +45,7 @@ import org.junit.runner.RunWith;
 
 import com.atlassian.activeobjects.external.ActiveObjects;
 import com.atlassian.activeobjects.test.TestActiveObjects;
+import com.atlassian.bitbucket.ssh.SshKey;
 import com.atlassian.bitbucket.ssh.SshKeyService;
 import com.atlassian.bitbucket.user.ApplicationUser;
 import com.atlassian.bitbucket.user.UserService;
@@ -119,9 +119,11 @@ public class EnterpriseSshKeyManagerImplTest {
         // mock their keys and potential keys
         when(approvedUserKey.getText()).thenReturn(APPROVED_PUBLIC_KEY_ONE);
         when(approvedUserKey.getUser()).thenReturn(blessedUser);
+        when(approvedUserKey.getLabel()).thenReturn("Known key created inside stash");
 
         when(unapprovedUserKey.getText()).thenReturn(UNAPPROVED_PUBLIC_KEY_ONE);
         when(unapprovedUserKey.getUser()).thenReturn(unblessedUser);
+        when(unapprovedUserKey.getLabel()).thenReturn("Unknown key created outside stash");
 
         when(existingKeyForUnapprovedUser.getText()).thenReturn(APPROVED_PUBLIC_KEY_ONE);
         when(existingKeyForUnapprovedUser.getUser()).thenReturn(unblessedUser);

@@ -24,16 +24,12 @@ import com.atlassian.bitbucket.ssh.event.SshKeyDeletedEvent;
 import org.apache.log4j.Logger;
 
 import com.atlassian.event.api.EventListener;
-import com.atlassian.bitbucket.event.ApplicationEvent;
 import com.atlassian.bitbucket.i18n.I18nService;
 import com.atlassian.bitbucket.ssh.SshKey;
 import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
 
 public class GeneralEventListener {
     private final Logger logger = Logger.getLogger(GeneralEventListener.class);
-    private final static String SSH_KEY_CREATED_EVENT_CLASS = "com.atlassian.bitbucket.ssh.SshKeyCreatedEvent";
-    private final static String SSH_KEY_DELETED_EVENT_CLASS = "com.atlassian.bitbucket.ssh.SshKeyDeletedEvent";
-    
     
     final private EnterpriseSshKeyService enterpriseSshKeyService;
     final private I18nService i18nService;
@@ -42,43 +38,6 @@ public class GeneralEventListener {
         this.enterpriseSshKeyService = enterpriseSshKeyService;
         this.i18nService = i18nService;
     }
-
-/*    @EventListener
-    public void mylistener(ApplicationEvent stashEvent) {
-        if (SSH_KEY_CREATED_EVENT_CLASS.equals(stashEvent.getClass().getCanonicalName())) {
-            try {
-                Method method = stashEvent.getClass().getMethod("getKey");
-                SshKey key = (SshKey) method.invoke(stashEvent);
-                enterpriseSshKeyService.removeKeyIfNotLegal(key, stashEvent.getUser());
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            } catch (SecurityException e) {
-                e.printStackTrace();
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            }
-        }else if (SSH_KEY_DELETED_EVENT_CLASS.equals(stashEvent.getClass().getCanonicalName())) {
-            try {
-                Method method = stashEvent.getClass().getMethod("getKey");
-                SshKey key = (SshKey) method.invoke(stashEvent);
-                enterpriseSshKeyService.forgetDeletedKey(key);
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            } catch (SecurityException e) {
-                e.printStackTrace();
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            }
-        }
-    }*/
 
     @EventListener
     public void createListener(SshKeyCreatedEvent stashEvent) {

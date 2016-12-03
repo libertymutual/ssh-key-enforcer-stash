@@ -187,7 +187,7 @@
                         <!-- standalone non-clustered w/ in-memory db -->
                         <product>
                             <id>bitbucket</id>
-                            <instanceId>bitbucket</instanceId>
+                            <instanceId>bitbucket-single</instanceId>
                             <version>${bitbucket.version}</version>
                             <dataVersion>${bitbucket.data.version}</dataVersion>
                         </product>
@@ -264,6 +264,12 @@
 							<productIds>
 								<productId>bitbucket-node-1</productId>
 								<productId>bitbucket-node-2</productId>
+							</productIds>
+						</testGroup>
+						<testGroup>
+							<id>default</id>
+							<productIds>
+								<productId>bitbucket-single</productId>
 							</productIds>
 						</testGroup>
 					</testGroups>

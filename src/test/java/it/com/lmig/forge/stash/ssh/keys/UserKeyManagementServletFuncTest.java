@@ -24,7 +24,7 @@ public class UserKeyManagementServletFuncTest {
     public void setup() {
         httpClient = new DefaultHttpClient();
         baseUrl = System.getProperty("baseurl");
-        servletUrl = baseUrl + "/plugins/servlet/userkeymanagementservlet";
+        servletUrl = baseUrl + "/plugins/servlet/enterprisekey";
     }
 
     @After

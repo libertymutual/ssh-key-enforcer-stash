@@ -23,13 +23,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.atlassian.bitbucket.permission.Permission;
 import org.junit.Before;
 import org.junit.Test;
 
 import ut.com.lmig.forge.stash.ssh.SshEnforcerTestHelper;
 
 import com.atlassian.bitbucket.user.EscalatedSecurityContext;
+import com.atlassian.bitbucket.permission.Permission;
 import com.atlassian.bitbucket.user.SecurityService;
 import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 import com.lmig.forge.stash.ssh.scheduler.KeyRotationJobRunner;
