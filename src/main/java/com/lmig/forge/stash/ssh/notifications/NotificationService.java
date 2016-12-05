@@ -20,12 +20,12 @@ import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.atlassian.stash.i18n.I18nService;
-import com.atlassian.stash.mail.MailMessage;
-import com.atlassian.stash.mail.MailService;
-import com.atlassian.stash.server.ApplicationPropertiesService;
-import com.atlassian.stash.user.StashUser;
-import com.atlassian.stash.user.UserService;
+import com.atlassian.bitbucket.i18n.I18nService;
+import com.atlassian.bitbucket.mail.MailMessage;
+import com.atlassian.bitbucket.mail.MailService;
+import com.atlassian.bitbucket.server.ApplicationPropertiesService;
+import com.atlassian.bitbucket.user.ApplicationUser;
+import com.atlassian.bitbucket.user.UserService;
 import com.lmig.forge.stash.ssh.UserNotFoundException;
 
 public class NotificationService {
@@ -49,7 +49,7 @@ public class NotificationService {
     }
 
     public void notifyUserOfExpiredKey(int userId) {
-        StashUser user = userService.getUserById(userId);
+        ApplicationUser user = userService.getUserById(userId);
         String pageUrl = applicationPropertiesService.getBaseUrl() + KEY_GEN_CONTEXT;
         String subject = i18nService.getMessage("stash.ssh.reset.email.subject");
         int maxDays = pluginSettingsService.getDaysAllowedForUserKeys();

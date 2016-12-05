@@ -18,9 +18,8 @@ package com.lmig.forge.stash.ssh.keys;
 
 import java.util.List;
 
-import com.atlassian.stash.ssh.SshKeyCreatedEvent;
-import com.atlassian.stash.ssh.api.SshKey;
-import com.atlassian.stash.user.StashUser;
+import com.atlassian.bitbucket.ssh.SshKey;
+import com.atlassian.bitbucket.user.ApplicationUser;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
 import com.lmig.forge.stash.ssh.events.GeneralEventListener;
 import com.lmig.forge.stash.ssh.rest.KeyDetailsResourceModel;
@@ -34,18 +33,18 @@ public interface EnterpriseSshKeyService {
      * @param stashUser
      * @return
      */
-    boolean isKeyValidForUser(SshKey key, StashUser stashUser);
+    boolean isKeyValidForUser(SshKey key, ApplicationUser stashUser);
 
 
   
 
     /**
-     * Called on {@link SshKeyCreatedEvent} by {@link GeneralEventListener} to block 
+     * Called by {@link GeneralEventListener} to block
      * user attempts to create their keys outside the enterprise services.
      * @param key
      * @param user
      */
-    void removeKeyIfNotLegal(SshKey key, StashUser user);
+    void removeKeyIfNotLegal(SshKey key, ApplicationUser user);
 
 
 
@@ -55,7 +54,7 @@ public interface EnterpriseSshKeyService {
      * @param authorizedUser
      * @return
      */
-    KeyPairResourceModel generateNewKeyPairFor(StashUser authorizedUser);
+    KeyPairResourceModel generateNewKeyPairFor(ApplicationUser authorizedUser);
 
 
 

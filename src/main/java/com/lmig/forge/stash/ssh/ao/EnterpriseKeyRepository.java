@@ -19,25 +19,25 @@ package com.lmig.forge.stash.ssh.ao;
 import java.util.Date;
 import java.util.List;
 
-import com.atlassian.stash.ssh.api.SshKey;
-import com.atlassian.stash.user.StashUser;
+import com.atlassian.bitbucket.ssh.SshKey;
+import com.atlassian.bitbucket.user.ApplicationUser;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity.KeyType;
 
 public interface EnterpriseKeyRepository {
     
-    SshKeyEntity createOrUpdateUserKey(StashUser user, String text, String label);
+    SshKeyEntity createOrUpdateUserKey(ApplicationUser user, String text, String label);
     
-    boolean isValidKeyForUser(StashUser user, String text);
+    boolean isValidKeyForUser(ApplicationUser user, String text);
 
     List<SshKeyEntity> listOfExpiredKeys(Date oldestValidDate, KeyType keyType);
     
-    List<SshKeyEntity> keysForUser(StashUser user);
+    List<SshKeyEntity> keysForUser(ApplicationUser user);
 
     void updateRecordWithKeyId(SshKeyEntity newRecord, SshKey newKey);
 
     void removeRecord(SshKeyEntity key);
 
-    SshKeyEntity saveExternallyGeneratedKeyDetails(SshKey key, StashUser stashUser, KeyType bamboo);
+    SshKeyEntity saveExternallyGeneratedKeyDetails(SshKey key, ApplicationUser ApplicationUser, KeyType bamboo);
 
     void forgetRecordMatching(SshKey key);
     

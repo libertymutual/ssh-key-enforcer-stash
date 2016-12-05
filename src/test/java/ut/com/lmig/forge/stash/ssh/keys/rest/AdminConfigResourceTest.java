@@ -13,8 +13,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.atlassian.sal.api.user.UserManager;
-import com.atlassian.stash.user.StashAuthenticationContext;
-import com.atlassian.stash.user.StashUser;
+import com.atlassian.bitbucket.auth.AuthenticationContext;
+import com.atlassian.bitbucket.user.ApplicationUser;
 import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 import com.lmig.forge.stash.ssh.rest.AdminConfigResource;
 import com.lmig.forge.stash.ssh.rest.AdminConfigResourceModel;
@@ -25,7 +25,7 @@ public class AdminConfigResourceTest {
     private static final String TEST_CONFIG_USER ="bamboolinker";
     private final AdminConfigResourceModel sampleConfig = new PluginSettingsServiceTest.TestBuilder().withAuthorizedGroup(TEST_CONFIG_GROUP).withBambooUser(TEST_CONFIG_USER).build();
     private UserManager userManager = mock(UserManager.class);
-    private StashAuthenticationContext stashAuthenticationContext = mock(StashAuthenticationContext.class);
+    private AuthenticationContext stashAuthenticationContext = mock(AuthenticationContext.class);
     private PluginSettingsService pluginSettingsService = mock(PluginSettingsService.class);
 
 
@@ -43,7 +43,7 @@ public class AdminConfigResourceTest {
     @Test
     public void configCanBeRerievedByAdmin() {
         when(userManager.isSystemAdmin(anyString())).thenReturn(true);
-        when(stashAuthenticationContext.getCurrentUser()).thenReturn(mock(StashUser.class));
+        when(stashAuthenticationContext.getCurrentUser()).thenReturn(mock(ApplicationUser.class));
         AdminConfigResource resource = new AdminConfigResource(userManager, stashAuthenticationContext, pluginSettingsService);
 
         Response response = resource.getConfig();
@@ -54,7 +54,7 @@ public class AdminConfigResourceTest {
     @Test
     public void configCanNotBeRerievedByNonAdmin() {
         when(userManager.isSystemAdmin(anyString())).thenReturn(false);
-        when(stashAuthenticationContext.getCurrentUser()).thenReturn(mock(StashUser.class));
+        when(stashAuthenticationContext.getCurrentUser()).thenReturn(mock(ApplicationUser.class));
         AdminConfigResource resource = new AdminConfigResource(userManager, stashAuthenticationContext, pluginSettingsService);
 
         Response response = resource.getConfig();

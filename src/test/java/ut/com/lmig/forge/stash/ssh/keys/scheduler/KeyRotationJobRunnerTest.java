@@ -28,9 +28,9 @@ import org.junit.Test;
 
 import ut.com.lmig.forge.stash.ssh.SshEnforcerTestHelper;
 
-import com.atlassian.stash.user.EscalatedSecurityContext;
-import com.atlassian.stash.user.Permission;
-import com.atlassian.stash.user.SecurityService;
+import com.atlassian.bitbucket.user.EscalatedSecurityContext;
+import com.atlassian.bitbucket.permission.Permission;
+import com.atlassian.bitbucket.user.SecurityService;
 import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 import com.lmig.forge.stash.ssh.scheduler.KeyRotationJobRunner;
 import com.lmig.forge.stash.ssh.scheduler.KeyRotationOperation;

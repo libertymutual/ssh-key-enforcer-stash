@@ -5,12 +5,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.lmig.forge.stash.ssh</groupId>
 	<artifactId>stash-ssh-key-enforcer</artifactId>
-	<version>1.2-SNAPSHOT</version>
+	<version>2.0-SNAPSHOT</version>
 	<organization>
 		<name>Liberty Mutual Insurance</name>
 		<url>https://libertymutual.com/</url>
 	</organization>
-	<name>stash-ssh-key-enforcer</name>
+	<name>SSH Key Enforcer for Bitbucket Server</name>
 	<packaging>atlassian-plugin</packaging>
 	<scm>
 		<connection>scm:git:git@github.com:Libertymutual/ssh-key-enforcer-stash.git</connection>
@@ -18,9 +18,9 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>com.atlassian.stash</groupId>
-				<artifactId>stash-parent</artifactId>
-				<version>${stash.version}</version>
+				<groupId>com.atlassian.bitbucket.server</groupId>
+				<artifactId>bitbucket-parent</artifactId>
+				<version>${bitbucket.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -33,17 +33,15 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.atlassian.stash</groupId>
-			<artifactId>stash-api</artifactId>
-			<version>${stash.version}</version>
+			<groupId>com.atlassian.bitbucket.server</groupId>
+			<artifactId>bitbucket-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.atlassian.stash</groupId>
-			<artifactId>stash-ssh</artifactId>
-			<version>${stash.ssh.version}</version>
-			<scope>provided</scope>
-		</dependency>
+        <dependency>
+            <groupId>com.atlassian.bitbucket.server</groupId>
+            <artifactId>bitbucket-ssh</artifactId>
+            <scope>provided</scope>
+        </dependency>
 		<dependency>
 			<groupId>com.atlassian.scheduler</groupId>
 			<artifactId>atlassian-scheduler-api</artifactId>
@@ -56,20 +54,20 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.atlassian.stash</groupId>
-			<artifactId>stash-spi</artifactId>
+			<groupId>com.atlassian.bitbucket.server</groupId>
+			<artifactId>bitbucket-spi</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.atlassian.stash</groupId>
-			<artifactId>stash-page-objects</artifactId>
+			<groupId>com.atlassian.bitbucket.server</groupId>
+			<artifactId>bitbucket-page-objects</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
 		<dependency>
 			<groupId>com.atlassian.activeobjects</groupId>
 			<artifactId>activeobjects-plugin</artifactId>
@@ -123,12 +121,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.atlassian.sal</groupId>
-			<artifactId>sal-api</artifactId>
-			<version>2.4.1</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.google.collections</groupId>
 			<artifactId>google-collections</artifactId>
 			<version>1.0</version>
@@ -181,27 +173,34 @@
 		<plugins>
 			<plugin>
 				<groupId>com.atlassian.maven.plugins</groupId>
-				<artifactId>maven-stash-plugin</artifactId>
+				<artifactId>bitbucket-maven-plugin</artifactId>
 				<version>${amps.version}</version>
 				<extensions>true</extensions>
 				<configuration>
                     <allowGoogleTracking>false</allowGoogleTracking>
 					<server>localhost</server>
 					<!-- run DC cluster using 'atlas-run \-\-testGroup clusterTestGroup' -->
-                    <!-- you will also need to download mysql driver and place in /home/lib for *all* nodes in cluster. See stash.shared.home values for each node below -->
+                    <!-- you will also need to download mysql driver and place in /home/lib for *all* nodes in cluster. See bitbucket.shared.home values for each node below -->
 					<!-- see https://developer.atlassian.com/stash/docs/latest/how-tos/cluster-safe-plugins.html -->
                     <!-- the file runClustered.sh aggregates some manipulations needed to make it easier, but starting a clister is sloooow -->
 					<products>
+                        <!-- standalone non-clustered w/ in-memory db -->
+                        <product>
+                            <id>bitbucket</id>
+                            <instanceId>bitbucket-single</instanceId>
+                            <version>${bitbucket.version}</version>
+                            <dataVersion>${bitbucket.data.version}</dataVersion>
+                        </product>
 						<!-- node 1 for clustered -->
 						<product>
-							<id>stash</id>
-							<instanceId>stash-node-1</instanceId>
-							<version>${stash.version}</version>
-							<dataVersion>${stash.data.version}</dataVersion>
+							<id>bitbucket</id>
+							<instanceId>bitbucket-node-1</instanceId>
+							<version>${bitbucket.version}</version>
+							<dataVersion>${bitbucket.data.version}</dataVersion>
 							<systemPropertyVariables>
-								<stash.shared.home>${project.basedir}/target/stash-node-1/home/shared</stash.shared.home>
+								<bitbucket.shared.home>${project.basedir}/target/bitbucket-node-1/home/shared</bitbucket.shared.home>
                                 <!-- override the SSH port used for this node -->
-                                <stash.plugin.ssh.port>7997</stash.plugin.ssh.port>
+                                <bitbucket.plugin.ssh.port>7997</bitbucket.plugin.ssh.port>
 								<!-- override database settings so both nodes use a single database -->
 								<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
 								<jdbc.url>jdbc:mysql://10.187.116.253:3306/cf_355c208f_d6d1_4f9b_b8c9_538453c89ec7?characterEncoding=utf8&amp;useUnicode=true&amp;sessionVariables=storage_engine%3DInnoDB</jdbc.url>
@@ -225,16 +224,16 @@
 						</product>
 						<!-- Node 2 -->
 						<product>
-							<id>stash</id>
-							<instanceId>stash-node-2</instanceId>
-							<version>${stash.version}</version>
-							<dataVersion>${stash.data.version}</dataVersion>
+							<id>bitbucket</id>
+							<instanceId>bitbucket-node-2</instanceId>
+							<version>${bitbucket.version}</version>
+							<dataVersion>${bitbucket.data.version}</dataVersion>
 							<!-- override the HTTP port used for this node -->
 							<httpPort>7992</httpPort>
 							<systemPropertyVariables>
-								<stash.shared.home>${project.basedir}/target/stash-node-1/home/shared</stash.shared.home>
+								<bitbucket.shared.home>${project.basedir}/target/bitbucket-node-1/home/shared</bitbucket.shared.home>
 								<!-- override the SSH port used for this node -->
-								<stash.plugin.ssh.port>7998</stash.plugin.ssh.port>
+								<bitbucket.plugin.ssh.port>7998</bitbucket.plugin.ssh.port>
 								<!-- override database settings so both nodes use a single database -->
 								<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
 								<jdbc.url>jdbc:mysql://10.187.116.253:3306/cf_355c208f_d6d1_4f9b_b8c9_538453c89ec7?characterEncoding=utf8&amp;useUnicode=true&amp;sessionVariables=storage_engine%3DInnoDB</jdbc.url>
@@ -263,8 +262,14 @@
 						<testGroup>
 							<id>clusterTestGroup</id>
 							<productIds>
-								<productId>stash-node-1</productId>
-								<productId>stash-node-2</productId>
+								<productId>bitbucket-node-1</productId>
+								<productId>bitbucket-node-2</productId>
+							</productIds>
+						</testGroup>
+						<testGroup>
+							<id>default</id>
+							<productIds>
+								<productId>bitbucket-single</productId>
 							</productIds>
 						</testGroup>
 					</testGroups>
@@ -302,13 +307,13 @@
 		</plugins>
 	</build>
 	<properties>
-		<stash.version>3.11.2</stash.version>
-		<stash.ssh.version>3.10.0</stash.ssh.version>
-		<stash.data.version>3.11.2</stash.data.version>
+		<bitbucket.version>4.10.2</bitbucket.version>
+		<bitbucket.ssh.version>4.10.2</bitbucket.ssh.version>
+		<bitbucket.data.version>4.10.2</bitbucket.data.version>
 		<amps.version>6.1.0</amps.version>
-		<plugin.testrunner.version>1.2.3</plugin.testrunner.version>
-		<ao.version>0.28.0</ao.version>
+		<plugin.testrunner.version>2.0.0</plugin.testrunner.version>
+		<ao.version>1.2.0</ao.version>
 	</properties>
-	<url>https://forge.lmig.com</url>
+	<url>https://developer.libertymutual.com</url>
 	<description>This plugin enables enterprise level SSH Key management over the default access provided in Bitbucket.</description>
 </project>

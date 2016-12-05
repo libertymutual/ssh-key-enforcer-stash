@@ -45,11 +45,10 @@ import org.junit.runner.RunWith;
 
 import com.atlassian.activeobjects.external.ActiveObjects;
 import com.atlassian.activeobjects.test.TestActiveObjects;
-import com.atlassian.stash.internal.key.ssh.SimpleSshKey;
-import com.atlassian.stash.ssh.api.SshKey;
-import com.atlassian.stash.ssh.api.SshKeyService;
-import com.atlassian.stash.user.StashUser;
-import com.atlassian.stash.user.UserService;
+import com.atlassian.bitbucket.ssh.SshKey;
+import com.atlassian.bitbucket.ssh.SshKeyService;
+import com.atlassian.bitbucket.user.ApplicationUser;
+import com.atlassian.bitbucket.user.UserService;
 import com.lmig.forge.stash.ssh.ao.EnterpriseKeyRepository;
 import com.lmig.forge.stash.ssh.ao.EnterpriseKeyRepositoryImpl;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
@@ -77,7 +76,9 @@ import org.mockito.ArgumentCaptor;
 @Data(value = EnterpriseSshKeyManagerImplTest.EnterpriseSshKeyRepositoryTestData.class)
 @Jdbc(net.java.ao.test.jdbc.DynamicJdbcConfiguration.class)
 public class EnterpriseSshKeyManagerImplTest {
+    //this key is pre-saved in our meta tables (see EnterpriseSshKeyRepositoryTestData_, thus 'allowed'
     private static final String APPROVED_PUBLIC_KEY_ONE = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC0O2PpfWd0RuoveFkSLP8DaL2ZekQZJM7gzQFi/cavziK8jnAY+xtNIAF1K7EN64JSM2DTMU7BZUFkJvqqbugzc29A/LOfZ6GzvMhSiR7YR2J/eOkVZbmPPyC1qWDCc5Ne71pEJhU5OdlFd4Hj5XgDzNyMANoYlO+xm1IDzHBxDSrvY++VGrnZG1rJ6aSdxyRCoE7MVtQkLuIMDSVPTVfdqDV4oKlH2bzd4LyA1Jm01+MBmWq2qVcKcF6UYKaUILVreZZZSm2/PBbgQ+H5yzjNeEbvdnAr7bcn+xRdhEM0ZGm/RRDRIvwkTlWJ2y9M3KvnJEKbv/c9ZAlOmbs5K1OhfGL/jCU8h1EslwQ9euFp0wjKUMj5u9ll8QqpNcXxsfUnaN9qc2rrm5FS5t5TFAkbIX5fOTJCPb+seE146ax/cNovzOoJUPvF+qBfvJLQGX2L/4JdPqDQ6FkLbvJy194/K5oWag8w4F9ftYIfd/SOgatPMiKuhOls2zYufm34UBbksc7qxDD12JUiI/q7JNted53tnPVBSDLM5RYtohDq/w4MfyFmA51UeETSLumlwg9kOuqaWBYjr2Esn09EtkQNIhQxxt3w47O0RFghZgJdnP3VORju3v2l0Qfo7A/EbeDGKXQhCl6yeMv82lmUtzOhVN6IAApOwMH7Hmh/z209jw==";
+    //this key does not match any key in our meta tables and considered invalid/unapproved.
     private static final String UNAPPROVED_PUBLIC_KEY_ONE = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC0O2PpfWd0RuoveFkSLP8DaL2ZekQZJM7gzQFi/cavziK8jnAY+xtNIAF1K7EN64JSM2DTMU7BZUFkJvqqbugzc29A/LOfZ6GzvMhSiR7YR2J/eOkVZbmPPyC1qWDCc5Ne71pEJhU5OdlFd4Hj5XgDzNyMANoYlO+xm1IDzHBxDSrvY++VGrnZG1rJ6aSdxyRCoE7MVtQkLuIMDSVPTVfdqDV4oKlH2bzd4LyA1Jm01+MBmWq2qVcKcF6UYKaUILVreZZZSm2/PBbgQ+H5yzjNeEbvdnAr7bcn+xRdhEM0ZGm/RRDRIvwkTlWJ2y9M3KvnJEKbv/c9ZAlOmbs5K1OhfGL/jCU8h1EslwQ9euFp0wjKUMj5u9ll8QqpNcXxsfUnaN9qc2rrm5FS5t5TFAkbIX5fOTJCPb+seE146ax/cNovzOoJUPvF+qBfvJLQGX2L/4JdPqDQ6FkLbvJy194/K5oWag8w4F9ftYIfd/SOgatPMiKuhOls2zYufm34UBbksc7qxDD1DG";
     private static final int EXPIRED_USER_ID = 1;
     private static final int VALID_USER_ID = 2;
@@ -98,17 +99,40 @@ public class EnterpriseSshKeyManagerImplTest {
     private SshKeyPairGenerator keyPairGenerator;
     private UserService userService;
     private PluginSettingsService pluginSettingsService;
-    private StashUser unblessedUser ;
-    private StashUser blessedUser;
+    private ApplicationUser unblessedUser ;
+    private ApplicationUser blessedUser;
+    private SshKey approvedUserKey = mock(SshKey.class);
+    private SshKey unapprovedUserKey = mock(SshKey.class);
+    private SshKey existingKeyForUnapprovedUser = mock(SshKey.class);
 
     @Before
     public void setup() {
+        //mock app users
+        userService = mock(UserService.class);
+        unblessedUser = mock(ApplicationUser.class);
+        when(unblessedUser.getId()).thenReturn(VALID_USER_ID);
+        when(userService.isUserInGroup(unblessedUser, AUTHED_GROUP)).thenReturn(false);
+        blessedUser = mock(ApplicationUser.class);
+        when(blessedUser.getId()).thenReturn(VALID_USER_ID);
+        when(userService.isUserInGroup(blessedUser, AUTHED_GROUP)).thenReturn(true);
+
+        // mock their keys and potential keys
+        when(approvedUserKey.getText()).thenReturn(APPROVED_PUBLIC_KEY_ONE);
+        when(approvedUserKey.getUser()).thenReturn(blessedUser);
+        when(approvedUserKey.getLabel()).thenReturn("Known key created inside stash");
+
+        when(unapprovedUserKey.getText()).thenReturn(UNAPPROVED_PUBLIC_KEY_ONE);
+        when(unapprovedUserKey.getUser()).thenReturn(unblessedUser);
+        when(unapprovedUserKey.getLabel()).thenReturn("Unknown key created outside stash");
+
+        when(existingKeyForUnapprovedUser.getText()).thenReturn(APPROVED_PUBLIC_KEY_ONE);
+        when(existingKeyForUnapprovedUser.getUser()).thenReturn(unblessedUser);
+
         ao = new TestActiveObjects(entityManager);
         keyRepo = new EnterpriseKeyRepositoryImpl(ao);
         stashKeyService = mock(SshKeyService.class);
-        when(stashKeyService.addForUser(any(StashUser.class),anyString())).thenReturn(new SimpleSshKey(999,"Label","KEYVALUE",blessedUser));
+        when(stashKeyService.addForUser(any(ApplicationUser.class),anyString())).thenReturn(approvedUserKey);
         notificationService = mock(NotificationService.class);
-        userService = mock(UserService.class);
         keyPairGenerator = new JschSshKeyPairGenerator();
         when(userService.existsGroup(anyString())).thenReturn(true);
         pluginSettingsService = mock(PluginSettingsService.class);
@@ -116,15 +140,9 @@ public class EnterpriseSshKeyManagerImplTest {
         when(pluginSettingsService.getDaysAllowedForUserKeys()).thenReturn(DAYS_ALLOWED);
         when(pluginSettingsService.getDaysAllowedForBambooKeys()).thenReturn(DAYS_ALLOWED);
         when(pluginSettingsService.getAuthorizedGroup()).thenReturn(AUTHED_GROUP);
-        when(userService.getUserByName(KeyRotationJobRunner.ADMIN_ACCOUNT_NAME)).thenReturn(mock(StashUser.class));//defeat NPE check
+        when(userService.getUserByName(KeyRotationJobRunner.ADMIN_ACCOUNT_NAME)).thenReturn(mock(ApplicationUser.class));//defeat NPE check
         ourKeyService = new EnterpriseSshKeyServiceImpl(stashKeyService, keyRepo, keyPairGenerator, notificationService,userService, pluginSettingsService);
-   
-         unblessedUser = mock(StashUser.class);
-        when(unblessedUser.getId()).thenReturn(VALID_USER_ID);
-        when(userService.isUserInGroup(unblessedUser, AUTHED_GROUP)).thenReturn(false);        
-         blessedUser = mock(StashUser.class);
-        when(blessedUser.getId()).thenReturn(VALID_USER_ID);
-        when(userService.isUserInGroup(blessedUser, AUTHED_GROUP)).thenReturn(true);
+
     }
 
     @Test
@@ -155,52 +173,48 @@ public class EnterpriseSshKeyManagerImplTest {
         validKey = ao.get(SshKeyEntity.class, EnterpriseSshKeyRepositoryTestData.expiredKey.getID());
         assertThat(validKey, nullValue());
         // stash ssh remve was called with ecxpired ssh key id
-
-        // stash's ssh service was not invoked
         verify(stashKeyService).remove(EXPIRED_STASH_KEY_ID);
     }
 
     @Test
     public void whenKeyIsExpiredTheAppropriateUserIsNotified() {
         ourKeyService.replaceExpiredKeysAndNotifyUsers();
-
-        // stash's ssh service was not invoked
         verify(notificationService).notifyUserOfExpiredKey(EXPIRED_USER_ID);
     }
     
     
     @Test
     public void userInBlessedGroupMayByPassDirectService(){
-        SshKey newKey = new SimpleSshKey(1, "a comment", UNAPPROVED_PUBLIC_KEY_ONE,blessedUser );
-        boolean isAllowed = ourKeyService.isKeyValidForUser(newKey, blessedUser);
-        
+        //given unknown key from an authorized user
+        boolean isAllowed = ourKeyService.isKeyValidForUser(unapprovedUserKey, blessedUser);
+        // then the key is accepted by rules
         assertThat(isAllowed,is(true));
     }
     
     
     @Test
-    public void userNotInBlessedGroupAreNotAllowedDirect(){
-        
-        SshKey newKey = new SimpleSshKey(1, "a comment", UNAPPROVED_PUBLIC_KEY_ONE ,unblessedUser );
-        boolean isAllowed = ourKeyService.isKeyValidForUser(newKey, unblessedUser);
-        
+    public void unknownKeysCreatedByUnauthorizedUsersAreNotAllowed(){
+        //given an unknown key from a non-authorized (standard) user
+        boolean isAllowed = ourKeyService.isKeyValidForUser(unapprovedUserKey, unblessedUser);
+        //then the keys are rejected by rules
         assertThat(isAllowed,is(false));        
     }
 
     @Test
-    public void userNotInBlessedGroupButUsedWrapperServiceAreAllowed(){
-        //when(keyRepo.isValidKeyForUser(unblessedUser, PUBLIC_KEY_ONE)).thenReturn(true);
-        SshKey newKey = new SimpleSshKey(1, "a comment", APPROVED_PUBLIC_KEY_ONE,unblessedUser );
-        boolean isAllowed = ourKeyService.isKeyValidForUser(newKey, unblessedUser);
-
+    // EVen when we create keys the event will fire causing it to be checked against rules
+    // make sure we dont delete our own keys!
+    public void keyCreatedViaCustomServiceIsAccptedByValidator(){
+        //given a pre-registered (i.e. known) key from an unauthorized (standard) user,
+        boolean isAllowed = ourKeyService.isKeyValidForUser(existingKeyForUnapprovedUser, unblessedUser);
+        // then  the key will be allowed
         assertThat(isAllowed,is(true));
     }
 
     @Test
     @NonTransactional
-    public void generatingNewUserKeysIgnoresOtherTypes(){
+    public void generatingNewUserKeysIgnoresNonUserTypeLeys(){
         //given a user with existing USER and BYPASS keys
-        // see EnterpriseSshKeyRepositoryTestData below and bypassKey
+        // (created via EnterpriseSshKeyRepositoryTestData below )
 
 
         //when new USER key is created
@@ -223,7 +237,9 @@ public class EnterpriseSshKeyManagerImplTest {
         public void update(EntityManager em) throws Exception {
             em.migrate(SshKeyEntity.class);
 
-            // create a pre-expired key in DB for scheduler
+            // create an expired and non-expired ID.
+            // Also create a BYPASS ID so that all types are present
+            // IMPORTANT - only use APPROVED_PUBLIC_KEY to make sure validation rules dont allow UNAPPROVED key in test sabove
             DateTime now = new DateTime();
             expiredKey = em.create(SshKeyEntity.class, new DBParam("USERID", EXPIRED_USER_ID), new DBParam("KEYID",
                     EXPIRED_STASH_KEY_ID), new DBParam("TEXT", APPROVED_PUBLIC_KEY_ONE), new DBParam("LABEL", "COMPROMISED"), new DBParam("TYPE", KeyType.USER),

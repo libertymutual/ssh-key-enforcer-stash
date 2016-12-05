@@ -40,8 +40,8 @@ import org.junit.runner.RunWith;
 
 import com.atlassian.activeobjects.external.ActiveObjects;
 import com.atlassian.activeobjects.test.TestActiveObjects;
-import com.atlassian.stash.ssh.api.SshKey;
-import com.atlassian.stash.user.StashUser;
+import com.atlassian.bitbucket.ssh.SshKey;
+import com.atlassian.bitbucket.user.ApplicationUser;
 import com.lmig.forge.stash.ssh.ao.EnterpriseKeyRepository;
 import com.lmig.forge.stash.ssh.ao.EnterpriseKeyRepositoryImpl;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
@@ -87,7 +87,7 @@ public class EnterpriseSshKeyRepositoryTest {
     @Test
     @NonTransactional
     public void aKeyCanBeSaved() {
-        StashUser user = mock(StashUser.class);
+        ApplicationUser user = mock(ApplicationUser.class);
         when(user.getId()).thenReturn(ADHOC_USER_ID);
         String comment = "No Comment123";
 

@@ -24,10 +24,10 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.atlassian.stash.ssh.api.SshKey;
-import com.atlassian.stash.ssh.api.SshKeyService;
-import com.atlassian.stash.user.StashUser;
-import com.atlassian.stash.user.UserService;
+import com.atlassian.bitbucket.ssh.SshKey;
+import com.atlassian.bitbucket.ssh.SshKeyService;
+import com.atlassian.bitbucket.user.ApplicationUser;
+import com.atlassian.bitbucket.user.UserService;
 import com.lmig.forge.stash.ssh.ao.EnterpriseKeyRepository;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity.KeyType;
@@ -60,7 +60,7 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
     }
 
     @Override
-    public boolean isKeyValidForUser(SshKey key, StashUser stashUser) {
+    public boolean isKeyValidForUser(SshKey key, ApplicationUser stashUser) {
         //allow bamboo <> stash keys for system accounts in special group.
         String bambooUser =  pluginSettingsService.getAuthorizedUser();
         String userGroup = pluginSettingsService.getAuthorizedGroup();
@@ -78,7 +78,7 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
     }
 
     @Override
-    public void removeKeyIfNotLegal(SshKey key, StashUser user) {
+    public void removeKeyIfNotLegal(SshKey key, ApplicationUser user) {
         if (isKeyValidForUser(key, user)) {
             return;
         } else {
@@ -89,7 +89,7 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
     }
 
     @Override
-    public KeyPairResourceModel generateNewKeyPairFor(StashUser user) {
+    public KeyPairResourceModel generateNewKeyPairFor(ApplicationUser user) {
         //purge old key for this user
         removeExistingUserKeysFor(user);
         //create new one
@@ -103,7 +103,7 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
         return result;
     }
 
-    private void removeExistingUserKeysFor(StashUser user) {
+    private void removeExistingUserKeysFor(ApplicationUser user) {
         List<SshKeyEntity> allKeys = enterpriseKeyRepository.keysForUser(user);
         for(SshKeyEntity key: allKeys){
             if(key.getKeyType() == KeyType.USER){
@@ -148,7 +148,7 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
 
     @Override
     public List<SshKeyEntity> getKeysForUser(String username) {
-        StashUser user = userService.getUserByName(username);
+        ApplicationUser user = userService.getUserByName(username);
         return enterpriseKeyRepository.keysForUser(user);
     }
     

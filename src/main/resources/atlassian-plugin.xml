@@ -28,9 +28,9 @@
     </transformation>
     <resource type="download" name="key-enforcer.js" location="/js/stash-ssh-key-generating.js"/>
   </web-resource>
-  <stash-resource key="account-ssh-soy" name="Account Tab Soy Templates">
+  <client-resource key="account-ssh-soy" name="Account Tab Soy Templates">
     <directory location="/templates/"/>
-  </stash-resource>
+  </client-resource>
   <servlet name="User Key Management Servlet" i18n-name-key="user-key-management-servlet.name" key="user-key-management-servlet" class="com.lmig.forge.stash.ssh.servlet.UserKeyManagementServlet">
     <description key="user-key-management-servlet.description">The User Key Management Servlet Plugin</description>
     <url-pattern>/account/enterprisekey</url-pattern>
@@ -38,17 +38,17 @@
   <rest name="Key Details Resource" i18n-name-key="key-details-resource.name" key="key-details-resource" path="/enterprisessh" version="1.0">
     <description key="key-details-resource.description">The Key Details Resource Plugin</description>
   </rest>
-  <web-item key="user-keys" name="User Keys" section="stash.user.account.nav">
+  <web-item key="user-keys" name="User Keys" section="bitbucket.user.account.nav">
     <link>/plugins/servlet/account/enterprisekey</link>
     <!-- <link>${navBuilder.pluginServlets().path('userkeymanagementservlet').buildRelNoContext()}</link-->
     <label key="key.enforcer.servlet.link.user.label"/>
   </web-item>
-  <web-item key="repo-keys" name="Repository Keys" section="stash.repository.settings.panel/repository-permissions-section">
+  <web-item key="repo-keys" name="Repository Keys" section="bitbucket.repository.settings.panel/repository-permissions-section">
     <link>/plugins/servlet/account/enterprisekey</link>
     <!-- <link>${navBuilder.pluginServlets().path('userkeymanagementservlet').buildRelNoContext()}</link-->
     <label key="key.enforcer.servlet.link.repo.label"/>
   </web-item>
-  <web-item key="project-keys" name="Project Keys" section="stash.user.account.nav">
+  <web-item key="project-keys" name="Project Keys" section="bitbucket.user.account.nav">
     <link>/plugins/servlet/account/enterprisekey</link>
     <!-- <link>${navBuilder.pluginServlets().path('userkeymanagementservlet').buildRelNoContext()}</link-->
     <label key="key.enforcer.servlet.link.project.label"/>
@@ -57,10 +57,10 @@
   <component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties"/>
   <component-import key="soyTemplateRenderer" interface="com.atlassian.soy.renderer.SoyTemplateRenderer" filter=""/>
   <component-import key="userManager" interface="com.atlassian.sal.api.user.UserManager" filter=""/>
-  <component-import key="sshKeyManager" interface="com.atlassian.stash.ssh.api.SshKeyService" filter=""/>
+  <component-import key="sshKeyManager" interface="com.atlassian.bitbucket.ssh.SshKeyService" filter=""/>
   <component-import key="schedulerService" interface="com.atlassian.scheduler.SchedulerService"/>
-  <component-import key="mailService" interface="com.atlassian.stash.mail.MailService"/>
-  <component-import key="applicationPropertiesService" interface="com.atlassian.stash.server.ApplicationPropertiesService"/>
+  <component-import key="mailService" interface="com.atlassian.bitbucket.mail.MailService"/>
+  <component-import key="applicationPropertiesService" interface="com.atlassian.bitbucket.server.ApplicationPropertiesService"/>
   <component key="GeneralEventListener" class="com.lmig.forge.stash.ssh.events.GeneralEventListener"/>
   <component key="NotificationService" class="com.lmig.forge.stash.ssh.notifications.NotificationService"/>
   <component key="enterpriseSshKeyService" class="com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyServiceImpl" name="Enterprise Ssh Key Manager Impl" i18n-name-key="enterprise-ssh-key-manager-impl.name">
@@ -92,7 +92,7 @@
   <component-import key="ao" name="Active Objects service" interface="com.atlassian.activeobjects.external.ActiveObjects">
     <description>Component to access Active Objects functionality from the plugin</description>
   </component-import>
-  <ao key="ao-module">
+  <ao key="ao-module" namespace="com.lmig.forge.stash.ssh.stash-ssh-key-enforcer">
     <description>The module configuring the Active Objects service used by this plugin</description>
     <entity>com.lmig.forge.stash.ssh.ao.SshKeyEntity</entity>
   </ao>

@@ -6,7 +6,7 @@
 {template .sshTab}
 <html>
 <head>
-    <meta name="decorator" content="stash.users.account">
+    <meta name="decorator" content="bitbucket.users.account">
     <meta name="activeTab" content="account-plugin-tab">
     <title>Enterprise Key Management</title>
     {webResourceManager_requireResource('com.lmig.forge.stash.ssh.stash-ssh-key-enforcer:stash-ssh-key-generator-resources')}
@@ -18,7 +18,7 @@
     <p>You may create a new SSH Key Pair if your previous was lost or compromised.</p>
     <p>Once created you will have the chance to download the public/private key as a file. Make sure to save them in a safe place. {if $policyLink}See <a id="dialog-show-link" href="{$policyLink}" target="_blank">company policy</a>.{/if}</p>
 </div>
-    
+<div id="aui-message-bar"></div>
 <div class="aui-group">
     <div class="aui-item">
        <button id="ssh-key-gen-button" class="aui-button aui-button-primary">Create New Key Pair</button>
