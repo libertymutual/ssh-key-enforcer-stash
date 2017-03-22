@@ -82,7 +82,7 @@ public class KeyRotationScheduler implements LifecycleAware, DisposableBean, Ini
     }
      private void unregisterJobRunner() {
          schedulerService.unregisterJobRunner(JobRunnerKey.of(JOB_RUNNER_KEY)); 
-         log.debug("KEY Expiring Job unregistered");
+         log.info("KEY Expiring Job unregistered");
      }
 
     /**
@@ -182,7 +182,7 @@ public class KeyRotationScheduler implements LifecycleAware, DisposableBean, Ini
         List<JobDetails> existingSchedules =  schedulerService.getJobsByJobRunnerKey(JobRunnerKey.of(JOB_RUNNER_KEY));
         if( existingSchedules.size() > 0 ){
             schedulerService.unregisterJobRunner(JobRunnerKey.of(JOB_RUNNER_KEY));
-            log.warn("Unregistered previously scheduled job");
+            log.info("Unregistered previously scheduled job");
         }
         long runInterval = pluginSettingsService.getMillisBetweenRuns();
         //  long runInterval = 60000; //for live demos
@@ -191,7 +191,7 @@ public class KeyRotationScheduler implements LifecycleAware, DisposableBean, Ini
             schedulerService.scheduleJob(JOB_ID, JobConfig.forJobRunnerKey(JobRunnerKey.of(JOB_RUNNER_KEY))
                     .withRunMode(RunMode.RUN_ONCE_PER_CLUSTER)
                     .withSchedule(Schedule.forInterval(runInterval, new Date(System.currentTimeMillis() + 5000))));
-            log.warn("KEY Expiring Job Scheduled to run every " + runInterval + " ms. First run will trigger in ~5 seconds");
+            log.info("KEY Expiring Job Scheduled to run every " + runInterval + " ms. First run will trigger in ~5 seconds");
         }
     }
 

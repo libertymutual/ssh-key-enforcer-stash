@@ -55,9 +55,12 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
                     key.setLabel(label);
                     key.setCreatedDate(new Date());
                     key.save();
+                    log.debug("Updated existing key for user");
                 } else {
                     key = ao.create(SshKeyEntity.class, new DBParam("TYPE", SshKeyEntity.KeyType.USER), new DBParam("USERID", user.getId()), new DBParam("TEXT", text), new DBParam("LABEL", label), new DBParam("CREATED", new Date()));
+                    log.debug("created new key for user");
                 }
+
                 return key;
             }
         });
@@ -110,8 +113,7 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
     @Override
     public void forgetRecordMatching(SshKey key) {
        int recordsDeleted = ao.deleteWithSQL(SshKeyEntity.class, "KEYID = ?", key.getId());
-       log.warn("Deleted " + recordsDeleted + " meta record related to key: " + key.getId());
-        
+       log.debug("Deleted " + recordsDeleted + " meta record related to key: " + key.getId());
     }
 
     @Override

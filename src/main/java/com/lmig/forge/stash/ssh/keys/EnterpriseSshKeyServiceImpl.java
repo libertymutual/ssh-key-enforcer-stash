@@ -67,11 +67,11 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
         String bambooUser =  pluginSettingsService.getAuthorizedUser();
         String userGroup = pluginSettingsService.getAuthorizedGroup();
         if( bambooUser != null && bambooUser.equals(stashUser.getName())){
-            log.warn("Username matches configured 'bambooUser', adding record");
+            log.debug("Username matches configured 'bambooUser', adding record");
             enterpriseKeyRepository.saveExternallyGeneratedKeyDetails(key,stashUser,SshKeyEntity.KeyType.BAMBOO);
             return true;
         }else if( userGroup != null && userService.existsGroup(userGroup) && userService.isUserInGroup(stashUser, userGroup)){
-            log.warn("Username matches configured 'bambooUser', adding record");
+            log.debug("Username matches configured 'bambooUser', adding record");
             enterpriseKeyRepository.saveExternallyGeneratedKeyDetails(key,stashUser,SshKeyEntity.KeyType.BYPASS);
             return true;
         }
@@ -87,7 +87,7 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
             log.debug("No action required, valid key.");
         }else{
             sshKeyService.remove(key.getId());
-            log.warn("Invalid or illegal key removed for user " + user.getId());
+            log.info("Invalid or illegal key removed for user " + user.getId());
             // TODO issue custom audit event
         }
         log.debug("<<<removeKeyIfNotLegal");
