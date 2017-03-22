@@ -64,7 +64,7 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
         //allow bamboo <> stash keys for system accounts in special group.
         String bambooUser =  pluginSettingsService.getAuthorizedUser();
         String userGroup = pluginSettingsService.getAuthorizedGroup();
-        if(enterpriseKeyRepository.isValidKeyForUser(stashUser, key.getText())){
+        if (matchingMetaExistsForKey(stashUser,key)){
             return true;
         }else if( bambooUser != null && bambooUser.equals(stashUser.getName())){
             enterpriseKeyRepository.saveExternallyGeneratedKeyDetails(key,stashUser,SshKeyEntity.KeyType.BAMBOO);
@@ -151,7 +151,16 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
         ApplicationUser user = userService.getUserByName(username);
         return enterpriseKeyRepository.keysForUser(user);
     }
-    
-   
+
+    /*
+    * This method means it's a key owned by this plugin, and therefore safe to let go through events
+    * without intervention
+     */
+   private boolean matchingMetaExistsForKey(ApplicationUser user, SshKey key){
+       if(null != key){
+           return key.getText().equals(key.getText());
+       }
+       return false;
+   }
 
 }

@@ -70,7 +70,8 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
         return entity;
     }
 
-    private SshKeyEntity findSingleUserKey(ApplicationUser user) {
+    @Override
+    public SshKeyEntity findSingleUserKey(ApplicationUser user) {
         SshKeyEntity[] keys = ao.find(SshKeyEntity.class, Query.select().where("USERID = ? AND TYPE = ?", user.getId(), KeyType.USER));
         if( null != keys && keys.length == 1 ){
             SshKeyEntity key = keys[0];
@@ -78,16 +79,6 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
         }else{
             return null;
         }
-    }
-
-    @Override
-    public boolean isValidKeyForUser(ApplicationUser user, String text) {
-        SshKeyEntity key = findSingleUserKey(user);
-        if(null != key){
-            return key.getText().equals(text);
-        }
-        return false;
-       
     }
 
     @Override

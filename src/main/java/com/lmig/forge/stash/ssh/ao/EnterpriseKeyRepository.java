@@ -26,8 +26,8 @@ import com.lmig.forge.stash.ssh.ao.SshKeyEntity.KeyType;
 public interface EnterpriseKeyRepository {
     
     SshKeyEntity createOrUpdateUserKey(ApplicationUser user, String text, String label);
-    
-    boolean isValidKeyForUser(ApplicationUser user, String text);
+
+    SshKeyEntity findSingleUserKey(ApplicationUser user);
 
     List<SshKeyEntity> listOfExpiredKeys(Date oldestValidDate, KeyType keyType);
     
