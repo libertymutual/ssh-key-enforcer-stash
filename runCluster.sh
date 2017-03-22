@@ -30,4 +30,4 @@ cat target/stash-node-1/home/shared/stash-config.properties > target/stash-node-
 
 echo "starting test group"
 # run with cluster optipn
-atlas-run -s ~/.m2/woek.xml  --testGroup clusterTestGroup
+atlas-run --testGroup clusterTestGroup
