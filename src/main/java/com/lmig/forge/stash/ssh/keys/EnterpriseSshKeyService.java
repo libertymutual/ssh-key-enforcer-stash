@@ -28,25 +28,12 @@ import com.lmig.forge.stash.ssh.rest.KeyPairResourceModel;
 public interface EnterpriseSshKeyService {
 
     /**
-     * is the key in question the registered key for the current period?
-     * @param key
-     * @param stashUser
-     * @return
-     */
-    boolean isKeyValidForUser(SshKey key, ApplicationUser stashUser);
-
-
-  
-
-    /**
      * Called by {@link GeneralEventListener} to block
      * user attempts to create their keys outside the enterprise services.
      * @param key
      * @param user
      */
     void removeKeyIfNotLegal(SshKey key, ApplicationUser user);
-
-
 
     /**
      * returns a pre-persisted key pair for the user (we only saved the public one though..)
@@ -56,21 +43,13 @@ public interface EnterpriseSshKeyService {
      */
     KeyPairResourceModel generateNewKeyPairFor(ApplicationUser authorizedUser);
 
-
-
-
     void replaceExpiredKeysAndNotifyUsers();
-
-
 
     /**
      * Remove our meta for any keys deleted via traditional UI/API
      * @param key
      */
     void forgetDeletedKey(SshKey key);
-
-
-
 
     List<SshKeyEntity> getKeysForUser(String username);
 

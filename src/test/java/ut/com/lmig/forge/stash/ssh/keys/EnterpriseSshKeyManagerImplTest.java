@@ -22,14 +22,11 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.*;
 
 import com.lmig.forge.stash.ssh.crypto.JschSshKeyPairGenerator;
 import com.lmig.forge.stash.ssh.crypto.SshKeyPairGenerator;
-import com.lmig.forge.stash.ssh.rest.KeyPairResourceModel;
 import net.java.ao.DBParam;
 import net.java.ao.EntityManager;
 import net.java.ao.test.jdbc.Data;
@@ -58,7 +55,6 @@ import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
 import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyServiceImpl;
 import com.lmig.forge.stash.ssh.notifications.NotificationService;
 import com.lmig.forge.stash.ssh.scheduler.KeyRotationJobRunner;
-import org.mockito.ArgumentCaptor;
 
 /**
  * Must run all methods that interact with service as @NonTransactional or
@@ -186,18 +182,18 @@ public class EnterpriseSshKeyManagerImplTest {
     @Test
     public void userInBlessedGroupMayByPassDirectService(){
         //given unknown key from an authorized user
-        boolean isAllowed = ourKeyService.isKeyValidForUser(unapprovedUserKey, blessedUser);
+        ourKeyService.removeKeyIfNotLegal(unapprovedUserKey, blessedUser);
         // then the key is accepted by rules
-        assertThat(isAllowed,is(true));
+        verify(stashKeyService,never()).remove(anyInt());
     }
     
     
     @Test
     public void unknownKeysCreatedByUnauthorizedUsersAreNotAllowed(){
         //given an unknown key from a non-authorized (standard) user
-        boolean isAllowed = ourKeyService.isKeyValidForUser(unapprovedUserKey, unblessedUser);
+        ourKeyService.removeKeyIfNotLegal(unapprovedUserKey, unblessedUser);
         //then the keys are rejected by rules
-        assertThat(isAllowed,is(false));        
+        verify(stashKeyService).remove(anyInt());
     }
 
     @Test
@@ -205,9 +201,9 @@ public class EnterpriseSshKeyManagerImplTest {
     // make sure we dont delete our own keys!
     public void keyCreatedViaCustomServiceIsAccptedByValidator(){
         //given a pre-registered (i.e. known) key from an unauthorized (standard) user,
-        boolean isAllowed = ourKeyService.isKeyValidForUser(existingKeyForUnapprovedUser, unblessedUser);
+        ourKeyService.removeKeyIfNotLegal(existingKeyForUnapprovedUser, unblessedUser);
         // then  the key will be allowed
-        assertThat(isAllowed,is(true));
+        verify(stashKeyService,never()).remove(anyInt());
     }
 
     @Test

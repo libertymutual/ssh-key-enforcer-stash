@@ -34,7 +34,6 @@ import com.lmig.forge.stash.ssh.ao.SshKeyEntity.KeyType;
 import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 import com.lmig.forge.stash.ssh.crypto.SshKeyPairGenerator;
 import com.lmig.forge.stash.ssh.notifications.NotificationService;
-import com.lmig.forge.stash.ssh.rest.KeyDetailsResourceModel;
 import com.lmig.forge.stash.ssh.rest.KeyPairResourceModel;
 
 public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
@@ -59,33 +58,39 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
 
     }
 
-    @Override
-    public boolean isKeyValidForUser(SshKey key, ApplicationUser stashUser) {
-        //allow bamboo <> stash keys for system accounts in special group.
+
+    /**
+     * If allowed user ID or Group exception this will add meta to our own records, and return true
+     * returns boolean: attempt was valid and added
+     */
+    public boolean addAllowedBypass(SshKey key, ApplicationUser stashUser) {
         String bambooUser =  pluginSettingsService.getAuthorizedUser();
         String userGroup = pluginSettingsService.getAuthorizedGroup();
-        if (matchingMetaExistsForKey(stashUser,key)){
-            return true;
-        }else if( bambooUser != null && bambooUser.equals(stashUser.getName())){
+        if( bambooUser != null && bambooUser.equals(stashUser.getName())){
+            log.warn("Username matches configured 'bambooUser', adding record");
             enterpriseKeyRepository.saveExternallyGeneratedKeyDetails(key,stashUser,SshKeyEntity.KeyType.BAMBOO);
             return true;
         }else if( userGroup != null && userService.existsGroup(userGroup) && userService.isUserInGroup(stashUser, userGroup)){
+            log.warn("Username matches configured 'bambooUser', adding record");
             enterpriseKeyRepository.saveExternallyGeneratedKeyDetails(key,stashUser,SshKeyEntity.KeyType.BYPASS);
             return true;
-        }else{
-            return false;
         }
+        log.debug("User not in excused roles, do not allow.");
+        return false;
     }
+
 
     @Override
     public void removeKeyIfNotLegal(SshKey key, ApplicationUser user) {
-        if (isKeyValidForUser(key, user)) {
-            return;
-        } else {
+        log.debug(">>>removeKeyIfNotLegal");
+        if ( pluginIsAwareOf(user,key) ||  addAllowedBypass(key,user)) {
+            log.debug("No action required, valid key.");
+        }else{
             sshKeyService.remove(key.getId());
             log.warn("Invalid or illegal key removed for user " + user.getId());
             // TODO issue custom audit event
         }
+        log.debug("<<<removeKeyIfNotLegal");
     }
 
     @Override
@@ -154,11 +159,12 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
 
     /*
     * This method means it's a key owned by this plugin, and therefore safe to let go through events
-    * without intervention
+    * without intervention.  The logic below more broadly
      */
-   private boolean matchingMetaExistsForKey(ApplicationUser user, SshKey key){
-       if(null != key){
-           return key.getText().equals(key.getText());
+   private boolean pluginIsAwareOf(ApplicationUser user, SshKey inspectedKey){
+       SshKeyEntity knownKey = enterpriseKeyRepository.findSingleUserKey(user);
+       if(null != knownKey){
+           return knownKey.getText().equals(inspectedKey.getText());
        }
        return false;
    }
