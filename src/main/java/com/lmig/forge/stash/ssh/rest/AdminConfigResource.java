@@ -8,6 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.atlassian.sal.api.user.UserKey;
 import com.atlassian.sal.api.user.UserManager;
 import com.atlassian.bitbucket.auth.AuthenticationContext;
 import com.atlassian.bitbucket.user.ApplicationUser;
@@ -36,8 +37,8 @@ public class AdminConfigResource {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getConfig()
     {
-        ApplicationUser user = stashAuthenticationContext.getCurrentUser();
-        if (user == null || !userManager.isSystemAdmin(user.getName())){
+        UserKey userKey = userManager.getRemoteUserKey();
+        if (userKey == null || !userManager.isSystemAdmin(userKey)){
           return Response.status(Response.Status.FORBIDDEN).build();
         }
         return Response.ok( pluginSettingsService.getAdminConfigResourcesModel()).build();      
@@ -48,8 +49,8 @@ public class AdminConfigResource {
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response updateConfig(AdminConfigResourceModel updatedModel)
     {
-        ApplicationUser user = stashAuthenticationContext.getCurrentUser();
-        if (user == null || !userManager.isSystemAdmin(user.getName())){
+        UserKey userKey = userManager.getRemoteUserKey();
+        if (userKey == null || !userManager.isSystemAdmin(userKey)){
           return Response.status(Response.Status.FORBIDDEN).build();
         }
 

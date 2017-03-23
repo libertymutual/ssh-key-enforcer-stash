@@ -55,9 +55,12 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
                     key.setLabel(label);
                     key.setCreatedDate(new Date());
                     key.save();
+                    log.debug("Updated existing key for user");
                 } else {
                     key = ao.create(SshKeyEntity.class, new DBParam("TYPE", SshKeyEntity.KeyType.USER), new DBParam("USERID", user.getId()), new DBParam("TEXT", text), new DBParam("LABEL", label), new DBParam("CREATED", new Date()));
+                    log.debug("created new key for user");
                 }
+
                 return key;
             }
         });
@@ -70,7 +73,8 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
         return entity;
     }
 
-    private SshKeyEntity findSingleUserKey(ApplicationUser user) {
+    @Override
+    public SshKeyEntity findSingleUserKey(ApplicationUser user) {
         SshKeyEntity[] keys = ao.find(SshKeyEntity.class, Query.select().where("USERID = ? AND TYPE = ?", user.getId(), KeyType.USER));
         if( null != keys && keys.length == 1 ){
             SshKeyEntity key = keys[0];
@@ -78,16 +82,6 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
         }else{
             return null;
         }
-    }
-
-    @Override
-    public boolean isValidKeyForUser(ApplicationUser user, String text) {
-        SshKeyEntity key = findSingleUserKey(user);
-        if(null != key){
-            return key.getText().equals(text);
-        }
-        return false;
-       
     }
 
     @Override
@@ -119,8 +113,7 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
     @Override
     public void forgetRecordMatching(SshKey key) {
        int recordsDeleted = ao.deleteWithSQL(SshKeyEntity.class, "KEYID = ?", key.getId());
-       log.warn("Deleted " + recordsDeleted + " meta record related to key: " + key.getId());
-        
+       log.debug("Deleted " + recordsDeleted + " meta record related to key: " + key.getId());
     }
 
     @Override

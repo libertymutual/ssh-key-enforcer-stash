@@ -50,6 +50,10 @@ public class KeyDetailsResource {
     }
 
 
+    /**
+     * Generate a new Key for this user per rules of service (1 active key, etc)
+     * @return
+     */
     @POST
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public Response generateNewPair() {

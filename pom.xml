@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.lmig.forge.stash.ssh</groupId>
 	<artifactId>stash-ssh-key-enforcer</artifactId>
-	<version>2.0-SNAPSHOT</version>
+	<version>2.1-SNAPSHOT</version>
 	<organization>
 		<name>Liberty Mutual Insurance</name>
 		<url>https://libertymutual.com/</url>
@@ -203,6 +203,8 @@
                                 <bitbucket.plugin.ssh.port>7997</bitbucket.plugin.ssh.port>
 								<!-- override database settings so both nodes use a single database -->
 								<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
+								<!-- We don't care this is visible. Protected network with empty dataset -->
+								<!-- You can modify to point to any MySQL db with permissions to create/alter/drop -->
 								<jdbc.url>jdbc:mysql://10.187.116.253:3306/cf_355c208f_d6d1_4f9b_b8c9_538453c89ec7?characterEncoding=utf8&amp;useUnicode=true&amp;sessionVariables=storage_engine%3DInnoDB</jdbc.url>
 								<jdbc.user>TcVfaZp8iohxwHMg</jdbc.user>
 								<jdbc.password>1vpJLjjMaoLVvozA</jdbc.password>
@@ -307,7 +309,7 @@
 		</plugins>
 	</build>
 	<properties>
-		<bitbucket.version>4.10.2</bitbucket.version>
+		<bitbucket.version>4.13.1</bitbucket.version>
 		<bitbucket.ssh.version>4.10.2</bitbucket.ssh.version>
 		<bitbucket.data.version>4.10.2</bitbucket.data.version>
 		<amps.version>6.1.0</amps.version>
