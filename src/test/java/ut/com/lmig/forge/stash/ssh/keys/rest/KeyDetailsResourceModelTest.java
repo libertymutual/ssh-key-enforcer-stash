@@ -16,6 +16,8 @@ import static org.mockito.Mockito.when;
 
 public class KeyDetailsResourceModelTest {
     private static final java.util.Date STATIC_DATE = new Date();
+    private static final java.lang.Integer USER_ID = 1;
+    private static final java.lang.String USERNAME = "Jean";
     private SshKeyEntity sshKey;
     private ApplicationUser user;
 
@@ -24,6 +26,8 @@ public class KeyDetailsResourceModelTest {
         sshKey = mock(SshKeyEntity.class);
         when(sshKey.getCreatedDate()).thenReturn(STATIC_DATE);
         user = mock(ApplicationUser.class);
+        when(user.getId()).thenReturn(USER_ID);
+        when(user.getSlug()).thenReturn(USERNAME);
     }
 
     @Test
@@ -36,7 +40,8 @@ public class KeyDetailsResourceModelTest {
     @Test
     public void keyDetailsContainUserEntity() {
         KeyDetailsResourceModel createdKeyDetails = KeyDetailsResourceModel.from(sshKey,user);
-        assertThat(createdKeyDetails.getUser(),is(user));
+        assertThat(createdKeyDetails.getUser().getId(),is(USER_ID));
+        assertThat(createdKeyDetails.getUser().getUsername(),is(USERNAME));
     }
 
 

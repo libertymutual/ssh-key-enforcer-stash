@@ -106,6 +106,7 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
         SshKeyEntity newRecord = enterpriseKeyRepository.createOrUpdateUserKey(user, result.getPublicKey(), keyComment);
         SshKey newKey = sshKeyService.addForUser(user, result.getPublicKey());
         enterpriseKeyRepository.updateRecordWithKeyId(newRecord, newKey);
+        log.info("New managed key " + newKey.getId() +" of type USER created user {} ({})", user.getId(), user.getSlug());
         return result;
     }
 

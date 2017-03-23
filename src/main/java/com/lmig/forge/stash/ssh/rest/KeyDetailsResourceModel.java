@@ -33,7 +33,7 @@ public class KeyDetailsResourceModel {
     private String message;
     private String publicKey;
     private String label;
-    private ApplicationUser user;
+    private UserDetails user;
     private int stashKeyId;
     private KeyType keyType;
     private Date created;
@@ -68,12 +68,12 @@ public class KeyDetailsResourceModel {
         return this;
     }
 
-    public ApplicationUser getUser() {
+    public UserDetails getUser() {
         return user;
     }
 
     public KeyDetailsResourceModel setUser(ApplicationUser user) {
-        this.user = user;
+        this.user = new UserDetails(user);
         return this;
     }
 
@@ -113,7 +113,7 @@ public class KeyDetailsResourceModel {
         result.keyType = keyEntity.getKeyType();
         result.publicKey = keyEntity.getText();
         result.label = keyEntity.getLabel();
-        result.user = user;
+        result.user = new UserDetails(user);
         result.stashKeyId = keyEntity.getKeyId();
         result.created = keyEntity.getCreatedDate();
         return result;
