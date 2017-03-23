@@ -16,30 +16,6 @@
 
 package ut.com.lmig.forge.stash.ssh.keys;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.*;
-
-import com.lmig.forge.stash.ssh.crypto.JschSshKeyPairGenerator;
-import com.lmig.forge.stash.ssh.crypto.SshKeyPairGenerator;
-import net.java.ao.DBParam;
-import net.java.ao.EntityManager;
-import net.java.ao.test.jdbc.Data;
-import net.java.ao.test.jdbc.DatabaseUpdater;
-import net.java.ao.test.jdbc.Jdbc;
-import net.java.ao.test.jdbc.NonTransactional;
-import net.java.ao.test.junit.ActiveObjectsJUnitRunner;
-
-import org.joda.time.DateTime;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import com.atlassian.activeobjects.external.ActiveObjects;
 import com.atlassian.activeobjects.test.TestActiveObjects;
 import com.atlassian.bitbucket.ssh.SshKey;
@@ -51,10 +27,30 @@ import com.lmig.forge.stash.ssh.ao.EnterpriseKeyRepositoryImpl;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity.KeyType;
 import com.lmig.forge.stash.ssh.config.PluginSettingsService;
+import com.lmig.forge.stash.ssh.crypto.JschSshKeyPairGenerator;
+import com.lmig.forge.stash.ssh.crypto.SshKeyPairGenerator;
 import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
 import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyServiceImpl;
 import com.lmig.forge.stash.ssh.notifications.NotificationService;
 import com.lmig.forge.stash.ssh.scheduler.KeyRotationJobRunner;
+import net.java.ao.DBParam;
+import net.java.ao.EntityManager;
+import net.java.ao.test.jdbc.Data;
+import net.java.ao.test.jdbc.DatabaseUpdater;
+import net.java.ao.test.jdbc.Jdbc;
+import net.java.ao.test.jdbc.NonTransactional;
+import net.java.ao.test.junit.ActiveObjectsJUnitRunner;
+import org.joda.time.DateTime;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 /**
  * Must run all methods that interact with service as @NonTransactional or
@@ -110,7 +106,9 @@ public class EnterpriseSshKeyManagerImplTest {
         when(userService.isUserInGroup(unblessedUser, AUTHED_GROUP)).thenReturn(false);
         blessedUser = mock(ApplicationUser.class);
         when(blessedUser.getId()).thenReturn(VALID_USER_ID);
+        when(blessedUser.getSlug()).thenReturn("ADMIN");
         when(userService.isUserInGroup(blessedUser, AUTHED_GROUP)).thenReturn(true);
+        when(userService.getUserById(anyInt())).thenReturn(blessedUser);
 
         // mock their keys and potential keys
         when(approvedUserKey.getText()).thenReturn(APPROVED_PUBLIC_KEY_ONE);
