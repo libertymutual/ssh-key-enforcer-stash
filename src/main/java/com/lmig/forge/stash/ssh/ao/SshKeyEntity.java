@@ -16,6 +16,7 @@
 
 package com.lmig.forge.stash.ssh.ao;
 
+import java.sql.Types;
 import java.util.Date;
 
 import net.java.ao.Accessor;
@@ -25,40 +26,43 @@ import net.java.ao.schema.NotNull;
 import net.java.ao.schema.StringLength;
 import net.java.ao.schema.Table;
 
+import javax.persistence.Access;
+
 @Table("ENTKEY")
 public interface SshKeyEntity extends Entity{
     
-    @Mutator("KEYID")
+    @Accessor("KEYID")
     Integer getKeyId();
     @NotNull
-    @Mutator("TEXT")
+    @Accessor("TEXT")
     @StringLength(value=StringLength.UNLIMITED)
     String getText();
     @NotNull
-    @Mutator("LABEL")
+    @Accessor("LABEL")
     String getLabel();
     @NotNull
-    @Mutator("USERID")
+    @Accessor("USERID")
     Integer getUserId();
     @NotNull
-    @Mutator("CREATED")
+    @Accessor("CREATED")
     Date getCreatedDate();
     @NotNull
-    @Mutator("TYPE")
+    @Accessor("TYPE")
     KeyType getKeyType();
     
 
-    @Accessor("KEYID")
+    @Mutator("KEYID")
     void setKeyId(int keyId);
-    @Accessor("TEXT")
+    @Mutator("TEXT")
+    @StringLength(value=StringLength.UNLIMITED)
     void setText(String text);
-    @Accessor("LABEL")
+    @Mutator("LABEL")
     void setLabel(String label);
-    @Accessor("USERID")
+    @Mutator("USERID")
     void setUserId(Integer id);
-    @Accessor("CREATED")
+    @Mutator("CREATED")
     void setCreatedDate(Date created);
-    @Accessor("TYPE")
+    @Mutator("TYPE")
     void setKeyType(KeyType type);
     
     public static enum KeyType{
