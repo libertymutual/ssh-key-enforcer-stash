@@ -16,17 +16,13 @@
 
 package com.lmig.forge.stash.ssh.events;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import com.atlassian.bitbucket.ssh.event.SshKeyCreatedEvent;
-import com.atlassian.bitbucket.ssh.event.SshKeyDeletedEvent;
-import org.apache.log4j.Logger;
-
-import com.atlassian.event.api.EventListener;
 import com.atlassian.bitbucket.i18n.I18nService;
 import com.atlassian.bitbucket.ssh.SshKey;
+import com.atlassian.bitbucket.ssh.event.SshKeyCreatedEvent;
+import com.atlassian.bitbucket.ssh.event.SshKeyDeletedEvent;
+import com.atlassian.event.api.EventListener;
 import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
+import org.apache.log4j.Logger;
 
 public class GeneralEventListener {
     private final Logger logger = Logger.getLogger(GeneralEventListener.class);
@@ -41,10 +37,9 @@ public class GeneralEventListener {
 
     @EventListener
     public void createListener(SshKeyCreatedEvent stashEvent) {
-        SshKey key= stashEvent.getKey();
+        SshKey key = stashEvent.getKey();
         enterpriseSshKeyService.removeKeyIfNotLegal(key, stashEvent.getUser());
     }
-
 
     @EventListener
     public void deleteListener(SshKeyDeletedEvent stashEvent) {

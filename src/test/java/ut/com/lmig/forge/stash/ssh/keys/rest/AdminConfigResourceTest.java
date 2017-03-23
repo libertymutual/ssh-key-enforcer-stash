@@ -1,23 +1,23 @@
 package ut.com.lmig.forge.stash.ssh.keys.rest;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import javax.ws.rs.core.Response;
-
-import com.atlassian.sal.api.user.UserKey;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.atlassian.sal.api.user.UserManager;
 import com.atlassian.bitbucket.auth.AuthenticationContext;
+import com.atlassian.sal.api.user.UserKey;
+import com.atlassian.sal.api.user.UserManager;
 import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 import com.lmig.forge.stash.ssh.rest.AdminConfigResource;
 import com.lmig.forge.stash.ssh.rest.AdminConfigResourceModel;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import ut.com.lmig.forge.stash.ssh.config.PluginSettingsServiceTest;
+
+import javax.ws.rs.core.Response;
+
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class AdminConfigResourceTest { 
     private static final String TEST_CONFIG_GROUP ="ssh-gods";
@@ -44,7 +44,7 @@ public class AdminConfigResourceTest {
     }
 
     @Test
-    public void configCanBeRerievedByAdmin() {
+    public void configCanBeRetrievedByAdmin() {
         givenAdmin();
         //when
         Response response = configResourceEndpoint.getConfig();
@@ -65,7 +65,7 @@ public class AdminConfigResourceTest {
         assertThat(response.getStatus(),is(200));
     }
     @Test
-    public void configCanNotBeRerievedByNonAdmin() {
+    public void configCanNotBeRetrievedByNonAdmin() {
         givenNonAdmin();
         //when
         Response response = configResourceEndpoint.getConfig();

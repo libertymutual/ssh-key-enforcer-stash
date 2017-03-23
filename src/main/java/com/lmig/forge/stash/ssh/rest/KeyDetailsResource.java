@@ -16,23 +16,19 @@
 
 package com.lmig.forge.stash.ssh.rest;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import com.atlassian.annotations.PublicApi;
 import com.atlassian.bitbucket.auth.AuthenticationContext;
 import com.atlassian.bitbucket.user.ApplicationUser;
+import com.atlassian.bitbucket.user.UserService;
 import com.lmig.forge.stash.ssh.EnterpriseKeyGenerationException;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
 import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A resource of message.
@@ -42,17 +38,18 @@ import com.lmig.forge.stash.ssh.keys.EnterpriseSshKeyService;
 public class KeyDetailsResource {
     private final EnterpriseSshKeyService enterpriseKeyService;
     private final AuthenticationContext stashAuthenticationContext;
+    private final UserService userService;
 
     public KeyDetailsResource(EnterpriseSshKeyService enterpriseKeyService,
-                              AuthenticationContext stashAuthenticationContext) {
+                              AuthenticationContext stashAuthenticationContext, UserService userService) {
         this.enterpriseKeyService = enterpriseKeyService;
         this.stashAuthenticationContext = stashAuthenticationContext;
+        this.userService = userService;
     }
 
 
     /**
      * Generate a new Key for this user per rules of service (1 active key, etc)
-     * @return
      */
     @POST
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -73,12 +70,12 @@ public class KeyDetailsResource {
     @Path("/user/{username}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public Response getAllKeysForUser(@PathParam("username") String username) {
-
+        ApplicationUser user = userService.getUserBySlug(username);
         try {
             List<SshKeyEntity> keyEntities = enterpriseKeyService.getKeysForUser(username);
             List<KeyDetailsResourceModel> keyResources = new ArrayList<KeyDetailsResourceModel>();
-            for (SshKeyEntity keyEntitiy : keyEntities) {
-                keyResources.add(KeyDetailsResourceModel.from(keyEntitiy));
+            for (SshKeyEntity keyEntity : keyEntities) {
+                keyResources.add(KeyDetailsResourceModel.from(keyEntity,user));
             }
             return Response.ok(keyResources).build();
         } catch (EnterpriseKeyGenerationException e) {

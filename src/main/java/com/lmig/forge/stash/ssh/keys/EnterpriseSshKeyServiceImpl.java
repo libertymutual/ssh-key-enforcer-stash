@@ -17,13 +17,6 @@
 package com.lmig.forge.stash.ssh.keys;
 
 
-import java.util.Date;
-import java.util.List;
-
-import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.atlassian.bitbucket.ssh.SshKey;
 import com.atlassian.bitbucket.ssh.SshKeyService;
 import com.atlassian.bitbucket.user.ApplicationUser;
@@ -35,6 +28,12 @@ import com.lmig.forge.stash.ssh.config.PluginSettingsService;
 import com.lmig.forge.stash.ssh.crypto.SshKeyPairGenerator;
 import com.lmig.forge.stash.ssh.notifications.NotificationService;
 import com.lmig.forge.stash.ssh.rest.KeyPairResourceModel;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Date;
+import java.util.List;
 
 public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
     final private SshKeyService sshKeyService;
@@ -63,15 +62,17 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
      * If allowed user ID or Group exception this will add meta to our own records, and return true
      * returns boolean: attempt was valid and added
      */
-    public boolean addAllowedBypass(SshKey key, ApplicationUser stashUser) {
+    private boolean addAllowedBypass(SshKey key, ApplicationUser stashUser) {
         String bambooUser =  pluginSettingsService.getAuthorizedUser();
         String userGroup = pluginSettingsService.getAuthorizedGroup();
         if( bambooUser != null && bambooUser.equals(stashUser.getName())){
             log.debug("Username matches configured 'bambooUser', adding record");
+            log.info("Bamboo Key {} created by an authorized bamboo system ID {} ", key.getId(), stashUser.getSlug());
             enterpriseKeyRepository.saveExternallyGeneratedKeyDetails(key,stashUser,SshKeyEntity.KeyType.BAMBOO);
             return true;
         }else if( userGroup != null && userService.existsGroup(userGroup) && userService.isUserInGroup(stashUser, userGroup)){
-            log.debug("Username matches configured 'bambooUser', adding record");
+            log.debug("Username matches configured 'authorizedGroup', adding record");
+            log.info("Bypass Key {} created by an authorized user {} in authorized group", key.getId(), stashUser.getSlug());
             enterpriseKeyRepository.saveExternallyGeneratedKeyDetails(key,stashUser,SshKeyEntity.KeyType.BYPASS);
             return true;
         }
@@ -87,7 +88,7 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
             log.debug("No action required, valid key.");
         }else{
             sshKeyService.remove(key.getId());
-            log.info("Invalid or illegal key removed for user " + user.getId());
+            log.info("Invalid or illegal key removed for user {} ({})", user.getId(), user.getSlug());
             // TODO issue custom audit event
         }
         log.debug("<<<removeKeyIfNotLegal");
@@ -129,7 +130,9 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
         
         for (SshKeyEntity keyRecord : expiredStashKeys) {
             try{
-                log.info("Removing Key for user " + keyRecord.getUserId());
+                ApplicationUser user = userService.getUserById(keyRecord.getUserId());
+                String username = ( null != user ? user.getSlug() : "UNKNOWN_ID:"+keyRecord.getUserId());
+                log.info("Removing Key for user: {}. KeyId: {}" , username, keyRecord.getKeyId());
                 sshKeyService.remove(keyRecord.getKeyId());
                 enterpriseKeyRepository.removeRecord(keyRecord);
                 notificationService.notifyUserOfExpiredKey(keyRecord.getUserId());
@@ -161,12 +164,9 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
     * This method means it's a key owned by this plugin, and therefore safe to let go through events
     * without intervention.  The logic below more broadly
      */
-   private boolean pluginIsAwareOf(ApplicationUser user, SshKey inspectedKey){
+   private boolean pluginIsAwareOf(ApplicationUser user, SshKey inspectedKey) {
        SshKeyEntity knownKey = enterpriseKeyRepository.findSingleUserKey(user);
-       if(null != knownKey){
-           return knownKey.getText().equals(inspectedKey.getText());
-       }
-       return false;
+       return null != knownKey && knownKey.getText().equals(inspectedKey.getText());
    }
 
 }
