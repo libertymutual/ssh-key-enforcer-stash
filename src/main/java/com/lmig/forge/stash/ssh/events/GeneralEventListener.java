@@ -17,6 +17,7 @@
 package com.lmig.forge.stash.ssh.events;
 
 import com.atlassian.bitbucket.i18n.I18nService;
+import com.atlassian.bitbucket.ssh.SshAccessKey;
 import com.atlassian.bitbucket.ssh.SshKey;
 import com.atlassian.bitbucket.ssh.event.SshKeyCreatedEvent;
 import com.atlassian.bitbucket.ssh.event.SshKeyDeletedEvent;

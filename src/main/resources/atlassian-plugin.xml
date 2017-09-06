@@ -86,7 +86,9 @@
   <component key="pluginSettingsService" class="com.lmig.forge.stash.ssh.config.PluginSettingsService" system="true">
     <description>Consolidates access to stash's plugin settings factory</description>
   </component>
-  
+  <component-import key="sshAccessKeyService" name="SSH Access Keyservice" interface="com.atlassian.bitbucket.ssh.SshAccessKeyService">
+    <description>Access SSH key service</description>
+  </component-import>
   
   <!--  AO support for key meta -->
   <component-import key="ao" name="Active Objects service" interface="com.atlassian.activeobjects.external.ActiveObjects">
@@ -95,5 +97,6 @@
   <ao key="ao-module" namespace="com.lmig.forge.stash.ssh.stash-ssh-key-enforcer">
     <description>The module configuring the Active Objects service used by this plugin</description>
     <entity>com.lmig.forge.stash.ssh.ao.SshKeyEntity</entity>
+    <upgradeTask>com.lmig.forge.stash.ssh.ao.migrations.AddRepoId</upgradeTask>
   </ao>
 </atlassian-plugin>

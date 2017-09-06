@@ -19,6 +19,10 @@ package com.lmig.forge.stash.ssh.ao;
 import java.util.Date;
 import java.util.List;
 
+import com.atlassian.bitbucket.nav.NavBuilder;
+import com.atlassian.bitbucket.project.Project;
+import com.atlassian.bitbucket.repository.Repository;
+import com.atlassian.bitbucket.ssh.SshAccessKey;
 import net.java.ao.DBParam;
 import net.java.ao.Query;
 
@@ -69,7 +73,15 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
 
     @Override
     public SshKeyEntity saveExternallyGeneratedKeyDetails(SshKey key, ApplicationUser user, KeyType keyType) {
-        SshKeyEntity entity =ao.create(SshKeyEntity.class, new DBParam("TYPE",keyType), new DBParam("USERID", user.getId()),  new DBParam("KEYID",key.getId()), new DBParam("TEXT", key.getText()),new DBParam("LABEL",key.getLabel()),new DBParam("CREATED", new Date()));
+        Integer resourceId = 0;
+        if( key instanceof SshAccessKey ){
+            if( ((SshAccessKey)key).getResource() instanceof Repository ){
+                resourceId = ((Repository)((SshAccessKey)key).getResource()).getId();
+            }else if( ((SshAccessKey)key).getResource() instanceof Project ){
+                resourceId = ((Project)((SshAccessKey)key).getResource()).getId();
+            }
+        }
+        SshKeyEntity entity =ao.create(SshKeyEntity.class, new DBParam("RESOURCE", resourceId),new DBParam("TYPE",keyType), new DBParam("USERID", user.getId()),  new DBParam("KEYID",key.getId()), new DBParam("TEXT", key.getText()),new DBParam("LABEL",key.getLabel()),new DBParam("CREATED", new Date()));
         return entity;
     }
 

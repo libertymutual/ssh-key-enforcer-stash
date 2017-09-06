@@ -37,6 +37,7 @@ public class KeyDetailsResourceModel {
     private int stashKeyId;
     private KeyType keyType;
     private Date created;
+    private Integer resourceId;
 
     public KeyDetailsResourceModel() {
     }
@@ -104,6 +105,16 @@ public class KeyDetailsResourceModel {
         return this;
     }
 
+    public Integer getResourceId() {
+        return resourceId;
+    }
+
+    public KeyDetailsResourceModel setResourceId(Integer resourceId) {
+        this.resourceId = resourceId;
+        return this;
+    }
+
+
     public KeyDetailsResourceModel(String message) {
         this.message = message;
     }
@@ -116,6 +127,7 @@ public class KeyDetailsResourceModel {
         result.user = new UserDetails(user);
         result.stashKeyId = keyEntity.getKeyId();
         result.created = keyEntity.getCreatedDate();
+        result.resourceId = keyEntity.getResourceId();
         return result;
     }
 }
