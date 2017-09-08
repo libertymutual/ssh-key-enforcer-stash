@@ -49,8 +49,10 @@ public interface SshKeyEntity extends Entity{
     @NotNull
     @Accessor("TYPE")
     KeyType getKeyType();
-    @Accessor("RESOURCE")
-    Integer getResourceId();
+    @Accessor("REPO")
+    Integer getRepoId();
+    @Accessor("PROJECT")
+    Integer getProjectId();
 
     @Mutator("KEYID")
     void setKeyId(int keyId);
@@ -65,8 +67,10 @@ public interface SshKeyEntity extends Entity{
     void setCreatedDate(Date created);
     @Mutator("TYPE")
     void setKeyType(KeyType type);
-    @Mutator("RESOURCE")
-    void setResourceId(Integer resourceId);
+    @Mutator("REPO")
+    void setRepoId(Integer resourceId);
+    @Mutator("PROJECT")
+    void setProjectId(Integer resourceId);
 
 
     

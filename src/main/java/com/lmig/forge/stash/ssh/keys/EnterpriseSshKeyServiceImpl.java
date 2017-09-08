@@ -17,10 +17,16 @@
 package com.lmig.forge.stash.ssh.keys;
 
 
+import com.atlassian.bitbucket.project.Project;
+import com.atlassian.bitbucket.repository.Repository;
+import com.atlassian.bitbucket.ssh.SshAccessKey;
+import com.atlassian.bitbucket.ssh.SshAccessKeyService;
 import com.atlassian.bitbucket.ssh.SshKey;
 import com.atlassian.bitbucket.ssh.SshKeyService;
 import com.atlassian.bitbucket.user.ApplicationUser;
 import com.atlassian.bitbucket.user.UserService;
+import com.atlassian.bitbucket.util.Page;
+import com.atlassian.bitbucket.util.PageRequestImpl;
 import com.lmig.forge.stash.ssh.ao.EnterpriseKeyRepository;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity.KeyType;
@@ -37,6 +43,7 @@ import java.util.List;
 
 public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
     final private SshKeyService sshKeyService;
+    final private SshAccessKeyService sshAccessKeyService;
     final private EnterpriseKeyRepository enterpriseKeyRepository;
     final private SshKeyPairGenerator sshKeyPairGenerator;
     final private NotificationService notificationService;
@@ -46,9 +53,10 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
 
     private static final Logger log = LoggerFactory.getLogger(EnterpriseSshKeyServiceImpl.class);
 
-    public EnterpriseSshKeyServiceImpl(SshKeyService sshKeyService, EnterpriseKeyRepository enterpriseKeyRepository,
-            SshKeyPairGenerator sshKeyPairGenerator, NotificationService notificationService, UserService userService,PluginSettingsService pluginSettingsService) {
+    public EnterpriseSshKeyServiceImpl(SshKeyService sshKeyService, SshAccessKeyService sshAccessKeyService, EnterpriseKeyRepository enterpriseKeyRepository,
+                                       SshKeyPairGenerator sshKeyPairGenerator, NotificationService notificationService, UserService userService, PluginSettingsService pluginSettingsService) {
         this.sshKeyService = sshKeyService;
+        this.sshAccessKeyService = sshAccessKeyService;
         this.enterpriseKeyRepository = enterpriseKeyRepository;
         this.sshKeyPairGenerator = sshKeyPairGenerator;
         this.notificationService = notificationService;
@@ -65,33 +73,40 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
     private boolean addAllowedBypass(SshKey key, ApplicationUser stashUser) {
         String bambooUser =  pluginSettingsService.getAuthorizedUser();
         String userGroup = pluginSettingsService.getAuthorizedGroup();
+        SshKeyEntity sshKeyEntity = null;
         if( bambooUser != null && bambooUser.equals(stashUser.getName())){
             log.debug("Username matches configured 'bambooUser', adding record");
+            sshKeyEntity = enterpriseKeyRepository.saveExternallyGeneratedKeyDetails(key,stashUser,SshKeyEntity.KeyType.BAMBOO);
             log.info("Bamboo Key {} created by an authorized bamboo system ID {} ", key.getId(), stashUser.getSlug());
-            enterpriseKeyRepository.saveExternallyGeneratedKeyDetails(key,stashUser,SshKeyEntity.KeyType.BAMBOO);
-            return true;
         }else if( userGroup != null && userService.existsGroup(userGroup) && userService.isUserInGroup(stashUser, userGroup)){
             log.debug("Username matches configured 'authorizedGroup', adding record");
+            sshKeyEntity = enterpriseKeyRepository.saveExternallyGeneratedKeyDetails(key,stashUser,SshKeyEntity.KeyType.BYPASS);
             log.info("Bypass Key {} created by an authorized user {} in authorized group", key.getId(), stashUser.getSlug());
-            enterpriseKeyRepository.saveExternallyGeneratedKeyDetails(key,stashUser,SshKeyEntity.KeyType.BYPASS);
-            return true;
+        }else{
+            log.debug("User not in excused roles, do not allow.");
+            return false;
         }
-        log.debug("User not in excused roles, do not allow.");
-        return false;
+        associateKeyWithResource(sshKeyEntity);
+        return true;
     }
 
 
     @Override
-    public void removeKeyIfNotLegal(SshKey key, ApplicationUser user) {
-        log.debug(">>>removeKeyIfNotLegal");
-        if ( pluginIsAwareOf(user,key) ||  addAllowedBypass(key,user)) {
-            log.debug("No action required, valid key.");
+    /**
+     * this method should be idempotent, callable by any ssh lifecycle event related to creation or access grants
+     */
+    public void interceptSystemKey(SshKey key, ApplicationUser user) {
+        log.debug(">>>interceptSystemKey checking for key " + key.getId());
+        if ( isPluginManagedKey(key) ){
+            log.info("No action required, valid key {} is already known.", key.getId());
+        }else if( addAllowedBypass(key,user)) {
+            log.info("bypassed key {} was added.",key.getId());
         }else{
             sshKeyService.remove(key.getId());
-            log.info("Invalid or illegal key removed for user {} ({})", user.getId(), user.getSlug());
+            log.warn("Invalid or illegal key removed for user {} ({})", user.getId(), user.getSlug());
             // TODO issue custom audit event
         }
-        log.debug("<<<removeKeyIfNotLegal");
+        log.debug("<<<interceptSystemKey");
     }
 
     @Override
@@ -99,7 +114,7 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
         //purge old key for this user
         removeExistingUserKeysFor(user);
         //create new one
-        String keyComment = "SYSTEM GENERATED";
+        String keyComment = "ENTERPRISE USER KEY";
         KeyPairResourceModel result = sshKeyPairGenerator.generateKeyPair(keyComment);
         // must add to our repo before calling stash SSH service since audit
         // listener will otherwise revoke it.
@@ -127,8 +142,6 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
         Date oldestAllowed = dateTime.minusDays(pluginSettingsService.getDaysAllowedForUserKeys()).toDate();
         //Date oldestAllowed = dateTime.minusMillis(100).toDate(); //for live demos
         List<SshKeyEntity> expiredStashKeys = enterpriseKeyRepository.listOfExpiredKeys( oldestAllowed, KeyType.USER);
-   
-        
         for (SshKeyEntity keyRecord : expiredStashKeys) {
             try{
                 ApplicationUser user = userService.getUserById(keyRecord.getUserId());
@@ -161,13 +174,29 @@ public class EnterpriseSshKeyServiceImpl implements EnterpriseSshKeyService {
         return enterpriseKeyRepository.keysForUser(user);
     }
 
+    @Override
+    public void associateKeyWithResource(SshKeyEntity key){
+        Page<SshAccessKey> keys = sshAccessKeyService.findByKeyForRepositories(key.getKeyId(), new PageRequestImpl(0, 1));
+        if( null != keys && keys.getSize() > 0 ){
+            log.info("New SSH Key {} is an access key",key.getKeyId());
+            SshAccessKey repoKey = keys.getValues().iterator().next();
+            if(repoKey.getResource() instanceof Repository){
+                key.setRepoId(((Repository)repoKey.getResource()).getId());
+            }else if(repoKey.getResource() instanceof Project){
+                key.setProjectId(((Project)repoKey.getResource()).getId());
+            }
+            key.save();
+            log.info("Key updated.");
+        }
+        enterpriseKeyRepository.updateKey(key);
+    }
+
     /*
-    * This method means it's a key owned by this plugin, and therefore safe to let go through events
-    * without intervention.  The logic below more broadly
+    * This checks if the plugin was the creator of key type USER, in which case we camn ingore as we have all data
      */
-   private boolean pluginIsAwareOf(ApplicationUser user, SshKey inspectedKey) {
-       SshKeyEntity knownKey = enterpriseKeyRepository.findSingleUserKey(user);
-       return null != knownKey && knownKey.getText().equals(inspectedKey.getText());
+   private boolean isPluginManagedKey(SshKey inspectedKey) {
+       SshKeyEntity knownKey = enterpriseKeyRepository.findKeyByText(inspectedKey.getText());
+       return null != knownKey;
    }
 
 }

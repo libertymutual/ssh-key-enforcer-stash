@@ -22,18 +22,18 @@ import com.atlassian.bitbucket.ssh.SshKey;
 import com.atlassian.bitbucket.user.ApplicationUser;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity;
 import com.lmig.forge.stash.ssh.events.GeneralEventListener;
-import com.lmig.forge.stash.ssh.rest.KeyDetailsResourceModel;
 import com.lmig.forge.stash.ssh.rest.KeyPairResourceModel;
 
 public interface EnterpriseSshKeyService {
 
     /**
      * Called by {@link GeneralEventListener} to block
-     * user attempts to create their keys outside the enterprise services.
+     * user attempts to create their keys outside the enterprise services, or capture meta of keys we allow based on
+     * {@link com.lmig.forge.stash.ssh.rest.AdminConfigResourceModel}
      * @param key
      * @param user
      */
-    void removeKeyIfNotLegal(SshKey key, ApplicationUser user);
+    void interceptSystemKey(SshKey key, ApplicationUser user);
 
     /**
      * returns a pre-persisted key pair for the user (we only saved the public one though..)
@@ -53,4 +53,5 @@ public interface EnterpriseSshKeyService {
 
     List<SshKeyEntity> getKeysForUser(String username);
 
+    void associateKeyWithResource(SshKeyEntity key);
 }

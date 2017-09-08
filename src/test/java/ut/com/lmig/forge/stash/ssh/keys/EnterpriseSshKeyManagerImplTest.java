@@ -18,6 +18,7 @@ package ut.com.lmig.forge.stash.ssh.keys;
 
 import com.atlassian.activeobjects.external.ActiveObjects;
 import com.atlassian.activeobjects.test.TestActiveObjects;
+import com.atlassian.bitbucket.ssh.SshAccessKeyService;
 import com.atlassian.bitbucket.ssh.SshKey;
 import com.atlassian.bitbucket.ssh.SshKeyService;
 import com.atlassian.bitbucket.user.ApplicationUser;
@@ -91,6 +92,7 @@ public class EnterpriseSshKeyManagerImplTest {
     private SshKeyPairGenerator keyPairGenerator;
     private UserService userService;
     private PluginSettingsService pluginSettingsService;
+    private SshAccessKeyService sshAccessKeyService;
     private ApplicationUser unblessedUser ;
     private ApplicationUser blessedUser;
     private SshKey approvedUserKey = mock(SshKey.class);
@@ -121,10 +123,12 @@ public class EnterpriseSshKeyManagerImplTest {
 
         when(existingKeyForUnapprovedUser.getText()).thenReturn(APPROVED_PUBLIC_KEY_ONE);
         when(existingKeyForUnapprovedUser.getUser()).thenReturn(unblessedUser);
+        when(existingKeyForUnapprovedUser.getId()).thenReturn(100);
 
         ao = new TestActiveObjects(entityManager);
         keyRepo = new EnterpriseKeyRepositoryImpl(ao);
         stashKeyService = mock(SshKeyService.class);
+        sshAccessKeyService = mock(SshAccessKeyService.class);
         when(stashKeyService.addForUser(any(ApplicationUser.class),anyString())).thenReturn(approvedUserKey);
         notificationService = mock(NotificationService.class);
         keyPairGenerator = new JschSshKeyPairGenerator();
@@ -135,7 +139,7 @@ public class EnterpriseSshKeyManagerImplTest {
         when(pluginSettingsService.getDaysAllowedForBambooKeys()).thenReturn(DAYS_ALLOWED);
         when(pluginSettingsService.getAuthorizedGroup()).thenReturn(AUTHED_GROUP);
         when(userService.getUserByName(KeyRotationJobRunner.ADMIN_ACCOUNT_NAME)).thenReturn(mock(ApplicationUser.class));//defeat NPE check
-        ourKeyService = new EnterpriseSshKeyServiceImpl(stashKeyService, keyRepo, keyPairGenerator, notificationService,userService, pluginSettingsService);
+        ourKeyService = new EnterpriseSshKeyServiceImpl(stashKeyService, sshAccessKeyService, keyRepo, keyPairGenerator, notificationService,userService, pluginSettingsService);
 
     }
 
@@ -178,31 +182,25 @@ public class EnterpriseSshKeyManagerImplTest {
     
     
     @Test
+    @NonTransactional
     public void userInBlessedGroupMayByPassDirectService(){
         //given unknown key from an authorized user
-        ourKeyService.removeKeyIfNotLegal(unapprovedUserKey, blessedUser);
+        ourKeyService.interceptSystemKey(unapprovedUserKey, blessedUser);
         // then the key is accepted by rules
         verify(stashKeyService,never()).remove(anyInt());
     }
     
     
     @Test
+    @NonTransactional
     public void unknownKeysCreatedByUnauthorizedUsersAreNotAllowed(){
         //given an unknown key from a non-authorized (standard) user
-        ourKeyService.removeKeyIfNotLegal(unapprovedUserKey, unblessedUser);
+        ourKeyService.interceptSystemKey(unapprovedUserKey, unblessedUser);
         //then the keys are rejected by rules
         verify(stashKeyService).remove(anyInt());
     }
 
-    @Test
-    // EVen when we create keys the event will fire causing it to be checked against rules
-    // make sure we dont delete our own keys!
-    public void keyCreatedViaCustomServiceIsAccptedByValidator(){
-        //given a pre-registered (i.e. known) key from an unauthorized (standard) user,
-        ourKeyService.removeKeyIfNotLegal(existingKeyForUnapprovedUser, unblessedUser);
-        // then  the key will be allowed
-        verify(stashKeyService,never()).remove(anyInt());
-    }
+
 
     @Test
     @NonTransactional

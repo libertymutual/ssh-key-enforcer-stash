@@ -17,7 +17,6 @@
 package com.lmig.forge.stash.ssh.events;
 
 import com.atlassian.bitbucket.i18n.I18nService;
-import com.atlassian.bitbucket.ssh.SshAccessKey;
 import com.atlassian.bitbucket.ssh.SshKey;
 import com.atlassian.bitbucket.ssh.event.SshKeyCreatedEvent;
 import com.atlassian.bitbucket.ssh.event.SshKeyDeletedEvent;
@@ -37,9 +36,14 @@ public class GeneralEventListener {
     }
 
     @EventListener
+    /**
+     * Listens for any SSHKey creation, including ones created by our custom service.
+     * Calls to {@link EnterpriseSshKeyService} will verify we know it, or that it is allowed and begin tracking it.
+     */
     public void createListener(SshKeyCreatedEvent stashEvent) {
+        logger.debug("ssh key created by " + stashEvent.getUser());
         SshKey key = stashEvent.getKey();
-        enterpriseSshKeyService.removeKeyIfNotLegal(key, stashEvent.getUser());
+        enterpriseSshKeyService.interceptSystemKey(key, stashEvent.getUser());
     }
 
     @EventListener

@@ -19,10 +19,8 @@ package com.lmig.forge.stash.ssh.ao;
 import java.util.Date;
 import java.util.List;
 
-import com.atlassian.bitbucket.nav.NavBuilder;
-import com.atlassian.bitbucket.project.Project;
-import com.atlassian.bitbucket.repository.Repository;
-import com.atlassian.bitbucket.ssh.SshAccessKey;
+import com.atlassian.bitbucket.IntegrityException;
+import com.atlassian.bitbucket.i18n.KeyedMessage;
 import net.java.ao.DBParam;
 import net.java.ao.Query;
 
@@ -40,7 +38,6 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
     
     
     private static final Logger log = LoggerFactory.getLogger(EnterpriseKeyRepositoryImpl.class);
-
     private final ActiveObjects ao;
 
     public EnterpriseKeyRepositoryImpl(ActiveObjects ao) {
@@ -48,9 +45,11 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
     }
 
     @Override
+    /**
+     * Only used for USER type keys of which an ID may only ever have 1 (by rules enforced here)
+     */
     public SshKeyEntity createOrUpdateUserKey(ApplicationUser user, String text, String label) {
         return ao.executeInTransaction(new TransactionCallback<SshKeyEntity>() {
-
             @Override
             public SshKeyEntity doInTransaction() {
                 SshKeyEntity key = findSingleUserKey(user);
@@ -69,32 +68,33 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
             }
         });
     }
-    
-
-    @Override
-    public SshKeyEntity saveExternallyGeneratedKeyDetails(SshKey key, ApplicationUser user, KeyType keyType) {
-        Integer resourceId = 0;
-        if( key instanceof SshAccessKey ){
-            if( ((SshAccessKey)key).getResource() instanceof Repository ){
-                resourceId = ((Repository)((SshAccessKey)key).getResource()).getId();
-            }else if( ((SshAccessKey)key).getResource() instanceof Project ){
-                resourceId = ((Project)((SshAccessKey)key).getResource()).getId();
-            }
-        }
-        SshKeyEntity entity =ao.create(SshKeyEntity.class, new DBParam("RESOURCE", resourceId),new DBParam("TYPE",keyType), new DBParam("USERID", user.getId()),  new DBParam("KEYID",key.getId()), new DBParam("TEXT", key.getText()),new DBParam("LABEL",key.getLabel()),new DBParam("CREATED", new Date()));
-        return entity;
-    }
-
     @Override
     public SshKeyEntity findSingleUserKey(ApplicationUser user) {
         SshKeyEntity[] keys = ao.find(SshKeyEntity.class, Query.select().where("USERID = ? AND TYPE = ?", user.getId(), KeyType.USER));
-        if( null != keys && keys.length == 1 ){
+        if (null != keys && keys.length == 1) {
             SshKeyEntity key = keys[0];
             return key;
-        }else{
+        } else {
             return null;
         }
     }
+
+    @Override
+    /**
+     * Captures meta dat for any keys created directly in bamboo that did not pass through us initially, but was allowed afterwards
+     */
+    public SshKeyEntity saveExternallyGeneratedKeyDetails(SshKey key, ApplicationUser user, KeyType keyType) {
+        return ao.executeInTransaction(new TransactionCallback<SshKeyEntity>() {
+            @Override
+            public SshKeyEntity doInTransaction() {
+                SshKeyEntity entity = ao.create(SshKeyEntity.class, new DBParam("TYPE", keyType), new DBParam("USERID", user.getId()), new DBParam("KEYID", key.getId()), new DBParam("TEXT", key.getText()), new DBParam("LABEL", key.getLabel()), new DBParam("CREATED", new Date()));
+                log.debug("Key with ID {} created", key.getId());
+                return entity;
+            }
+        });
+    }
+
+
 
     @Override
     public List<SshKeyEntity> listOfExpiredKeys(Date oldestValidDate, KeyType keyType) {
@@ -105,7 +105,6 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
     @Override
     public void updateRecordWithKeyId(final SshKeyEntity newRecord, final SshKey stashKey ) {
         ao.executeInTransaction(new TransactionCallback<Void>() {
-
             @Override
             public Void doInTransaction() {
                 SshKeyEntity updated = ao.get(SshKeyEntity.class, newRecord.getID());
@@ -118,8 +117,7 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
 
     @Override
     public void removeRecord(SshKeyEntity key) {
-        //SshKeyEntity[] recordToDelete = ao.find(SshKeyEntity.class, Query.select().where("KEYID = ?",stashKeyId));
-        ao.delete(key);
+         ao.delete(key);
     }
 
     @Override
@@ -129,11 +127,41 @@ public class EnterpriseKeyRepositoryImpl implements EnterpriseKeyRepository {
     }
 
     @Override
+    public SshKeyEntity updateKey(SshKeyEntity key) {
+        return ao.executeInTransaction(new TransactionCallback<SshKeyEntity>() {
+            @Override
+            public SshKeyEntity doInTransaction() {
+                key.save();
+                return key;
+            }
+        });
+    }
+
+    @Override
+    public SshKeyEntity findKeyByText(String keyText) {
+        return ao.executeInTransaction(new TransactionCallback<SshKeyEntity>() {
+            @Override
+            public SshKeyEntity doInTransaction() {
+                SshKeyEntity[] results = ao.find(SshKeyEntity.class, Query.select().where("TEXT = ?", keyText));
+                if (results.length > 1) {
+                    String message = "Data integrity issue, more than 1 record exists for Key with TEXT: " + keyText;
+                    throw new IntegrityException(new KeyedMessage("duplicate-key", message, message));
+                }
+                if (results.length < 1) {
+                    return null;
+                }
+                return results[0];
+            }
+        });
+    }
+
+
+    @Override
     public List<SshKeyEntity> keysForUser(ApplicationUser user) {
         SshKeyEntity[] results = ao.find(SshKeyEntity.class,Query.select().where("USERID = ?", user.getId()));
         return Lists.newArrayList(results);
     }
 
-    
-    
-}
+
+
+    }

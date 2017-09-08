@@ -41,9 +41,9 @@ public class AddRepoId implements ActiveObjectsUpgradeTask {
                 log.info("Key {} is access key",key.getKeyId());
                 SshAccessKey repoKey = keys.getValues().iterator().next();
                 if(repoKey.getResource() instanceof Repository){
-                    key.setResourceId(((Repository)repoKey.getResource()).getId());
+                    key.setRepoId(((Repository)repoKey.getResource()).getId());
                 }else if(repoKey.getResource() instanceof Project){
-                    key.setResourceId(((Project)repoKey.getResource()).getId());
+                    key.setProjectId(((Project)repoKey.getResource()).getId());
                 }
                 key.save();
                 log.info("Key updated.");

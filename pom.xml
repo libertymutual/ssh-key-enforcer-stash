@@ -179,6 +179,9 @@
 				<configuration>
                     <allowGoogleTracking>false</allowGoogleTracking>
 					<server>localhost</server>
+					<enableQuickReload>true</enableQuickReload>
+					<enableDevToolbox>false</enableDevToolbox>
+					<enableFastdev>false</enableFastdev>
 					<!-- run DC cluster using 'atlas-run \-\-testGroup clusterTestGroup' -->
                     <!-- you will also need to download mysql driver and place in /home/lib for *all* nodes in cluster. See bitbucket.shared.home values for each node below -->
 					<!-- see https://developer.atlassian.com/stash/docs/latest/how-tos/cluster-safe-plugins.html -->
@@ -310,7 +313,7 @@
 	</build>
 	<properties>
 		<bitbucket.version>4.13.1</bitbucket.version>
-		<bitbucket.ssh.version>4.10.2</bitbucket.ssh.version>
+		<bitbucket.ssh.version>4.13.1</bitbucket.ssh.version>
 		<bitbucket.data.version>4.10.2</bitbucket.data.version>
 		<amps.version>6.1.0</amps.version>
 		<plugin.testrunner.version>2.0.0</plugin.testrunner.version>

@@ -19,6 +19,7 @@ package com.lmig.forge.stash.ssh.ao;
 import java.util.Date;
 import java.util.List;
 
+import com.atlassian.bitbucket.ssh.SshAccessKey;
 import com.atlassian.bitbucket.ssh.SshKey;
 import com.atlassian.bitbucket.user.ApplicationUser;
 import com.lmig.forge.stash.ssh.ao.SshKeyEntity.KeyType;
@@ -30,7 +31,7 @@ public interface EnterpriseKeyRepository {
     SshKeyEntity findSingleUserKey(ApplicationUser user);
 
     List<SshKeyEntity> listOfExpiredKeys(Date oldestValidDate, KeyType keyType);
-    
+
     List<SshKeyEntity> keysForUser(ApplicationUser user);
 
     void updateRecordWithKeyId(SshKeyEntity newRecord, SshKey newKey);
@@ -40,8 +41,10 @@ public interface EnterpriseKeyRepository {
     SshKeyEntity saveExternallyGeneratedKeyDetails(SshKey key, ApplicationUser ApplicationUser, KeyType bamboo);
 
     void forgetRecordMatching(SshKey key);
-    
-    
+
+    SshKeyEntity updateKey(SshKeyEntity key);
+
+    SshKeyEntity findKeyByText(String keyText);
 
 }
 

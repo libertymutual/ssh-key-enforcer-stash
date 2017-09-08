@@ -37,7 +37,8 @@ public class KeyDetailsResourceModel {
     private int stashKeyId;
     private KeyType keyType;
     private Date created;
-    private Integer resourceId;
+    private Integer repoId;
+    private Integer projectId;
 
     public KeyDetailsResourceModel() {
     }
@@ -105,12 +106,21 @@ public class KeyDetailsResourceModel {
         return this;
     }
 
-    public Integer getResourceId() {
-        return resourceId;
+    public Integer getRepoId() {
+        return repoId;
     }
 
-    public KeyDetailsResourceModel setResourceId(Integer resourceId) {
-        this.resourceId = resourceId;
+    public KeyDetailsResourceModel setRepoId(Integer repoId) {
+        this.repoId = repoId;
+        return this;
+    }
+
+    public Integer getProjectId() {
+        return projectId;
+    }
+
+    public KeyDetailsResourceModel setProjectId(Integer projectId) {
+        this.projectId = projectId;
         return this;
     }
 
@@ -127,7 +137,8 @@ public class KeyDetailsResourceModel {
         result.user = new UserDetails(user);
         result.stashKeyId = keyEntity.getKeyId();
         result.created = keyEntity.getCreatedDate();
-        result.resourceId = keyEntity.getResourceId();
+        result.repoId = keyEntity.getRepoId();
+        result.projectId = keyEntity.getProjectId();
         return result;
     }
 }
