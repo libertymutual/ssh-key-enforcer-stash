@@ -309,9 +309,8 @@
 		</plugins>
 	</build>
 	<properties>
-		<bitbucket.version>4.13.1</bitbucket.version>
-		<bitbucket.ssh.version>4.10.2</bitbucket.ssh.version>
-		<bitbucket.data.version>4.10.2</bitbucket.data.version>
+		<bitbucket.version>5.11.1</bitbucket.version>
+		<bitbucket.data.version>5.11.1</bitbucket.data.version>
 		<amps.version>6.1.0</amps.version>
 		<plugin.testrunner.version>2.0.0</plugin.testrunner.version>
 		<ao.version>1.2.0</ao.version>
