@@ -190,6 +190,9 @@
                             <instanceId>bitbucket-single</instanceId>
                             <version>${bitbucket.version}</version>
                             <dataVersion>${bitbucket.data.version}</dataVersion>
+							<systemPropertyVariables>
+								<logging.logger.com.lmig.forge>DEBUG</logging.logger.com.lmig.forge>
+							</systemPropertyVariables>
                         </product>
 						<!-- node 1 for clustered -->
 						<product>
