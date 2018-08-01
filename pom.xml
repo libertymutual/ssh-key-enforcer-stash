@@ -190,6 +190,7 @@
                             <instanceId>bitbucket-single</instanceId>
                             <version>${bitbucket.version}</version>
                             <dataVersion>${bitbucket.data.version}</dataVersion>
+							<enableQuickReload>true</enableQuickReload>
 							<systemPropertyVariables>
 								<logging.logger.com.lmig.forge>DEBUG</logging.logger.com.lmig.forge>
 							</systemPropertyVariables>
@@ -264,13 +265,13 @@
 					<!-- <log4jProperties>src/main/resources/log4j.properties</log4jProperties> -->
 					<testGroups>
 						<!-- tell AMPS / Maven which products ie nodes to run for the named testGroup 'clusterTestGroup' -->
-						<testGroup>
-							<id>clusterTestGroup</id>
-							<productIds>
-								<productId>bitbucket-node-1</productId>
-								<productId>bitbucket-node-2</productId>
-							</productIds>
-						</testGroup>
+						<!--<testGroup>-->
+							<!--<id>clusterTestGroup</id>-->
+							<!--<productIds>-->
+								<!--<productId>bitbucket-node-1</productId>-->
+								<!--<productId>bitbucket-node-2</productId>-->
+							<!--</productIds>-->
+						<!--</testGroup>-->
 						<testGroup>
 							<id>default</id>
 							<productIds>
@@ -314,7 +315,7 @@
 	<properties>
 		<bitbucket.version>5.11.1</bitbucket.version>
 		<bitbucket.data.version>5.11.1</bitbucket.data.version>
-		<amps.version>6.1.0</amps.version>
+		<amps.version>6.3.15</amps.version>
 		<plugin.testrunner.version>2.0.0</plugin.testrunner.version>
 		<ao.version>1.2.0</ao.version>
 	</properties>
