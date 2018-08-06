@@ -190,6 +190,10 @@
                             <instanceId>bitbucket-single</instanceId>
                             <version>${bitbucket.version}</version>
                             <dataVersion>${bitbucket.data.version}</dataVersion>
+							<enableQuickReload>true</enableQuickReload>
+							<systemPropertyVariables>
+								<logging.logger.com.lmig.forge>DEBUG</logging.logger.com.lmig.forge>
+							</systemPropertyVariables>
                         </product>
 						<!-- node 1 for clustered -->
 						<product>
@@ -197,31 +201,31 @@
 							<instanceId>bitbucket-node-1</instanceId>
 							<version>${bitbucket.version}</version>
 							<dataVersion>${bitbucket.data.version}</dataVersion>
+							<enableQuickReload>true</enableQuickReload>
 							<systemPropertyVariables>
 								<bitbucket.shared.home>${project.basedir}/target/bitbucket-node-1/home/shared</bitbucket.shared.home>
                                 <!-- override the SSH port used for this node -->
                                 <bitbucket.plugin.ssh.port>7997</bitbucket.plugin.ssh.port>
 								<!-- override database settings so both nodes use a single database -->
-								<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
-								<!-- We don't care this is visible. Protected network with empty dataset -->
-								<!-- You can modify to point to any MySQL db with permissions to create/alter/drop -->
-								<jdbc.url>jdbc:mysql://10.187.116.253:3306/cf_355c208f_d6d1_4f9b_b8c9_538453c89ec7?characterEncoding=utf8&amp;useUnicode=true&amp;sessionVariables=storage_engine%3DInnoDB</jdbc.url>
-								<jdbc.user>TcVfaZp8iohxwHMg</jdbc.user>
-								<jdbc.password>1vpJLjjMaoLVvozA</jdbc.password>
+								<jdbc.driver>org.postgresql.Driver</jdbc.driver>
+								<!-- You can modify to point to any Postgres db with permissions to create/alter/drop -->
+								<jdbc.url>jdbc:postgresql://localhost:${test.db.port}/${test.db.name}</jdbc.url>
+								<jdbc.user>${test.db.user}</jdbc.user>
+								<jdbc.password>${test.db.password}</jdbc.password>
 								<!-- allow cluster nodes to find each other over TCP/IP thus enabling clustering for this node -->
 								<hazelcast.network.tcpip>true</hazelcast.network.tcpip>
 								<!-- set to true if your load balancer supports stick sessions -->
 								<hazelcast.http.stickysessions>false</hazelcast.http.stickysessions>
 								<!-- forces Stash to fully finish starting up before yielding to the func test runner or atlas-run -->
 								<johnson.spring.lifecycle.synchronousStartup>true</johnson.spring.lifecycle.synchronousStartup>
+								<logging.logger.com.lmig.forge>DEBUG</logging.logger.com.lmig.forge>
 							</systemPropertyVariables>
                             <libArtifacts>
-                                <!-- ensure MySQL drivers are available to Stash -->
-                                <libArtifact>
-                                    <groupId>mysql</groupId>
-                                    <artifactId>mysql-connector-java</artifactId>
-                                    <version>5.1.32</version>
-                                </libArtifact>
+								<libArtifact>
+									<groupId>org.postgresql</groupId>
+									<artifactId>postgresql</artifactId>
+									<version>${postgresjdbc.libversion}</version>
+								</libArtifact>
                             </libArtifacts>
 						</product>
 						<!-- Node 2 -->
@@ -230,30 +234,31 @@
 							<instanceId>bitbucket-node-2</instanceId>
 							<version>${bitbucket.version}</version>
 							<dataVersion>${bitbucket.data.version}</dataVersion>
+							<enableQuickReload>true</enableQuickReload>
 							<!-- override the HTTP port used for this node -->
-							<httpPort>7992</httpPort>
+							<httpPort>7991</httpPort>
 							<systemPropertyVariables>
 								<bitbucket.shared.home>${project.basedir}/target/bitbucket-node-1/home/shared</bitbucket.shared.home>
 								<!-- override the SSH port used for this node -->
 								<bitbucket.plugin.ssh.port>7998</bitbucket.plugin.ssh.port>
 								<!-- override database settings so both nodes use a single database -->
-								<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
-								<jdbc.url>jdbc:mysql://10.187.116.253:3306/cf_355c208f_d6d1_4f9b_b8c9_538453c89ec7?characterEncoding=utf8&amp;useUnicode=true&amp;sessionVariables=storage_engine%3DInnoDB</jdbc.url>
-								<jdbc.user>TcVfaZp8iohxwHMg</jdbc.user>
-								<jdbc.password>1vpJLjjMaoLVvozA</jdbc.password>
+								<jdbc.driver>org.postgresql.Driver</jdbc.driver>
+								<jdbc.url>jdbc:postgresql://localhost:${test.db.port}/${test.db.name}</jdbc.url>
+								<jdbc.user>${test.db.user}</jdbc.user>
+								<jdbc.password>${test.db.password}</jdbc.password>
 								<!-- allow cluster nodes to find each other over TCP/IP thus enabling clustering for this node -->
 								<hazelcast.network.tcpip>true</hazelcast.network.tcpip>
 								<!-- set to true if your load balancer supports stick sessions -->
 								<hazelcast.http.stickysessions>false</hazelcast.http.stickysessions>
 								<!-- forces Stash to fully finish starting up before yielding to the func test runner or atlas-run -->
 								<johnson.spring.lifecycle.synchronousStartup>true</johnson.spring.lifecycle.synchronousStartup>
+								<logging.logger.com.lmig.forge>DEBUG</logging.logger.com.lmig.forge>
 							</systemPropertyVariables>
 							<libArtifacts>
-								<!-- ensure MySQL drivers are available to Stash -->
 								<libArtifact>
-									<groupId>mysql</groupId>
-									<artifactId>mysql-connector-java</artifactId>
-									<version>5.1.32</version>
+									<groupId>org.postgresql</groupId>
+									<artifactId>postgresql</artifactId>
+									<version>${postgresjdbc.libversion}</version>
 								</libArtifact>
 							</libArtifacts>
 						</product>
@@ -276,6 +281,52 @@
 						</testGroup>
 					</testGroups>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.26.1</version>
+				<extensions>true</extensions>
+				<configuration>
+					<images>
+						<image>
+							<alias>database</alias>
+							<name>postgres:9</name>
+							<run>
+								<wait>
+									<log>database system is ready to accept connections</log>
+									<time>20000</time>
+								</wait>
+								<env>
+									<POSTGRES_DB>${test.db.name}</POSTGRES_DB>
+									<POSTGRES_USER>${test.db.user}</POSTGRES_USER>
+									<POSTGRES_PASSWORD>${test.db.password}</POSTGRES_PASSWORD>
+									<POSTGRES_INITDB_ARGS>-E UTF8</POSTGRES_INITDB_ARGS>
+								</env>
+								<ports>
+									<port>${test.db.port}:${test.db.port}</port>
+								</ports>
+							</run>
+						</image>
+					</images>
+				</configuration>
+				<executions>
+					<execution>
+						<id>start</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>build</goal>
+							<goal>start</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>stop</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -311,9 +362,14 @@
 	<properties>
 		<bitbucket.version>5.11.1</bitbucket.version>
 		<bitbucket.data.version>5.11.1</bitbucket.data.version>
-		<amps.version>6.1.0</amps.version>
+		<amps.version>6.3.15</amps.version>
 		<plugin.testrunner.version>2.0.0</plugin.testrunner.version>
 		<ao.version>1.2.0</ao.version>
+		<postgresjdbc.libversion>9.4.1211</postgresjdbc.libversion>
+		<test.db.name>bitbucket</test.db.name>
+		<test.db.user>user</test.db.user>
+		<test.db.password>password</test.db.password>
+		<test.db.port>5432</test.db.port>
 	</properties>
 	<url>https://developer.libertymutual.com</url>
 	<description>This plugin enables enterprise level SSH Key management over the default access provided in Bitbucket.</description>

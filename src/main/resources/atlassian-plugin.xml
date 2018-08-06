@@ -74,7 +74,8 @@
   <component name="SSH Key Generator (jsch implementation)" i18n-name-key="enterprise-key-repository.name" key="key-generator" class="com.lmig.forge.stash.ssh.crypto.JschSshKeyPairGenerator">
     <interface>com.lmig.forge.stash.ssh.crypto.SshKeyPairGenerator</interface>
   </component>
-  <component key="keyRotationScheduler" class="com.lmig.forge.stash.ssh.scheduler.KeyRotationScheduler" system="true">
+  <component key="keyRotationScheduler" class="com.lmig.forge.stash.ssh.scheduler.KeyRotationScheduler" system="true" public="true">
+    <interface>com.atlassian.sal.api.lifecycle.LifecycleAware</interface>
     <description>The plugin component that schedules the key expiration job.</description>
   </component>
   <component key="keyRotationJobRunner" class="com.lmig.forge.stash.ssh.scheduler.KeyRotationJobRunner" system="true">

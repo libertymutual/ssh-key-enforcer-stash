@@ -70,11 +70,32 @@ Admins may update the values capture in JSON below via `/rest/enterprisessh/1.0/
    See the License for the specific language governing permissions and
    limitations under the License.
 
-
 ## Contributing
+### Prerequisites
+First install and run Docker locally 
+* [Mac Instructions](https://docs.docker.com/docker-for-mac/install/)
+* [Windows Instructions](https://docs.docker.com/docker-for-windows/install/)
+
+### Running Locally
+* Faster start, single instance `$ atlas-run --testGroup default`
+* Slower start, testing Data Center `$ mvn docker:start && atlas-run --testGroup clusterTestGroup`
+
+### Testing Locally
+* Testing against Data Center cluster `$ atlas-integration-test -DtestGroups=clusterTestGroup`
+* Testing against single server instance `$ atlas-integration-test -DtestGroups=default`
+
+### Reloading Plugin Changes to Save Time
+If one of the two test groups is already running locally you may save time and reload any plugin changes by opening a separate terminal in the project root directory and running `$ atlas-package -DskipTests`
+
+Ex.
+1. Start cluster `$ mvn docker:start && atlas-run --testGroup clusterTestGroup`
+2. Make a code change and run `$ atlas-package -DskipTests` to load the new plugin jar without restarting the application
+
+### Troubleshooting 
+* When database does not get cleaned up properly after shutting down clusterTestGroup, run `$ mvn docker:stop`
+* When starting clusterTestGroup throws address already in use exception, try changing the port in the pom. Ex. change http port of second node to 7991 and restart cluster  
+
 SSH Key Enforcer for Stash is built using Atlassian SDK, here's some info on that...
-
-
 
 Here are the SDK commands you'll use immediately:
 
